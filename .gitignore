@@ -9,7 +9,17 @@ runs/*
 !runs/registry.jsonl
 !runs/*/
 runs/*/*
-!runs/*/report.json
+!runs/*/report*.json
 !runs/*/log.jsonl
-!runs/*/predictions.jsonl
+!runs/*/predictions*.jsonl
 runs/jobs/
+# desktop build
+packaging/.venv/
+packaging/models/
+packaging/pip.log
+build/
+dist/
+
+# private documents (funding, finances)
+private/
+packaging/build.log
