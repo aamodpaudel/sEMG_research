@@ -55,7 +55,8 @@
     if (!a.words.length) out.textContent = "(nothing recognised)";
     a.words.forEach(function (w, k) {
       if (k) out.appendChild(document.createTextNode(" "));
-      var s = document.createElement("span"); s.className = w.ok ? "w-ok" : "w-bad"; s.textContent = w.word;
+      var s = document.createElement("span"); s.className = (w.ok ? "w-ok" : "w-bad") + " w"; s.textContent = w.word;
+      s.style.animationDelay = (k * 0.07) + "s";
       out.appendChild(s);
     });
     $("out-raw").textContent = raw || "(empty)";
@@ -84,6 +85,8 @@
     if (!S || busy) return;
     busy = true; $("decode").disabled = true;
     var m = S.info.samples[sel], v = vocab;
+    var sw = document.getElementById("scope-wrap");
+    if (sw) { sw.classList.remove("scanning"); void sw.offsetWidth; sw.classList.add("scanning"); }
     Promise.all([ensureModel(), ensureLexicons()]).then(function (r) {
       status("Decoding on this device…");
       var x = new Float32Array(S.data.subarray(m.offset, m.offset + m.length * m.channels));

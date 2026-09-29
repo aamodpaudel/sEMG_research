@@ -24,10 +24,11 @@ Files: `site/assets/afono-symbol.svg`, `afono-symbol-light.svg` (dark background
 | Mist | `#E4EBE8` | `#15282C` | Quiet surfaces |
 
 ## Type
-- Display: **Manrope** 700–800.
-- Body: **Atkinson Hyperlegible** (designed by the Braille Institute for low-vision readers).
-- Data and labels: **JetBrains Mono**.
-All three are free on Google Fonts. Tokens live in `site/assets/afono.css`.
+- Wordmark only: **Manrope** ExtraBold (800).
+- Display and interface: **Geist** 500–600, tight tracking (−3% to −4.5% on large sizes).
+- Body: **Atkinson Hyperlegible Next** (designed by the Braille Institute for low-vision readers), 16–17 px.
+- Data and labels: **Geist Mono**.
+All four are free on Google Fonts. Tokens live in `site/assets/afono.css`.
 
 ## Motion: the intro (about 4 s)
 1. 0.2–1.0 s: the ring draws itself, like a mouth opening.

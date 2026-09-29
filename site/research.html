@@ -8,7 +8,7 @@
 <link rel="icon" href="assets/afono-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Manrope:wght@800&display=swap">
 <link rel="stylesheet" href="assets/afono.css">
 <style>
   .wrap { max-width: 980px; }
@@ -18,10 +18,10 @@
   main { padding-block: 64px 96px; }
   article { display: grid; gap: 64px; }
   .title { display: grid; gap: 14px; }
-  .title h1 { font-size: clamp(38px, 5.6vw, 60px); font-weight: 800; letter-spacing: -0.035em; }
+  .title h1 { font-size: clamp(32px, 4.6vw, 48px); font-weight: 600; letter-spacing: -0.04em; }
   .meta { font: 400 14px var(--mono); color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 6px 18px; }
-  .abstract { font-size: 19px; max-width: 70ch; }
-  h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 18px; }
+  .abstract { font-size: 17.5px; max-width: 70ch; }
+  h2 { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 18px; }
   h2 .num { font: 600 14px var(--mono); color: var(--ink-2); margin-right: 10px; letter-spacing: 0; }
   h3 { font-size: 19px; margin: 22px 0 8px; }
   p + p { margin-top: 12px; }
@@ -41,7 +41,7 @@
   .fig figcaption { font-size: 14px; color: var(--ink-2); margin-top: 8px; }
   .tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--paper); font: 400 13px/1.45 var(--body); padding: 8px 10px; border-radius: 8px; max-width: 260px; }
   .callout { border: 1.5px solid var(--line); border-radius: 14px; padding: 20px 22px; background: var(--card); display: grid; gap: 8px; }
-  .callout .big { font: 800 30px var(--display); letter-spacing: -0.02em; color: var(--teal); font-variant-numeric: tabular-nums; }
+  .callout .big { font: 600 26px var(--display); letter-spacing: -0.02em; color: var(--teal); font-variant-numeric: tabular-nums; }
   code, pre { font-family: var(--mono); font-size: 14px; }
   pre { background: var(--ink); color: #D6E6E3; padding: 16px 18px; border-radius: 12px; overflow-x: auto; margin: 0; line-height: 1.6; }
   :root[data-theme="dark"] pre { background: #06110F; }
@@ -248,18 +248,18 @@ python -m semg.compare --profile demo-open --a runs/base/best.pt --b runs/&lt;ca
   function el(tag, a, text) { var e = document.createElementNS(NS, tag); for (var k in a) e.setAttribute(k, a[k]); if (text != null) e.textContent = text; svg.appendChild(e); return e; }
   [0, 25, 50, 75, 100].forEach(function (v) {
     el("line", { x1: x(v), x2: x(v), y1: top - 10, y2: H - 34, stroke: "var(--line)", "stroke-width": 1 });
-    el("text", { x: x(v), y: H - 12, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 13, "font-family": "JetBrains Mono, monospace" }, v + "%");
+    el("text", { x: x(v), y: H - 12, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 13, "font-family": "Geist Mono, monospace" }, v + "%");
   });
   el("line", { x1: x(90), x2: x(90), y1: top - 16, y2: H - 34, stroke: "var(--ink-2)", "stroke-width": 1.5, "stroke-dasharray": "5 5" });
-  el("text", { x: x(90) - 6, y: top - 20, "text-anchor": "end", fill: "var(--ink-2)", "font-size": 13, "font-family": "JetBrains Mono, monospace" }, "goal 90%");
+  el("text", { x: x(90) - 6, y: top - 20, "text-anchor": "end", fill: "var(--ink-2)", "font-size": 13, "font-family": "Geist Mono, monospace" }, "goal 90%");
   R.tasks.forEach(function (t, i) {
     var y = top + i * rowH + rowH / 2;
-    el("text", { x: 0, y: y - 3, fill: "var(--ink)", "font-size": 16, "font-family": "Atkinson Hyperlegible, sans-serif" }, t.label);
-    el("text", { x: 0, y: y + 15, fill: "var(--ink-2)", "font-size": 12, "font-family": "JetBrains Mono, monospace" }, t.vocab.toLocaleString() + " words · n = " + t.n);
+    el("text", { x: 0, y: y - 3, fill: "var(--ink)", "font-size": 16, "font-family": "Atkinson Hyperlegible Next, sans-serif" }, t.label);
+    el("text", { x: 0, y: y + 15, fill: "var(--ink-2)", "font-size": 12, "font-family": "Geist Mono, monospace" }, t.vocab.toLocaleString() + " words · n = " + t.n);
     el("line", { x1: x(t.acc_ci[0]), x2: x(t.acc_ci[1]), y1: y, y2: y, stroke: "var(--chart)", "stroke-width": 2, "stroke-linecap": "round" });
     [t.acc_ci[0], t.acc_ci[1]].forEach(function (v) { el("line", { x1: x(v), x2: x(v), y1: y - 6, y2: y + 6, stroke: "var(--chart)", "stroke-width": 2, "stroke-linecap": "round" }); });
     el("circle", { cx: x(t.acc), cy: y, r: 6, fill: "var(--chart)", stroke: "var(--card)", "stroke-width": 2 });
-    el("text", { x: x(t.acc_ci[1]) + 10, y: y + 5, fill: "var(--ink)", "font-size": 14, "font-weight": 700, "font-family": "Manrope, sans-serif" }, f1(t.acc) + "%");
+    el("text", { x: x(t.acc_ci[1]) + 10, y: y + 5, fill: "var(--ink)", "font-size": 14, "font-weight": 600, "font-family": "Geist, sans-serif" }, f1(t.acc) + "%");
     var hit = el("rect", { x: left - 10, y: y - rowH / 2, width: W - left - right + 20, height: rowH, fill: "transparent" });
     hit.addEventListener("pointermove", function (e) {
       var b = svg.getBoundingClientRect(), fb = svg.parentNode.getBoundingClientRect();
