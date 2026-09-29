@@ -3,66 +3,94 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Afono Lab</title>
+<title>Afono Nullpoint</title>
 <link rel="icon" href="/assets/afono-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Manrope:wght@800&display=swap">
 <link rel="stylesheet" href="/assets/afono.css">
 <style>
-  body { font-size: 16px; }
-  header { border-bottom: 1px solid var(--line); background: var(--card); }
-  header .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; padding: 12px 24px; }
-  header .tag { font: 600 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+  body { font-size: 15px; }
+  header { border-bottom: 1px solid var(--line); background: var(--card); position: sticky; top: 0; z-index: 3; }
+  header .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; padding: 10px 22px; }
   header .grow { flex: 1; }
-  label.f { display: grid; gap: 4px; font: 600 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
-  input[type=text], input[type=number], select, textarea { font: 400 16px var(--body); color: var(--ink); background: var(--paper);
-    border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 12px; min-height: 42px; }
+  .tag { font: 500 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+  .tabs { display: flex; gap: 4px; background: var(--paper-2); padding: 4px; border-radius: 999px; }
+  .tabs button { border: 0; background: transparent; color: var(--ink-2); font: 500 14px var(--display); padding: 8px 16px; border-radius: 999px; cursor: pointer; min-height: 38px; }
+  .tabs button[aria-selected="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  label.f { display: grid; gap: 4px; font: 500 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+  input[type=text], input[type=number], select, textarea { font: 400 15px var(--body); color: var(--ink); background: var(--paper);
+    border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 11px; min-height: 40px; }
   textarea { width: 100%; resize: vertical; }
-  .layout { display: grid; grid-template-columns: 320px minmax(0, 1fr) 360px; gap: 0; min-height: calc(100vh - 70px); }
-  .col { padding: 22px; display: grid; gap: 18px; align-content: start; min-width: 0; }
+  .layout { display: grid; grid-template-columns: 300px minmax(0, 1fr) 340px; min-height: calc(100vh - 62px); }
+  .col { padding: 20px; display: grid; gap: 16px; align-content: start; min-width: 0; }
   .col + .col { border-left: 1px solid var(--line); }
-  h2 { font-size: 15px; font-family: var(--mono); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
-  .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-  .list { display: grid; gap: 6px; max-height: 46vh; overflow: auto; padding-right: 4px; }
-  .item { text-align: left; border: 1.5px solid transparent; background: var(--card); border-radius: 10px; padding: 9px 12px; cursor: pointer;
+  h2 { font: 500 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .list { display: grid; gap: 6px; max-height: 44vh; overflow: auto; padding-right: 4px; }
+  .item { text-align: left; border: 1.5px solid transparent; background: var(--card); border-radius: 10px; padding: 8px 11px; cursor: pointer;
     font: 400 14px/1.35 var(--body); color: var(--ink); display: grid; gap: 2px; }
   .item small { font: 400 11px var(--mono); color: var(--ink-2); }
-  .item[aria-pressed="true"] { border-color: var(--teal); box-shadow: inset 4px 0 0 var(--teal); }
-  .scope { background: #12262A; border-radius: 14px; overflow: hidden; }
-  .scope canvas { width: 100%; height: 200px; display: block; }
-  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  .out { display: grid; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
-  .out .k { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
-  .out .v { font: 700 24px/1.3 var(--display); overflow-wrap: anywhere; }
-  .out .raw { font: 400 13px var(--mono); color: var(--ink-2); overflow-wrap: anywhere; }
-  .msg { font-size: 14px; color: var(--ink-2); min-height: 1.4em; }
+  .item[aria-pressed="true"] { border-color: var(--teal); box-shadow: inset 3px 0 0 var(--teal); }
+  .scope { background: #0E1F22; border-radius: 14px; overflow: hidden; }
+  .scope canvas { width: 100%; height: 190px; display: block; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .out { display: grid; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .out .k { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+  .out .v { font: 500 22px/1.3 var(--display); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+  .out .raw { font: 400 12.5px var(--mono); color: var(--ink-2); overflow-wrap: anywhere; }
+  .msg { font-size: 13.5px; color: var(--ink-2); min-height: 1.4em; }
   .msg.err { color: var(--bad); }
-  .stat { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .stat div { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
-  .stat b { display: block; font: 800 26px var(--display); color: var(--teal); }
-  .stat span { font-size: 13px; color: var(--ink-2); }
-  pre.log { background: #12262A; color: #CFE3DF; font: 400 12px/1.5 var(--mono); border-radius: 12px; padding: 12px; max-height: 220px; overflow: auto; white-space: pre-wrap; margin: 0; }
-  .runs { display: grid; gap: 8px; }
-  .run { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 13px; display: grid; gap: 4px; }
+  .stat { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .stat div { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 11px; }
+  .stat b { display: block; font: 600 24px var(--display); color: var(--teal); letter-spacing: -0.03em; }
+  .stat span { font-size: 12.5px; color: var(--ink-2); }
+  pre.log { background: #0E1F22; color: #CFE3DF; font: 400 12px/1.5 var(--mono); border-radius: 12px; padding: 12px; max-height: 220px; overflow: auto; white-space: pre-wrap; margin: 0; }
+  .runs { display: grid; gap: 6px; }
+  .run { background: var(--card); border: 1px solid var(--line); border-radius: 11px; padding: 9px 11px; font-size: 13px; display: grid; gap: 3px; }
   .run .meta { font: 400 11px var(--mono); color: var(--ink-2); }
   .w-ok { color: var(--teal); } .w-bad { color: var(--signal); text-decoration: underline wavy; text-underline-offset: 5px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 12px; align-content: start; }
+  .panel p { color: var(--ink-2); font-size: 14px; }
+  video#cam { width: 100%; border-radius: 12px; background: #0E1F22; transform: scaleX(-1); aspect-ratio: 4 / 3; object-fit: cover; }
+  .targets { display: grid; gap: 4px; max-height: 50vh; overflow: auto; }
+  .targets div { display: grid; grid-template-columns: 3ch 1fr auto; gap: 10px; font-size: 14px; padding: 5px 8px; border-radius: 8px; background: var(--paper); }
+  .targets b { font-family: var(--mono); color: var(--signal); }
+  .targets span.k { font: 400 11px var(--mono); color: var(--ink-2); }
+  ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--ink-2); font-size: 14px; }
+  code { font: 400 12.5px var(--mono); background: var(--paper-2); padding: 1px 6px; border-radius: 5px; overflow-wrap: anywhere; }
+  #stage { position: fixed; inset: 0; background: var(--paper); z-index: 50; }
+  #stage .dot { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 8px rgba(217,85,43,.18); transition: transform .9s var(--ease); }
+  #stage .dot.shrink { transform: scale(.35); }
+  #stage .gaze { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 3px solid var(--teal); pointer-events: none; }
+  #stage .grid { position: absolute; inset: 6vh 6vw; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 3vh 3vw; }
+  #stage .grid div { border: 2px solid var(--line); border-radius: 18px; display: grid; place-items: center; font: 600 26px var(--display); color: var(--ink-2); transition: all .12s; }
+  #stage .grid div.goal { border-color: var(--signal); color: var(--signal); }
+  #stage .grid div.hot { background: var(--teal); color: var(--on-dark); border-color: var(--teal); }
+  #stage .help { position: absolute; left: 50%; bottom: 3vh; transform: translateX(-50%); font: 500 15px var(--display); color: var(--ink-2); background: var(--card); padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); }
   @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } .col + .col { border-left: 0; border-top: 1px solid var(--line); } }
 </style>
 </head>
 <body>
 <header>
   <div class="bar">
-    <span class="lockup" style="font-size: 26px"><svg viewBox="0 0 64 96" aria-hidden="true"><circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="9"></circle><line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="9" stroke-linecap="round"></line></svg><span>afono</span></span>
-    <span class="tag">Lab · local</span>
+    <span class="lockup" style="font-size: 24px"><svg viewBox="0 0 64 96" aria-hidden="true"><circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="9"></circle><line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="9" stroke-linecap="round"></line></svg><span>afono</span></span>
+    <span class="tag">Nullpoint</span>
+    <div class="tabs" role="tablist" aria-label="Models">
+      <button role="tab" aria-selected="true" data-tab="semg" id="tab-semg">sEMG Model</button>
+      <button role="tab" aria-selected="false" data-tab="track" id="tab-track">Track Model</button>
+      <button role="tab" aria-selected="false" data-tab="dom" id="tab-dom">DOM Model</button>
+      <button role="tab" aria-selected="false" data-tab="settings" id="tab-settings">Settings</button>
+    </div>
     <span class="grow"></span>
-    <label class="f" for="profile">Profile<input type="text" id="profile" value="default" size="14" autocomplete="off"></label>
-    <label class="f" for="ckpt">Model<select id="ckpt"></select></label>
+    <label class="f" for="profile">Profile<input type="text" id="profile" value="default" size="12" autocomplete="off"></label>
+    <label class="f" for="ckpt">sEMG model<select id="ckpt"></select></label>
     <span class="tag" id="device"></span>
   </div>
 </header>
-<div class="layout">
+
+<section class="layout" id="view-semg" role="tabpanel" aria-labelledby="tab-semg">
   <div class="col">
     <h2>Recordings</h2>
-    <div class="tabs" role="group" aria-label="Source">
+    <div class="chips" role="group" aria-label="Source">
       <button class="chip" type="button" data-src="closed-test" aria-pressed="true">Dates · test</button>
       <button class="chip" type="button" data-src="open-test" aria-pressed="false">Sentences · test</button>
       <button class="chip" type="button" data-src="mine" aria-pressed="false">My recordings</button>
@@ -74,24 +102,25 @@
         <button class="btn" type="button" id="serial">Connect sensor</button>
         <button class="btn" type="button" id="rec" disabled>Hold to record</button>
       </div>
-      <p class="msg" id="serial-msg">Sensor input uses Web Serial (Chrome or Edge): one line per sample, comma-separated channel values, 921,600 baud.</p>
+      <div class="row"><button class="btn" type="button" id="simulate">Simulated sensor</button></div>
+      <p class="msg" id="serial-msg">Sensor input uses Web Serial: one line per sample, comma-separated channel values, 921,600 baud. The simulated sensor streams a real recording through the same path.</p>
     </div>
   </div>
-
   <div class="col">
     <h2>Decode</h2>
-    <div class="scope"><canvas id="scope" width="900" height="200" aria-label="EMG signal"></canvas></div>
-    <div class="row" role="group" aria-label="Vocabulary">
+    <div class="scope"><canvas id="scope" width="900" height="190" aria-label="EMG signal"></canvas></div>
+    <div class="chips" role="group" aria-label="Vocabulary">
       <button class="chip" type="button" data-vocab="dates" aria-pressed="true">Dates · 51</button>
       <button class="chip" type="button" data-vocab="open" aria-pressed="false">Open · 9,139</button>
       <button class="chip" type="button" data-vocab="personal" aria-pressed="false">Personal</button>
-      <button class="chip" type="button" data-vocab="custom" aria-pressed="false">Words on screen</button>
+      <button class="chip" type="button" data-vocab="page" aria-pressed="false">Page commands</button>
+      <button class="chip" type="button" data-vocab="custom" aria-pressed="false">Custom words</button>
     </div>
-    <label class="f" for="words" id="words-wrap" hidden>Words on screen (what the page lets you say)<textarea id="words" rows="2">search open back next close menu settings help</textarea></label>
-    <div class="row"><button class="btn primary" type="button" id="decode">Decode</button><span class="msg" id="msg"></span></div>
+    <label class="f" for="words" id="words-wrap" hidden>Custom words<textarea id="words" rows="2">search open back next close menu settings help</textarea></label>
+    <div class="row"><button class="btn primary" type="button" id="decode">Decode</button><label class="row" style="gap: 6px; font-size: 14px"><input type="checkbox" id="send"> Send result to the page</label><span class="msg" id="msg"></span></div>
     <div class="out" aria-live="polite">
-      <span class="k">Reference</span><span class="v" id="ref" style="color: var(--ink-2); font-weight: 600">—</span>
-      <span class="k">Afono read</span><span class="v" id="hyp">—</span>
+      <span class="k">Reference</span><span class="v" id="ref" style="color: var(--ink-2)">—</span>
+      <span class="k">sEMG Model read</span><span class="v" id="hyp">—</span>
       <span class="k">Raw letters</span><span class="raw" id="raw">—</span>
     </div>
     <h2>Teach it</h2>
@@ -101,7 +130,6 @@
       <span class="msg" id="fix-msg">Corrections change the Personal vocabulary at once and are used by the next calibration.</span>
     </div>
   </div>
-
   <div class="col">
     <h2>Profile</h2>
     <div class="stat">
@@ -110,28 +138,122 @@
       <div><b id="s-cor">0</b><span>corrections</span></div>
       <div><b id="s-voc">0</b><span>personal words</span></div>
     </div>
-    <div class="row">
-      <button class="btn" type="button" id="import">Add demo recordings</button>
-    </div>
-    <p class="msg">Adds labelled dataset recordings to this profile so you can try calibration before hardware exists.</p>
+    <div class="row"><button class="btn" type="button" id="import">Add demo recordings</button></div>
+    <p class="msg">Adds 42 labelled dev recordings, so calibration can be tried before hardware exists. Test recordings are never used for training.</p>
     <h2>Calibrate</h2>
     <div class="row">
-      <label class="f" for="epochs">Epochs<input type="number" id="epochs" value="12" min="1" max="60" style="width: 90px"></label>
+      <label class="f" for="epochs">Epochs<input type="number" id="epochs" value="12" min="1" max="60" style="width: 86px"></label>
       <button class="btn primary" type="button" id="calibrate">Calibrate now</button>
     </div>
     <pre class="log" id="job-log">No calibration running.</pre>
     <h2>Run log</h2>
     <div class="runs" id="runs"></div>
   </div>
-</div>
+</section>
+
+<section class="layout" id="view-track" role="tabpanel" aria-labelledby="tab-track" hidden>
+  <div class="col">
+    <h2>Camera</h2>
+    <video id="cam" playsinline muted></video>
+    <div class="row"><button class="btn primary" type="button" id="cam-start">Start camera</button><button class="btn" type="button" id="cam-stop">Stop</button></div>
+    <p class="msg" id="track-msg">The Track Model runs on this computer. No video is saved or sent anywhere.</p>
+    <div class="stat"><div><b id="t-fps">0</b><span>frames per second</span></div><div><b id="t-face">no</b><span>face found</span></div></div>
+  </div>
+  <div class="col">
+    <h2>Calibrate and test</h2>
+    <div class="panel">
+      <ol class="steps">
+        <li>Sit about an arm's length from the screen, face lit from the front.</li>
+        <li><b>Calibrate:</b> look at each orange dot until it shrinks. 9 dots, about 15 seconds.</li>
+        <li><b>Accuracy test:</b> 5 new dots measure the error in pixels and degrees.</li>
+        <li><b>Target test:</b> look at the orange square and press Space when it turns teal. 12 trials.</li>
+      </ol>
+      <div class="row">
+        <button class="btn primary" type="button" id="t-cal" disabled>Calibrate</button>
+        <button class="btn" type="button" id="t-val" disabled>Accuracy test</button>
+        <button class="btn" type="button" id="t-grid" disabled>Target test</button>
+        <button class="btn" type="button" id="t-live" disabled>Live gaze dot</button>
+      </div>
+      <div class="row">
+        <label class="f" for="scr-cm">Screen width, cm<input type="number" id="scr-cm" value="34.5" step="0.1" style="width: 110px"></label>
+        <label class="f" for="dist-cm">Distance to screen, cm<input type="number" id="dist-cm" value="60" style="width: 110px"></label>
+      </div>
+    </div>
+    <div class="out"><span class="k">Last result</span><span class="v" id="t-result" style="font-size: 18px">No test yet.</span></div>
+  </div>
+  <div class="col">
+    <h2>What gets measured</h2>
+    <div class="panel">
+      <p><b>Accuracy</b> is the distance between where you looked and the Track Model's median estimate. <b>Precision</b> is the jitter between consecutive estimates. Both are reported in pixels and degrees of visual angle, the standard eye-tracking units.</p>
+      <p><b>Target test</b> measures what matters for Nullpoint: whether gaze snapped to the nearest of 12 buttons picks the right one, and how long it takes.</p>
+      <p>Results go to the run log with your screen size and distance.</p>
+    </div>
+  </div>
+</section>
+
+<section class="layout" id="view-dom" role="tabpanel" aria-labelledby="tab-dom" hidden>
+  <div class="col">
+    <h2>Browser extension</h2>
+    <div class="panel">
+      <p id="ext-state">Waiting for the Afono Nullpoint extension.</p>
+      <ol class="steps">
+        <li>Open <code>chrome://extensions</code> or <code>edge://extensions</code>.</li>
+        <li>Turn on <b>Developer mode</b>, choose <b>Load unpacked</b>.</li>
+        <li>Pick the extension folder: <code id="ext-dir">…</code></li>
+      </ol>
+      <button class="btn" type="button" id="open-ext">Open extension folder</button>
+    </div>
+  </div>
+  <div class="col">
+    <h2>What the DOM Model sees</h2>
+    <p class="msg" id="ctx-page">No page yet.</p>
+    <div class="targets" id="ctx-targets"></div>
+  </div>
+  <div class="col">
+    <h2>Send a command</h2>
+    <div class="panel">
+      <label class="f" for="typed">Type what you would mouth<input type="text" id="typed" placeholder="click 3 · scroll down · zoom in · back" autocomplete="off"></label>
+      <div class="row"><button class="btn primary" type="button" id="send-typed">Send to page</button></div>
+      <p>Or decode a recording with the <b>Page commands</b> vocabulary on the sEMG tab and tick <b>Send result to the page</b>.</p>
+    </div>
+    <h2>Recent actions</h2>
+    <div class="runs" id="ran"></div>
+  </div>
+</section>
+
+<section class="layout" id="view-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
+  <div class="col">
+    <h2>Signal</h2>
+    <div class="panel">
+      <label class="f" for="mains">Mains frequency where you record<select id="mains"><option value="50">50 Hz (most of Asia, Europe, Africa)</option><option value="60">60 Hz (Americas, parts of Asia)</option></select></label>
+      <p>The filters remove electrical hum at this frequency and its harmonics. The public dataset was recorded at 60 Hz.</p>
+      <button class="btn primary" type="button" id="save-settings">Save for this profile</button>
+      <p class="msg" id="set-msg"></p>
+    </div>
+  </div>
+  <div class="col">
+    <h2>About</h2>
+    <div class="panel">
+      <p>Afono Nullpoint <span id="ver"></span>. Running on <span id="dev2"></span>. Recordings come from the <span id="src"></span>.</p>
+      <p>Your data folder: <code id="data-dir">…</code></p>
+      <p>Everything runs on this computer. Nullpoint only listens on 127.0.0.1 and refuses requests from other websites.</p>
+    </div>
+  </div>
+  <div class="col"></div>
+</section>
+
+<div id="stage" hidden><div class="help" id="stage-help"></div></div>
+
 <script>
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
   var src = "closed-test", vocab = "dates", current = null, lastHyp = "", pollT = null;
+  window.NP = {};
 
   function prof() { return ($("profile").value || "default").trim(); }
   function api(path, opt) {
+    opt = opt || {}; opt.headers = Object.assign({ "X-Afono-Client": "nullpoint" }, opt.headers || {});
     return fetch(path, opt).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (j) {
         if (!r.ok) throw new Error(j.detail || ("Request failed (" + r.status + ")"));
@@ -142,37 +264,52 @@
   function post(path, body) { return api(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
   function msg(id, t, err) { var e = $(id); e.textContent = t; e.classList.toggle("err", !!err); }
   function press(sel, attr, val) { document.querySelectorAll(sel).forEach(function (b) { b.setAttribute("aria-pressed", b.dataset[attr] === val); }); }
+  NP.api = api; NP.post = post; NP.msg = msg; NP.prof = prof;
 
+  document.querySelectorAll("[data-tab]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === b); $("view-" + x.dataset.tab).hidden = x !== b; });
+      if (b.dataset.tab === "dom") refreshDom();
+    });
+  });
+
+  function pct(x) { return Math.round(x * 1000) / 10 + "%"; }
   function refreshStatus() {
     return api("/api/status?profile=" + encodeURIComponent(prof())).then(function (s) {
-      $("device").textContent = s.device === "cpu" ? "CPU" : "GPU";
+      $("device").textContent = s.device === "cpu" ? "CPU" : "GPU"; $("dev2").textContent = s.device === "cpu" ? "the CPU" : "the GPU";
+      if (s.device === "cpu" && !NP.epochsSet) { $("epochs").value = 8; NP.epochsSet = true; $("epochs").title = "About 2 minutes per epoch on a CPU for 40 recordings"; }
+      $("ver").textContent = s.version; $("src").textContent = s.source; $("data-dir").textContent = s.data_dir; $("ext-dir").textContent = s.extension_dir;
+      $("mains").value = String(s.settings.mains_hz);
       var sel = $("ckpt"); sel.textContent = "";
-      s.checkpoints.forEach(function (c) { var o = document.createElement("option"); o.value = c; o.textContent = c.replace("runs/", "").replace("/best.pt", ""); o.selected = c === s.ckpt; sel.appendChild(o); });
+      s.checkpoints.forEach(function (c) { var o = document.createElement("option"); o.value = c.path; o.textContent = c.name; o.selected = c.path === s.ckpt; sel.appendChild(o); });
       $("s-rec").textContent = s.profile.recordings; $("s-lab").textContent = s.profile.labelled;
       $("s-cor").textContent = s.profile.corrections; $("s-voc").textContent = s.profile.vocabulary;
       var runs = $("runs"); runs.textContent = "";
       s.runs.forEach(function (r) {
         var d = document.createElement("div"); d.className = "run";
         var m = document.createElement("span"); m.className = "meta"; m.textContent = r.time.slice(0, 16).replace("T", " ") + " · " + r.kind + " · " + r.run_id;
-        var t = document.createElement("span");
-        if (r.kind === "calibrate" && r.before && r.after) t.textContent = "Held-out word accuracy " + Math.round(r.before.lexicon_word_acc * 1000) / 10 + "% → " + Math.round(r.after.lexicon_word_acc * 1000) / 10 + "% (" + r.train_recordings + " recordings)";
-        else if (r.kind === "evaluate" && r.metrics) t.textContent = "Dates " + Math.round(r.metrics.dates_word_acc * 1000) / 10 + "% · 500-word " + Math.round(r.metrics.closed500_word_acc * 1000) / 10 + "% · open WER " + Math.round(r.metrics.open_wer * 1000) / 10 + "%";
-        else if (r.kind === "train") t.textContent = "Trained " + r.params_m + "M params, dev CER " + Math.round(r.dev_cer * 1000) / 10 + "%";
+        var t = document.createElement("span"), mt = r.metrics || {};
+        if (r.kind === "calibrate" && r.before && r.after) t.textContent = "Held-out word accuracy " + pct(r.before.lexicon_word_acc) + " → " + pct(r.after.lexicon_word_acc) + " (" + r.train_recordings + " recordings)";
+        else if (r.model === "track") t.textContent = r.benchmark + ": " + (mt.accuracy_deg != null ? mt.accuracy_deg.toFixed(2) + "° accuracy, " + mt.precision_deg.toFixed(2) + "° precision" : pct(mt.hit_rate) + " hits, " + Math.round(mt.mean_time_ms) + " ms");
+        else if (r.model === "dom") t.textContent = r.benchmark + ": precision " + pct(mt.precision) + ", recall " + pct(mt.recall);
+        else if (r.kind === "evaluate" && mt.dates_word_acc != null) t.textContent = "Dates " + pct(mt.dates_word_acc) + " · 500-word " + pct(mt.closed500_word_acc) + (r.lm ? " · " + r.lm : "");
+        else if (r.kind === "compare") t.textContent = (r.task || "") + " WER " + pct(r.wer_a) + " → " + pct(r.wer_b) + ", p = " + (r.p_b_not_better != null ? r.p_b_not_better.toFixed(3) : "?");
+        else if (r.kind === "train") t.textContent = "Trained " + r.params_m + "M params";
         d.appendChild(m); d.appendChild(t); runs.appendChild(d);
       });
       var job = s.jobs.length ? s.jobs[s.jobs.length - 1] : null;
-      if (job) { $("job-log").textContent = "[" + job.state + "] started " + job.started + "\n" + job.log; if (job.state === "running") schedulePoll(); }
+      if (job) { $("job-log").textContent = "[" + job.state + "] started " + job.started + "\n" + job.log; if (job.state === "running") { clearTimeout(pollT); pollT = setTimeout(refreshStatus, 3000); } }
       return s;
     }).catch(function (e) { msg("msg", e.message, true); });
   }
-  function schedulePoll() { clearTimeout(pollT); pollT = setTimeout(refreshStatus, 3000); }
+  NP.refreshStatus = refreshStatus;
 
   function loadList() {
     var list = $("list"); list.textContent = "";
     $("mine-tools").hidden = src !== "mine";
     var url = src === "mine" ? "/api/recordings?profile=" + encodeURIComponent(prof()) : "/api/samples?set=" + src;
     api(url).then(function (items) {
-      if (!items.length) { var p = document.createElement("p"); p.className = "msg"; p.textContent = src === "mine" ? "No recordings yet. Upload one, record one, or add demo recordings." : "No recordings found."; list.appendChild(p); }
+      if (!items.length) { var p = document.createElement("p"); p.className = "msg"; p.textContent = src === "mine" ? "No recordings yet. Upload one, record one, or use the simulated sensor." : "No recordings found."; list.appendChild(p); }
       items.forEach(function (it) {
         var b = document.createElement("button"); b.type = "button"; b.className = "item"; b.setAttribute("aria-pressed", "false");
         var t = document.createElement("span"); t.textContent = it.text || it.label || "(unlabelled)";
@@ -182,7 +319,6 @@
           list.querySelectorAll(".item").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
           current = { source: src === "mine" ? "recording" : "dataset", id: it.id };
           $("save-fix").disabled = src !== "mine";
-          $("fix-msg").textContent = src === "mine" ? "Corrections change the Personal vocabulary at once and are used by the next calibration." : "Corrections are saved for your own recordings. Dataset recordings already have labels.";
           if (src !== "mine") setVocab(src === "closed-test" ? "dates" : "open");
           decode();
         });
@@ -190,6 +326,7 @@
       });
     }).catch(function (e) { msg("msg", e.message, true); });
   }
+  NP.loadList = loadList;
 
   function drawScope(env) {
     var cv = $("scope"), r = cv.getBoundingClientRect(), d = Math.min(2, window.devicePixelRatio || 1);
@@ -199,17 +336,12 @@
     for (var c = 0; c < C; c++) {
       ctx.fillStyle = c % 2 ? "rgba(240,121,74,.85)" : "rgba(127,203,196,.9)";
       var mid = lane * (c + 0.5), s = lane * 0.1;
-      for (var px = 0; px < W; px++) {
-        var e = env[c][Math.min(n - 1, Math.floor(px * n / W))];
-        var y1 = mid - e[1] * s, y2 = mid - e[0] * s; ctx.fillRect(px, y1, 1, Math.max(1, y2 - y1));
-      }
+      for (var px = 0; px < W; px++) { var e = env[c][Math.min(n - 1, Math.floor(px * n / W))]; var y1 = mid - e[1] * s, y2 = mid - e[0] * s; ctx.fillRect(px, y1, 1, Math.max(1, y2 - y1)); }
     }
   }
-
   function words(ref, hyp) {
     var out = $("hyp"); out.textContent = "";
-    var r = (ref || "").split(" "), set = {};
-    r.forEach(function (w) { set[w] = (set[w] || 0) + 1; });
+    var set = {}; (ref || "").split(" ").forEach(function (w) { set[w] = (set[w] || 0) + 1; });
     (hyp || "").split(" ").filter(Boolean).forEach(function (w, i) {
       if (i) out.appendChild(document.createTextNode(" "));
       var s = document.createElement("span"); s.textContent = w;
@@ -218,103 +350,134 @@
     });
     if (!hyp) out.textContent = "(nothing recognised)";
   }
-
   function decode() {
     if (!current) { msg("msg", "Pick a recording first."); return; }
     msg("msg", "Decoding…");
-    post("/api/decode", { source: current.source, id: current.id, profile: prof(), vocab: vocab, words: $("words").value, ckpt: $("ckpt").value })
+    post("/api/decode", { source: current.source, id: current.id, profile: prof(), vocab: vocab, words: $("words").value, ckpt: $("ckpt").value, send: $("send").checked })
       .then(function (r) {
-        drawScope(r.preview);
-        $("ref").textContent = r.reference || "(no label yet)";
-        words(r.reference, r.text); lastHyp = r.text;
-        $("raw").textContent = r.greedy || "(empty)";
+        drawScope(r.preview); $("ref").textContent = r.reference || "(no label yet)";
+        words(r.reference, r.text); lastHyp = r.text; $("raw").textContent = r.greedy || "(empty)";
         $("fix").value = r.reference || r.text;
-        msg("msg", r.seconds + " s of signal · model " + r.model_ms + " ms · decoding " + r.decode_ms + " ms · " + r.lexicon_size + " words" +
-          (r.word_accuracy != null ? " · word accuracy " + Math.round(r.word_accuracy * 100) + "%" : ""));
+        msg("msg", r.seconds + " s · model " + r.model_ms + " ms · decoder " + r.decode_ms + " ms · " + r.lexicon_size + " words" +
+          (r.word_accuracy != null ? " · word accuracy " + Math.round(r.word_accuracy * 100) + "%" : "") + (r.sent ? " · sent to the page" : ""));
       }).catch(function (e) { msg("msg", e.message, true); });
   }
-
   function setVocab(v) { vocab = v; press("[data-vocab]", "vocab", v); $("words-wrap").hidden = v !== "custom"; }
-
   document.querySelectorAll("[data-src]").forEach(function (b) { b.addEventListener("click", function () { src = b.dataset.src; press("[data-src]", "src", src); loadList(); }); });
   document.querySelectorAll("[data-vocab]").forEach(function (b) { b.addEventListener("click", function () { setVocab(b.dataset.vocab); if (current) decode(); }); });
   $("decode").addEventListener("click", decode);
   $("ckpt").addEventListener("change", function () { post("/api/model", { ckpt: $("ckpt").value }).then(function () { if (current) decode(); }).catch(function (e) { msg("msg", e.message, true); }); });
   $("profile").addEventListener("change", function () { refreshStatus(); if (src === "mine") loadList(); });
-
   $("save-fix").addEventListener("click", function () {
     if (!current || current.source !== "recording") return;
     post("/api/labels", { profile: prof(), id: current.id, text: $("fix").value, model_output: lastHyp }).then(function (r) {
-      msg("fix-msg", (r.saved.source === "confirmed" ? "Confirmed" : "Correction saved") + ": \"" + r.saved.text + "\". The Personal vocabulary now prefers these words.");
+      msg("fix-msg", (r.saved.source === "confirmed" ? "Confirmed" : "Correction saved") + ": “" + r.saved.text + "”. The Personal vocabulary now prefers these words.");
       refreshStatus(); loadList();
     }).catch(function (e) { msg("fix-msg", e.message, true); });
   });
-
   $("file").addEventListener("change", function () {
     var f = $("file").files[0]; if (!f) return;
     var fd = new FormData(); fd.append("file", f);
     msg("serial-msg", "Uploading " + f.name + "…");
     api("/api/recordings?profile=" + encodeURIComponent(prof()), { method: "POST", body: fd }).then(function (r) {
-      msg("serial-msg", "Saved " + r.samples + " samples × " + r.channels + " channels. Pick it in the list, decode, then save what you said.");
-      refreshStatus(); loadList();
+      msg("serial-msg", "Saved " + r.samples + " samples × " + r.channels + " channels."); refreshStatus(); loadList();
     }).catch(function (e) { msg("serial-msg", e.message, true); });
   });
-
   $("import").addEventListener("click", function () {
     $("import").disabled = true;
     post("/api/import", { profile: prof(), set: "closed-dev", limit: 200 }).then(function (r) {
-      msg("fix-msg", "Added " + r.imported + " labelled demo recordings to profile " + prof() + ".");
-      refreshStatus(); if (src === "mine") loadList();
+      msg("fix-msg", "Added " + r.imported + " labelled demo recordings to profile " + prof() + "."); refreshStatus(); if (src === "mine") loadList();
     }).catch(function (e) { msg("fix-msg", e.message, true); }).then(function () { $("import").disabled = false; });
   });
-
   $("calibrate").addEventListener("click", function () {
     post("/api/calibrate", { profile: prof(), epochs: +$("epochs").value, base: $("ckpt").value }).then(function (j) {
-      $("job-log").textContent = "[" + j.state + "] started " + j.started + "\n" + j.log; schedulePoll();
+      $("job-log").textContent = "[" + j.state + "] started " + j.started + "\n" + j.log; clearTimeout(pollT); pollT = setTimeout(refreshStatus, 2000);
     }).catch(function (e) { $("job-log").textContent = e.message; });
   });
 
-  /* Web Serial capture (Phase 4 hardware). One CSV line per sample. */
+  /* sensor input: one parser shared by Web Serial and the simulated sensor */
   var port = null, reader = null, recording = false, buf = [], partial = "";
+  function feed(text) {
+    partial += text;
+    var lines = partial.split("\n"); partial = lines.pop();
+    if (!recording) return;
+    lines.forEach(function (l) { var v = l.trim().split(/[,\t ]+/).map(Number); if (v.length && v.every(isFinite)) buf.push(v); });
+  }
+  NP.feed = feed;
+  function startRec() { buf = []; partial = ""; recording = true; $("rec").textContent = "Recording… release to stop"; }
+  function stopRec(source) {
+    if (!recording) return Promise.resolve(); recording = false; $("rec").textContent = "Hold to record";
+    var n = buf.length && buf[0].length, rows = buf.filter(function (r) { return r.length === n; });
+    if (rows.length < 500) { msg("serial-msg", "Too short (" + rows.length + " samples). Hold for at least half a second.", true); return Promise.resolve(); }
+    return post("/api/recordings/stream", { profile: prof(), samples: rows, source: source || "sensor" }).then(function (r) {
+      msg("serial-msg", "Saved " + (r.samples / 1000).toFixed(1) + " s × " + r.channels + " channels from the " + r.source + "."); refreshStatus(); if (src === "mine") loadList();
+      return r;
+    }).catch(function (e) { msg("serial-msg", e.message, true); });
+  }
   $("serial").addEventListener("click", function () {
-    if (!("serial" in navigator)) { msg("serial-msg", "This browser has no Web Serial. Use Chrome or Edge on a computer.", true); return; }
+    if (!("serial" in navigator)) { msg("serial-msg", "This window has no Web Serial. Use Chrome or Edge.", true); return; }
     navigator.serial.requestPort().then(function (p) { port = p; return p.open({ baudRate: 921600 }); }).then(function () {
-      msg("serial-msg", "Sensor connected. Hold the button while you mouth a word or phrase.");
-      $("rec").disabled = false; readLoop();
+      msg("serial-msg", "Sensor connected. Hold the button while you mouth a word or phrase."); $("rec").disabled = false;
+      var dec = new TextDecoder(); reader = port.readable.getReader();
+      (function pump() { reader.read().then(function (r) { if (r.done) return; feed(dec.decode(r.value, { stream: true })); pump(); })
+        .catch(function (e) { msg("serial-msg", "Sensor stopped: " + e.message, true); }); })();
     }).catch(function (e) { msg("serial-msg", e.message, true); });
   });
-  function readLoop() {
-    var dec = new TextDecoder(); reader = port.readable.getReader();
-    (function pump() {
-      reader.read().then(function (r) {
-        if (r.done) return;
-        partial += dec.decode(r.value, { stream: true });
-        var lines = partial.split("\n"); partial = lines.pop();
-        if (recording) lines.forEach(function (l) {
-          var v = l.trim().split(/[,\t ]+/).map(Number);
-          if (v.length && v.every(isFinite)) buf.push(v);
-        });
-        pump();
-      }).catch(function (e) { msg("serial-msg", "Sensor stopped: " + e.message, true); });
-    })();
-  }
-  function startRec() { buf = []; recording = true; $("rec").textContent = "Recording… release to stop"; }
-  function stopRec() {
-    if (!recording) return; recording = false; $("rec").textContent = "Hold to record";
-    var n = buf.length && buf[0].length, rows = buf.filter(function (r) { return r.length === n; });
-    if (rows.length < 500) { msg("serial-msg", "Too short (" + rows.length + " samples). Hold for at least half a second.", true); return; }
-    post("/api/recordings/stream", { profile: prof(), samples: rows }).then(function (r) {
-      msg("serial-msg", "Saved " + (r.samples / 1000).toFixed(1) + " s × " + r.channels + " channels."); refreshStatus(); if (src === "mine") loadList();
-    }).catch(function (e) { msg("serial-msg", e.message, true); });
-  }
   $("rec").addEventListener("pointerdown", startRec);
-  $("rec").addEventListener("pointerup", stopRec);
-  $("rec").addEventListener("pointerleave", stopRec);
+  $("rec").addEventListener("pointerup", function () { stopRec("sensor"); });
+  $("rec").addEventListener("pointerleave", function () { stopRec("sensor"); });
   $("rec").addEventListener("keydown", function (e) { if ((e.key === " " || e.key === "Enter") && !recording) { e.preventDefault(); startRec(); } });
-  $("rec").addEventListener("keyup", function (e) { if (e.key === " " || e.key === "Enter") stopRec(); });
+  $("rec").addEventListener("keyup", function (e) { if (e.key === " " || e.key === "Enter") stopRec("sensor"); });
+  NP.simulate = function (id) {
+    return api("/api/demo/raw?id=" + encodeURIComponent(id)).then(function (d) {
+      var text = d.rows.map(function (r) { return r.join(","); }).join("\n") + "\n", i = 0, chunk = 20 * (text.length / d.rows.length) | 0;
+      startRec();
+      return new Promise(function (res) {
+        var t = setInterval(function () {
+          feed(text.slice(i, i + chunk)); i += chunk;
+          if (i >= text.length) { clearInterval(t); stopRec("simulated sensor").then(res); }
+        }, 20);
+      });
+    });
+  };
+  $("simulate").addEventListener("click", function () {
+    api("/api/samples?set=closed-test&limit=10").then(function (s) {
+      var pick = s[Math.floor(Math.random() * s.length)];
+      msg("serial-msg", "Simulated sensor is streaming “" + pick.text + "” in real time…");
+      return NP.simulate(pick.id);
+    }).catch(function (e) { msg("serial-msg", e.message, true); });
+  });
 
+  function refreshDom() {
+    api("/api/context").then(function (c) {
+      $("ext-state").textContent = c.url ? "Connected. Last update " + c.time + "." : "Waiting for the Afono Nullpoint extension.";
+      $("ctx-page").textContent = c.url ? (c.title || c.url) + " · " + c.targets.length + " targets · " + (c.vocabulary || []).length + " words" : "No page yet.";
+      var box = $("ctx-targets"); box.textContent = "";
+      (c.targets || []).forEach(function (t) {
+        var d = document.createElement("div"), n = document.createElement("b"), l = document.createElement("span"), k = document.createElement("span");
+        n.textContent = t.n; l.textContent = t.label; k.className = "k"; k.textContent = t.kind; d.appendChild(n); d.appendChild(l); d.appendChild(k); box.appendChild(d);
+      });
+    }).catch(function () {});
+    api("/api/ran").then(function (list) {
+      var box = $("ran"); box.textContent = "";
+      list.forEach(function (r) { var d = document.createElement("div"); d.className = "run"; d.textContent = r.time + " · " + r.text + " → " + r.action; box.appendChild(d); });
+    }).catch(function () {});
+  }
+  setInterval(function () { if (!$("view-dom").hidden) refreshDom(); }, 1500);
+  $("send-typed").addEventListener("click", function () { var t = $("typed").value; if (!t) return; post("/api/commands", { text: t }).then(function () { $("typed").value = ""; }); });
+  $("typed").addEventListener("keydown", function (e) { if (e.key === "Enter") $("send-typed").click(); });
+  $("open-ext").addEventListener("click", function () { post("/api/open-extension", {}).catch(function () {}); });
+
+  $("save-settings").addEventListener("click", function () {
+    post("/api/settings", { profile: prof(), mains_hz: +$("mains").value }).then(function (s) { msg("set-msg", "Saved: " + s.mains_hz + " Hz for profile " + prof() + "."); })
+      .catch(function (e) { msg("set-msg", e.message, true); });
+  });
+
+  function beat() { post("/api/heartbeat", {}).catch(function () {}); }
+  beat(); setInterval(beat, 5000);
   refreshStatus(); loadList();
 })();
 </script>
+<script type="module" src="/static/track-ui.js"></script>
 </body>
 </html>
