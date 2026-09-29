@@ -1,19 +1,46 @@
 {
   "phases": [
-    {"id": "p1", "name": "Benchmark on public data", "status": "active",
-     "goal": "90% word accuracy on a closed vocabulary, silent speech",
-     "detail": "Dates & times vocabulary passed. Free-form 500-word sentences are next."},
-    {"id": "p2", "name": "Tiny and fast in the browser", "status": "active",
-     "goal": "Under 10 MB, runs on the device, no server",
-     "detail": "9 MB model decodes in the browser today. Streaming input is next."},
-    {"id": "p3", "name": "Page-aware browser extension", "status": "next",
-     "goal": "Pick from what is on screen: links, buttons, fields",
-     "detail": "Chrome extension that narrows the decoder to the page's own words."},
-    {"id": "p4", "name": "$50 open hardware", "status": "next",
-     "goal": "4-channel sensor + ESP32, 20-minute calibration",
-     "detail": "Our own recordings; the calibration loop is already built."},
-    {"id": "p5", "name": "Pilots with disabled users", "status": "later",
-     "goal": "Laryngectomy and spinal-cord-injury communities",
-     "detail": "Words per minute and task completion, measured with clinicians."}
+    {
+      "id": "p1",
+      "name": "Benchmark on public data",
+      "status": "active",
+      "goal": "90% word accuracy on a closed vocabulary, silent speech",
+      "detail": "Dates and times passed 90%. Bigram decoder lifted 500-word sentences to 46.5%; phoneme targets are next."
+    },
+    {
+      "id": "p2",
+      "name": "Tiny and fast in the browser",
+      "status": "active",
+      "goal": "Under 10 MB, runs on the device, no server",
+      "detail": "9 MB model decodes in the browser. Afono Nullpoint desktop app runs all three models locally."
+    },
+    {
+      "id": "p3",
+      "name": "Afono DOM Model",
+      "status": "active",
+      "goal": "Pick from what is on screen: links, buttons, fields",
+      "detail": "Chrome extension v0 numbers every target and runs commands; 17 of 17 on our fixture. WebUI benchmark next."
+    },
+    {
+      "id": "p3b",
+      "name": "Afono Track Model",
+      "status": "active",
+      "goal": "Webcam gaze that snaps to page targets",
+      "detail": "v0 built: 9-point calibration, accuracy test and 12-target test. First human results next."
+    },
+    {
+      "id": "p4",
+      "name": "$50 open hardware",
+      "status": "next",
+      "goal": "4-channel sensor + ESP32, 20-minute calibration",
+      "detail": "Our own recordings; the calibration loop is already built."
+    },
+    {
+      "id": "p5",
+      "name": "Pilots with disabled users",
+      "status": "later",
+      "goal": "Laryngectomy and spinal-cord-injury communities",
+      "detail": "Words per minute and task completion, measured with clinicians."
+    }
   ]
 }

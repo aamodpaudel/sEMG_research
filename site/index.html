@@ -198,7 +198,7 @@
       <span class="word" aria-hidden="true"><span class="l">a</span><span class="l">f</span><span class="l">o</span><span class="l">n</span><span class="l">o</span></span>
     </div>
     <h1 class="words" id="headline">Use a computer without lifting a finger.</h1>
-    <p class="sub">Afono is a nonprofit AI lab. We build three small models that run on your own device: one reads silent speech, one follows your eyes, one understands the page.</p>
+    <p class="sub">Afono is a nonprofit AI lab. Afono Nullpoint runs three small models on your own device: the Track Model follows your eyes, the sEMG Model reads silent speech, and the DOM Model understands the page.</p>
     <div class="cta">
       <a class="btn primary" href="#demo">Try the model</a>
       <a class="btn" href="research.html">Read the research</a>
@@ -220,23 +220,23 @@
       <li class="rv" style="--d: .15s">
         <svg class="glyph" viewBox="0 0 56 56" aria-hidden="true"><g class="g-eye"><path d="M4 28 C14 12 42 12 52 28 C42 44 14 44 4 28 Z" fill="none" stroke="var(--teal)" stroke-width="3.5" stroke-linejoin="round"></path><circle class="g-pupil" cx="25" cy="28" r="6.5" fill="var(--signal)"></circle></g></svg>
         <span class="verb">Look</span>
-        <span class="model">Gaze model</span>
+        <span class="model">Afono Track Model</span>
         <p>A plain webcam follows where you look, so your eyes become the pointer.</p>
-        <div class="state"><span class="pill next">Next</span><small>benchmark: angular error, MPIIFaceGaze</small></div>
+        <div class="state"><span class="pill active">Prototype</span><small>in Nullpoint · scored in degrees and target hit rate</small></div>
       </li>
       <li class="rv" style="--d: .3s; --dd: .6s">
         <svg class="glyph" viewBox="0 0 56 84" aria-hidden="true" style="height: 48px"><circle cx="28" cy="42" r="19" fill="none" stroke="var(--teal)" stroke-width="6.5"></circle><line class="g-bar" x1="28" y1="8" x2="28" y2="76" stroke="var(--signal)" stroke-width="6.5" stroke-linecap="round"></line></svg>
         <span class="verb">Mouth</span>
-        <span class="model">Silent-speech model</span>
+        <span class="model">Afono sEMG Model</span>
         <p>Skin sensors read the muscles of speech. You form the word, no sound needed.</p>
         <div class="state"><span class="pill active">Training</span><span class="num"><span data-p="dates_word_acc" data-count>94.8</span>%</span><small>word accuracy · 51 words · 95% CI <span data-p="dates_ci">90.9–98.2%</span></small></div>
       </li>
       <li class="rv" style="--d: .45s; --dd: .9s">
         <svg class="glyph" viewBox="0 0 56 56" aria-hidden="true"><rect x="4" y="6" width="48" height="44" rx="8" fill="none" stroke="var(--teal)" stroke-width="3.5"></rect><rect x="12" y="15" width="32" height="8" rx="3" fill="var(--teal)" opacity=".35"></rect><rect x="12" y="28" width="32" height="8" rx="3" fill="var(--teal)" opacity=".35"></rect><rect class="g-pick" x="10" y="13" width="36" height="12" rx="4" fill="none" stroke="var(--signal)" stroke-width="2.5"></rect></svg>
         <span class="verb">Done</span>
-        <span class="model">Page model</span>
+        <span class="model">Afono DOM Model</span>
         <p>The browser knows every button and link on screen, so Afono picks 1 of 12, not 1 of 50,000.</p>
-        <div class="state"><span class="pill next">Prototype</span><small>benchmark: element detection, WebUI</small></div>
+        <div class="state"><span class="pill active">Prototype</span><small>Chrome extension · 17 of 17 targets on our fixture</small></div>
       </li>
     </ol>
   </div>

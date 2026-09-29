@@ -50,9 +50,36 @@ Calibration on a demo profile (155 labelled recordings, same speaker): held-out 
 
 Published open-vocabulary silent WER on this dataset: previous state of the art 28.8%, MONA LISA 12.2% (Benster et al., 2024). Ours: 59.5%.
 
+## Decoder ablation (run `base`, protocol v2)
+A bigram word prior (interpolated absolute discounting, D = 0.75, training transcripts only) against the unigram prior,
+same model and test utterances, paired bootstrap:
+
+| Task | WER unigram | WER bigram | Change [95% CI] | p |
+|---|---|---|---|---|
+| closed500 | 60.3% | 53.5% | −6.8 [−8.8, −4.8] | < 0.001 |
+| open | 59.5% | 56.8% | −2.7 [−5.0, −0.5] | 0.006 |
+| closed100 | 62.7% | 46.7% | −16.0 [−29.0, −4.9] | 0.002 |
+| closed250 | 51.1% | 47.3% | −3.9 [−7.5, 0.0] | 0.033 |
+| dates | 5.2% | 4.1% | −1.2 [−3.0, 0.0] | 0.125 (not significant) |
+
+The bigram decoder is now the default in Nullpoint. The browser demo still uses the unigram prior.
+
+## Afono DOM Model: DOM-0 fixture
+`python -m semg.dom_eval` runs the detector in headless Chrome on `extension/test/fixture.html`: 17 true targets
+(links, buttons, an icon button with aria-label, ARIA roles, two script-only click handlers, form fields, a checkbox,
+an image link, a summary) and 6 decoys (disabled, display:none, visibility:hidden, aria-hidden, covered, off-screen).
+v0 result: precision 100%, recall 100%, label accuracy 100%, 5 of 5 commands parsed. We wrote this page ourselves,
+so it is a regression test, not evidence of real-world performance.
+
+## Afono Track Model: session protocol
+Accuracy = distance between each validation target and the median estimate over 1 s (after 0.6 s settling), averaged
+over 5 targets not used in calibration. Precision = RMS distance between consecutive estimates. Both in pixels and
+degrees of visual angle from the entered screen width and viewing distance. Target test: 12 cells in a 4 × 3 grid,
+random order, selection by Space when the gaze-snapped highlight is on the goal; reports hit rate and time per selection.
+
 ## Planned protocols for the other two models
-- **Gaze model**: angular error (degrees) on MPIIFaceGaze, leave-one-subject-out; on-screen pointing hit rate and error in pixels at a fixed viewing distance.
-- **Page model**: precision and recall of actionable elements on the WebUI dataset; median size of the per-page vocabulary handed to the decoder.
+- **Afono Track Model** (gaze): angular error (degrees) on MPIIFaceGaze, leave-one-subject-out; on-screen pointing hit rate and error in pixels at a fixed viewing distance.
+- **Afono DOM Model** (page elements): precision and recall of actionable elements on the WebUI dataset; median size of the per-page vocabulary handed to the decoder.
 - **Combined system**: success rate and time per task on scripted web tasks, selections per minute and ITR, against keyboard, mouse and eye-gaze baselines. Participants with and without motor impairments, with ethics review before any human study.
 
 ## Rules

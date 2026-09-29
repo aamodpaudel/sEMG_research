@@ -4,15 +4,19 @@
 |---|---|---|
 | Model + training | `semg/` | `python -m semg.train`, `python -m semg.evaluate` |
 | Learning loop (per-user calibration) | `semg/user.py`, `semg/calibrate.py` | `python -m semg.calibrate --profile <name>` |
-| Afono Lab, the local app | `app/` | `python -m app.server`, then open http://127.0.0.1:8765 |
+| Afono Nullpoint, the desktop app | `app/` | `python -m app.server`, or the installed `Afono Nullpoint.exe` |
 | Website with in-browser demo | `site/` | `python -m http.server 8000 -d site`, then open http://127.0.0.1:8000 |
 | Run registry (every experiment) | `runs/registry.jsonl` | written automatically |
 | Research metrics, paired tests | `semg/metrics.py`, `semg/compare.py`, [METRICS.md](METRICS.md) | `python -m semg.compare --profile P --a A.pt --b B.pt` |
 | Brand | `BRAND.md`, `site/brand.html` | |
 | $50 rig firmware (untested) | `firmware/esp32_emg/` | Arduino IDE, ESP32 board |
+| Afono DOM Model (Chrome/Edge extension) | `extension/` | Load unpacked in `chrome://extensions`; `python -m semg.dom_eval` scores it |
+| Afono Track Model (webcam gaze) | `app/static/track.js` | Track tab in Nullpoint |
+| Tier 1 command vocabulary | `vocab/commands.json` | used by Nullpoint and the extension |
+| Desktop build | `packaging/` | `python packaging/build.py` → `dist/Afono Nullpoint/Afono Nullpoint.exe` |
 
 ## The loop we follow for every experiment
-1. **Train or calibrate.** `python -m semg.train --out runs/<name> --notes "what this tests"` or Calibrate in Afono Lab.
+1. **Train or calibrate.** `python -m semg.train --out runs/<name> --notes "what this tests"` or Calibrate in Afono Nullpoint.
    Each run appends one line to `runs/registry.jsonl`.
 2. **Benchmark.** `python -m semg.evaluate --ckpt runs/<name>/best.pt --out runs/<name>/report.json`.
    This also rebuilds the website's numbers (`site/data/progress.*`).
@@ -22,14 +26,26 @@
 
 The website never contains a number that is not in the registry.
 
-## Afono Lab: teaching the model
-- Pick a recording, choose a vocabulary, press Decode.
-- "Words on screen" limits the decoder to the words you type: this is how page-aware decoding will work.
-- For your own recordings, type what you actually said and press Save correction. The Personal vocabulary uses it at once.
-- "Add demo recordings" fills a profile with real labelled dataset recordings, so calibration can be tried before hardware exists.
-- Calibrate fine-tunes on the profile's labelled recordings, mixing in original training data so the model does not forget.
-  It measures held-out recordings before and after and logs both. A rig with a different number of electrodes is handled
-  by re-initialising only the first layer.
+## Afono Nullpoint
+One desktop app for the three models. Double-click `Afono Nullpoint.exe` (or `python -m app.desktop`);
+it opens in its own window and closes its server when you close the window. It works without the
+3.9 GB dataset by using a bundled pack of 155 real demo recordings.
+
+| Tab | What it does |
+|---|---|
+| **sEMG Model** | Decode recordings with the dates, open, personal, page-command or custom vocabulary. Save corrections. Calibrate on your own labelled recordings (in the app, CPU or GPU). Record from the sensor over Web Serial, or use the **simulated sensor**, which streams a real recording through the same parser. |
+| **Track Model** | Webcam gaze: 9-point calibration, accuracy test (degrees), 12-target selection test, live gaze dot. Results go to the run log. |
+| **DOM Model** | Shows what the browser extension sees on the current page, and sends commands to it (typed, or decoded from sEMG). |
+| **Settings** | Mains frequency (50 or 60 Hz) per profile. Must match where you record. |
+
+User data lives in `%LOCALAPPDATA%\Afono Nullpoint` for the packaged app. Nullpoint listens on 127.0.0.1 only, and every
+request that changes something needs an `X-Afono-Client` header, so other websites cannot drive it.
+
+### Browser extension (Afono DOM Model)
+Load `extension/` with **Load unpacked** in `chrome://extensions` or `edge://extensions` (Developer mode on).
+`Alt+Shift+F` shows target numbers, `Alt+Shift+K` opens the command bar (`click 3`, `click sign in`, `scroll down`,
+`zoom in`, `back`, `search …`). With Nullpoint running it sends the page's target labels to Nullpoint, which adds them
+to the sEMG vocabulary, and runs the commands Nullpoint decodes.
 
 This is supervised learning from corrections. Reward-based learning (reinforcement from accept/undo signals) needs real
 usage data first; it is planned for Phase 3, once the browser extension produces those signals.

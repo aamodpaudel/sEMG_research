@@ -108,7 +108,7 @@ Suggested bill of materials (prices approximate):
 
 ### What exists now
 - Baseline model, benchmark, run registry, per-user calibration loop (tested on real data).
-- Afono Lab local app, in-browser demo (checked in Chrome: output matches Python exactly), pitch website, brand.
+- Afono Nullpoint desktop app, in-browser demo (checked in Chrome: output matches Python exactly), pitch website, brand.
 
 ### Next 6 weeks, in order
 1. **Put the project in git and on GitHub.** `git init`, commit, push. Commit `runs/registry.jsonl` and the reports, not `data/`
@@ -120,7 +120,7 @@ Suggested bill of materials (prices approximate):
 4. **Build the Chrome extension** that sends the page's visible link and button labels to the decoder as "Words on screen".
    Test it first with a fake decoder, then with dataset recordings.
 5. **Order the hardware** once any Phase 1 task passes 90% on 500 words: ESP32 + 4 BioAmp EXG Pills + gel electrodes.
-   Record yourself with Afono Lab (500 words × 10 repetitions), then Calibrate.
+   Record yourself with Afono Nullpoint (500 words × 10 repetitions), then Calibrate.
 
 ### After every run
 Evaluate → the site data rebuilds itself → republish the site. The training log section then shows the new run.
@@ -136,7 +136,14 @@ Evaluate → the site data rebuilds itself → republish the site. The training 
 
 ## Positioning (2026-09-29)
 - **Organisation:** Afono is a nonprofit AI lab for hands-free computing. One interface, three models: gaze (where), silent speech (what), page understanding (what is possible).
-- **Lead with one model.** Silent speech has the evidence; gaze and the page model are the roadmap, each with a defined benchmark (METRICS.md).
+- **Lead with one model.** Silent speech has the evidence; the Track Model and DOM Model are the roadmap, each with a defined benchmark (METRICS.md).
 - **Vision line:** "Accessible brain–computer interfaces start with a simple human–computer interface." Use it as the vision, not a product claim: sEMG reads muscles, it is not a BCI.
 - **Two audiences:** people who cannot use their hands or voice first; everyone with tired hands second ("use a computer without lifting a finger").
 - **Research track:** every run follows METRICS.md, so results can go straight into a workshop paper (e.g. interface-constrained decoding as the contribution).
+
+## Status (2026-09-29, evening)
+- **Afono Nullpoint** desktop app built (Windows, `dist/`), runs the three models locally, works without the dataset.
+- **sEMG Model:** bigram decoder is significantly better on sentences (500-word 39.7% → 46.5%, p < 0.001).
+- **DOM Model v0:** Chrome extension, Tier 1 commands, Nullpoint bridge; passes the DOM-0 fixture.
+- **Track Model v0:** webcam gaze with calibration and scored tests; no human session logged yet.
+- **Next:** first Track session on yourself; WebUI benchmark for the DOM Model; phoneme-target sEMG run; hardware and Tier 1 recordings.

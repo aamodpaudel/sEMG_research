@@ -26,8 +26,18 @@ def _summary(r):
                 f"for {r.get('hours', '?')} h. Dev character error {_pct(r.get('dev_cer'))}%.")
     if k == "evaluate":
         m = r.get("metrics", {})
-        return (f"Benchmark: dates & times {_pct(m.get('dates_word_acc'))}% word accuracy, "
+        return (f"Benchmark ({r.get('lm', 'unigram')} decoder): dates & times {_pct(m.get('dates_word_acc'))}% word accuracy, "
                 f"500-word sentences {_pct(m.get('closed500_word_acc'))}%, open vocabulary WER {_pct(m.get('open_wer'))}%.")
+    if k == "evaluate" and r.get("model") == "dom":
+        m = r.get("metrics", {})
+        return (f"DOM Model on {r.get('benchmark')}: precision {_pct(m.get('precision'))}%, recall {_pct(m.get('recall'))}%, "
+                f"labels right {_pct(m.get('label_accuracy'))}%.")
+    if k == "evaluate" and r.get("model") == "track":
+        m = r.get("metrics", {})
+        return f"Track Model {r.get('benchmark')}: " + (f"{m.get('accuracy_deg', 0):.2f}° accuracy." if "accuracy_deg" in m else f"{_pct(m.get('hit_rate'))}% hits.")
+    if k == "compare" and r.get("task"):
+        return (f"Decoder comparison, {r['task']}: WER {_pct(r.get('wer_a'))}% to {_pct(r.get('wer_b'))}% "
+                f"(95% CI {_pct(r['delta_ci95'][0])} to {_pct(r['delta_ci95'][1])} pts), p = {r.get('p_b_not_better'):.3f}.")
     if k == "compare":
         return (f"Paired test on {r.get('n_utterances')} held-out recordings: WER {_pct(r.get('wer_a'))}% to "
                 f"{_pct(r.get('wer_b'))}%, change {_pct(r.get('delta_wer'))} pts (95% CI {_pct(r['delta_ci95'][0])} "
@@ -41,7 +51,7 @@ def _summary(r):
 
 def build(site=SITE, registry=None):
     runs = read_runs(registry)
-    evals = [r for r in runs if r["kind"] == "evaluate"]
+    evals = [r for r in runs if r["kind"] == "evaluate" and r.get("model") is None]
     latest = evals[-1] if evals else None
     demo = {}
     sj = os.path.join(site, "demo", "samples.json")
@@ -59,7 +69,7 @@ def build(site=SITE, registry=None):
             roadmap = json.load(f)
     m = (latest or {}).get("metrics", {})
     research = {}
-    v2 = [r for r in evals if r.get("protocol") == "v2"]
+    v2 = [r for r in evals if r.get("protocol") == "v2" and r.get("model") is None]
     if v2:
         r = v2[-1]
         rep = {}
@@ -80,14 +90,30 @@ def build(site=SITE, registry=None):
                          "greedy_acc": _pct(G["word_accuracy"]), "bits": round(L.get("bits_per_word", 0), 2),
                          "itr": round(L.get("itr_bits_per_min", 0), 1), "cwpm": round(L.get("correct_wpm", 0), 1),
                          "rtf": round(L.get("real_time_factor", 0), 3)})
-        research = {"run": r["run_id"], "date": r["time"][:10], "protocol": r.get("protocol"), "tasks": rows,
+        research = {"run": r["run_id"], "date": r["time"][:10], "protocol": r.get("protocol"), "lm": r.get("lm", "unigram"), "tasks": rows,
                     "dataset": rep.get("dataset"), "decoder": rep.get("decoder"), "compute": rep.get("compute"),
                     "params_m": rep.get("params_m"), "epoch": rep.get("epoch")}
-    paired = [r for r in runs if r["kind"] == "compare"]
-    if paired:
-        c = paired[-1]
+    calib = [r for r in runs if r["kind"] == "compare" and r.get("profile")]
+    if calib:
+        c = calib[-1]
         research["paired"] = {k: c.get(k) for k in ("wer_a", "wer_b", "delta_wer", "delta_ci95", "p_b_not_better",
                                                     "n_utterances", "profile", "a", "b")}
+    dec = [r for r in runs if r["kind"] == "compare" and r.get("task")]
+    if dec:
+        last = {}
+        for r in dec:
+            last[r["task"]] = r
+        research["decoder_compare"] = [{"task": t, "wer_a": _pct(r["wer_a"]), "wer_b": _pct(r["wer_b"]),
+                                        "delta": _pct(r["delta_wer"]), "ci": [_pct(x) for x in r["delta_ci95"]],
+                                        "p": round(r["p_b_not_better"], 3), "n": r["n_utterances"], "notes": r.get("notes", "")}
+                                       for t, r in sorted(last.items())]
+    dom = [r for r in runs if r.get("model") == "dom"]
+    if dom:
+        research["dom"] = {"date": dom[-1]["time"][:10], "benchmark": dom[-1].get("benchmark"), **dom[-1].get("metrics", {}),
+                           "targets": dom[-1].get("details", {}).get("ground_truth")}
+    track = [r for r in runs if r.get("model") == "track"]
+    if track:
+        research["track"] = [{"date": r["time"][:10], "benchmark": r.get("benchmark"), **r.get("metrics", {})} for r in track[-5:]]
     if research.get("tasks"):
         t = {row["task"]: row for row in research["tasks"]}
         m = dict(m)

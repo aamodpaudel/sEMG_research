@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Afono Research</title>
-<meta name="description" content="Benchmark card for Afono's silent-speech model: protocol, results with confidence intervals, limitations, and planned benchmarks.">
+<meta name="description" content="Benchmark card for the Afono sEMG Model: protocol, results with confidence intervals, limitations, and planned benchmarks.">
 <link rel="icon" href="assets/afono-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,10 +73,10 @@
 <div class="wrap">
 <article>
   <div class="title">
-    <p class="eyebrow">Research card · silent-speech model</p>
+    <p class="eyebrow">Research card · Afono sEMG Model</p>
     <h1>Silent speech to text with a vocabulary the interface already knows</h1>
     <div class="meta"><span>Run <b data-r="run">base</b></span><span>Protocol <b data-r="protocol">v2</b></span><span>Measured <b data-r="date">2026-09-29</b></span><span><b data-r="params">5.8</b>M parameters</span></div>
-    <p class="abstract">We decode silent speech from 8-channel facial surface EMG with a 5.8M-parameter convolutional Transformer trained with CTC on characters. Restricting the decoder to the words an interface can accept raises word accuracy on a 51-word dates-and-times task from 57.6% to 94.8% (95% CI 90.9–98.2%). On free-form sentences the same model reaches 40.5% open-vocabulary word accuracy, well behind the published state of the art (87.8%). All results are from one speaker on lab hardware.</p>
+    <p class="abstract">The Afono sEMG Model decodes silent speech from 8-channel facial surface EMG with a 5.8M-parameter convolutional Transformer trained with CTC on characters. Restricting the decoder to the words an interface can accept, and scoring them with a bigram word prior, raises word accuracy on a 51-word dates-and-times task from 57.6% to <span data-r="dates_acc">95.9</span>% (95% CI <span data-r="dates_ci">92.5–98.8</span>%). On free-form sentences the same model reaches <span data-r="open_acc">43.2</span>% open-vocabulary word accuracy, well behind the published state of the art (87.8%). All results are from one speaker on lab hardware.</p>
   </div>
 
   <section aria-labelledby="r1">
@@ -111,6 +111,17 @@
     </div>
   </section>
 
+  <section aria-labelledby="r2b">
+    <h2 id="r2b"><span class="num">2b</span>Decoder ablation: unigram vs bigram word prior</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">Task</th><th scope="col">WER, unigram</th><th scope="col">WER, bigram</th><th scope="col">Change [95% CI]</th><th scope="col">p</th><th scope="col">Utterances</th></tr></thead>
+        <tbody id="ablation-body"><tr><td colspan="6">Loading…</td></tr></tbody>
+        <caption>Same model, same test utterances; paired bootstrap, one-sided p that the bigram is not better. Negative change means fewer errors.</caption>
+      </table>
+    </div>
+  </section>
+
   <section aria-labelledby="r3">
     <h2 id="r3"><span class="num">3</span>Published baselines</h2>
     <div class="tablewrap">
@@ -119,7 +130,7 @@
         <tbody>
           <tr><td>Previous state of the art (as reported by Benster et al., 2024)</td><td class="n">28.8%</td><td>Gaddy (2020) benchmark</td></tr>
           <tr><td>MONA LISA (Benster et al., 2024)</td><td class="n hl">12.2%</td><td>Cross-modal training + LLM rescoring</td></tr>
-          <tr><td>Afono, run <span data-r="run">base</span></td><td class="n hl"><span data-r="open_wer">59.5</span>%</td><td>Small on-device model, unigram prior, no LLM</td></tr>
+          <tr><td>Afono, run <span data-r="run">base</span></td><td class="n hl"><span data-r="open_wer">59.5</span>%</td><td>Small on-device model, bigram word prior, no LLM</td></tr>
         </tbody>
       </table>
     </div>
@@ -132,7 +143,7 @@
     <h3>Signal and model</h3>
     <p>Causal filtering (2 Hz high-pass, 60 Hz notch and harmonics, 450 Hz low-pass), per-utterance channel z-scoring. Three strided residual convolution blocks (1,000 → 125 Hz), a depthwise convolutional position embedding, six pre-norm Transformer layers (d = 256, 4 heads), and a character CTC head (29 symbols). Trained 80 epochs on silent and voiced EMG with a mode embedding, AdamW (lr 5×10⁻⁴, cosine), bf16, and augmentations for gain, noise, electrode dropout and time masks. The checkpoint with the lowest dev WER (epoch 70) is used.</p>
     <h3>Decoding</h3>
-    <p>Lexicon-constrained CTC prefix beam search (beam 32) with a unigram word prior. The prior weight and word bonus are tuned on the first 100 dev utterances only. Test sentences never influence any setting. Closed-N tasks keep test sentences, in index order, while their combined vocabulary fits N words, then pad the lexicon to exactly N with the most frequent training words.</p>
+    <p>Lexicon-constrained CTC prefix beam search (beam 32) with a word prior: an interpolated absolute-discount bigram (discount 0.75) trained on the training transcripts only. The prior weight and word bonus are tuned on the first 100 dev utterances only. Test sentences never influence any setting. Closed-N tasks keep test sentences, in index order, while their combined vocabulary fits N words, then pad the lexicon to exactly N with the most frequent training words.</p>
     <h3>Compute</h3>
     <p><span data-r="device">NVIDIA GeForce RTX 4060 Laptop GPU</span>, PyTorch <span data-r="torch">2.7.0</span>. Median encoder time <span data-r="enc">12.7</span> ms per utterance at batch size 1.</p>
   </section>
@@ -158,11 +169,11 @@
   </section>
 
   <section aria-labelledby="r7">
-    <h2 id="r7"><span class="num">7</span>The three-model program</h2>
+    <h2 id="r7"><span class="num">7</span>The three models in Afono Nullpoint</h2>
     <div class="cols">
-      <div class="card"><span class="pill active" style="justify-self: start">Training</span><h3>Silent-speech model</h3><p>Facial sEMG to text. Metrics above.</p></div>
-      <div class="card"><span class="pill next" style="justify-self: start">Next</span><h3>Gaze model</h3><ul><li>Webcam-only gaze estimation.</li><li>Angular error in degrees on MPIIFaceGaze, leave-one-subject-out.</li><li>Pointing accuracy on screen targets, in pixels and in hit rate.</li></ul></div>
-      <div class="card"><span class="pill next" style="justify-self: start">Prototype</span><h3>Page model</h3><ul><li>Detects actionable elements and their labels on any web page.</li><li>Precision and recall of clickable elements on the WebUI dataset.</li><li>Vocabulary it hands the decoder: median size per page.</li></ul></div>
+      <div class="card"><span class="pill active" style="justify-self: start">Training</span><h3>Afono sEMG Model</h3><p>Facial sEMG to text. Metrics above.</p></div>
+      <div class="card"><span class="pill active" style="justify-self: start">Prototype</span><h3>Afono Track Model</h3><ul><li>v0 in Nullpoint: MediaPipe iris landmarks, 9-point calibration, ridge regression, One Euro smoothing.</li><li>Scores accuracy and precision in degrees, and hit rate on a 12-target selection test.</li><li id="track-status">No human sessions logged yet. Public benchmark: MPIIFaceGaze, leave-one-subject-out.</li></ul></div>
+      <div class="card"><span class="pill active" style="justify-self: start">Prototype</span><h3>Afono DOM Model</h3><ul><li>v0 Chrome extension: numbers every visible target and runs Tier 1 commands.</li><li id="dom-status">DOM-0 fixture (ours, 17 targets, 6 decoys): 100% precision, 100% recall. A sanity check, not a benchmark.</li><li>Next: precision and recall on the WebUI dataset, and the vocabulary size it hands the sEMG Model.</li></ul></div>
     </div>
     <p class="muted" style="margin-top: 16px">The combined system will be scored on web tasks by success rate, time per task, and selections per minute with Wolpaw ITR, against keyboard, mouse and eye-gaze baselines.</p>
   </section>
@@ -224,10 +235,31 @@ python -m semg.compare --profile demo-open --a runs/base/best.pt --b runs/&lt;ca
     body.appendChild(tr);
   });
 
+  var T0 = {}; R.tasks.forEach(function (t) { T0[t.task] = t; });
+  if (T0.dates) { set("dates_acc", f1(T0.dates.acc)); set("dates_ci", f1(T0.dates.acc_ci[0]) + "–" + f1(T0.dates.acc_ci[1])); }
+  if (T0.open) set("open_acc", f1(T0.open.acc));
+  var ab = document.getElementById("ablation-body");
+  if (ab && R.decoder_compare) {
+    ab.textContent = "";
+    R.decoder_compare.forEach(function (c) {
+      var tr = document.createElement("tr");
+      [[c.task], [f1(c.wer_a) + "%", "n"], [f1(c.wer_b) + "%", "n hl"], [(c.delta > 0 ? "+" : "") + f1(c.delta) + " [" + f1(c.ci[0]) + ", " + f1(c.ci[1]) + "]", "n"],
+       [c.p < 0.001 ? "< 0.001" : c.p.toFixed(3), "n"], [String(c.n), "n"]].forEach(function (x) {
+        var td = document.createElement("td"); td.textContent = x[0]; if (x[1]) td.className = x[1]; tr.appendChild(td);
+      });
+      ab.appendChild(tr);
+    });
+  }
+  if (R.dom) document.getElementById("dom-status").textContent = R.dom.benchmark + " (ours, " + R.dom.targets + " targets): " +
+    Math.round(R.dom.precision * 100) + "% precision, " + Math.round(R.dom.recall * 100) + "% recall. A sanity check, not a benchmark.";
+  if (R.track && R.track.length) {
+    var tk = R.track[R.track.length - 1];
+    document.getElementById("track-status").textContent = "Latest: " + tk.benchmark + ", " + (tk.accuracy_deg != null ? tk.accuracy_deg.toFixed(2) + "° accuracy" : Math.round(tk.hit_rate * 100) + "% hits") + " (" + tk.date + ").";
+  }
   var pr = R.paired;
   if (pr) {
     var d = pr.delta_wer * 100, sig = pr.delta_ci95[1] < 0;
-    document.getElementById("paired-headline").textContent = (d < 0 ? "−" : "+") + f1(Math.abs(d)) + " points WER, " + (sig ? "significant" : "not significant");
+    if (pr.profile) document.getElementById("paired-headline").textContent = (d < 0 ? "−" : "+") + f1(Math.abs(d)) + " points WER, " + (sig ? "significant" : "not significant");
     document.getElementById("paired-detail").textContent = "Fine-tuning changed held-out WER from " + f1(pr.wer_a * 100) + "% to " + f1(pr.wer_b * 100) +
       "% (n = " + pr.n_utterances + "; paired bootstrap 95% CI " + f1(pr.delta_ci95[0] * 100) + " to " + f1(pr.delta_ci95[1] * 100) +
       " points; one-sided p = " + pr.p_b_not_better.toFixed(2) + ").";
