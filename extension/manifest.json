@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Afono Nullpoint",
+  "version": "0.1.0",
+  "description": "Afono DOM Model: numbers everything you can click on a page and runs commands from Afono Nullpoint.",
+  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "action": { "default_popup": "popup.html", "default_title": "Afono Nullpoint" },
+  "permissions": ["storage"],
+  "host_permissions": ["http://127.0.0.1:8765/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{
+    "matches": ["http://*/*", "https://*/*"],
+    "js": ["dom-model.js", "commands.js", "content.js"],
+    "run_at": "document_idle"
+  }],
+  "commands": {
+    "toggle-hints": { "suggested_key": { "default": "Alt+Shift+F" }, "description": "Show or hide target numbers" },
+    "command-bar": { "suggested_key": { "default": "Alt+Shift+K" }, "description": "Open the command bar" }
+  }
+}

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DOM-0 fixture</title>
+<style>
+  body { font: 16px system-ui, sans-serif; margin: 24px; width: 1100px; }
+  .card { display: inline-block; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; margin: 6px; cursor: pointer; }
+  .cover { position: absolute; left: 20px; top: 520px; width: 200px; height: 60px; background: #eee; z-index: 5; }
+  .under { position: absolute; left: 30px; top: 530px; }
+  nav a { margin-right: 12px; }
+  .icon { width: 28px; height: 28px; display: inline-block; background: #333; border-radius: 50%; }
+</style>
+</head>
+<body>
+<!-- Ground truth: data-gt holds the expected spoken label of every element a person can act on. -->
+<nav>
+  <a href="#home" data-gt="home">Home</a>
+  <a href="#news" data-gt="news">News</a>
+  <a href="#about" data-gt="about us">About us</a>
+</nav>
+<h1>Fixture</h1>
+<p>Plain text that is <span>not clickable</span>.</p>
+<button data-gt="sign in">Sign in</button>
+<button aria-label="Close dialog" data-gt="close dialog"><span class="icon"></span></button>
+<button disabled>Disabled button</button>
+<button style="display:none">Hidden button</button>
+<button style="visibility:hidden">Invisible button</button>
+<a href="#x" data-gt="read more"><span>Read</span> <b>more</b></a>
+<div role="button" tabindex="0" data-gt="save draft">Save draft</div>
+<div class="card" id="js-card" data-gt="open project">Open project</div>
+<div class="card" id="js-card2" data-gt="delete project">Delete project</div>
+<label for="email">Email address</label>
+<input id="email" type="email" data-gt="email address">
+<input type="search" placeholder="Search products" data-gt="search products">
+<input type="hidden" name="token" value="x">
+<select name="country" data-gt="country"><option>Nepal</option><option>Canada</option></select>
+<textarea placeholder="Your message" data-gt="your message"></textarea>
+<input type="submit" value="Send message" data-gt="send message">
+<label><input type="checkbox" data-gt="remember me"> Remember me</label>
+<a href="#img" data-gt="company logo"><img alt="Company logo" width="40" height="20" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></a>
+<div aria-hidden="true"><button>Hidden from assistive tech</button></div>
+<div class="cover"></div>
+<button class="under">Covered button</button>
+<details><summary data-gt="more options">More options</summary><p>Inside</p></details>
+<div style="height: 1400px"></div>
+<button>Far below the fold</button>
+<script>
+  document.getElementById("js-card").addEventListener("click", function () {});
+  document.getElementById("js-card2").addEventListener("click", function () {});
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Afono Nullpoint</title>
+<style>
+  body { margin: 0; width: 300px; font: 14px/1.45 system-ui, "Segoe UI", sans-serif; background: #12262A; color: #F3F5F2; }
+  .wrap { padding: 16px; display: grid; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; color: #5DB5AE; }
+  .brand b { color: #F0794A; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #6B7F7C; display: inline-block; margin-right: 6px; }
+  .dot.on { background: #5CC08C; }
+  button { font: 600 13px system-ui, sans-serif; border-radius: 999px; border: 1.5px solid #3A5A5E; background: transparent; color: #F3F5F2; padding: 8px 12px; cursor: pointer; }
+  button:hover { border-color: #F0794A; }
+  .muted { color: #A9BAB8; font-size: 12.5px; }
+  kbd { font: 12px ui-monospace, monospace; background: #0B1B1E; border: 1px solid #2E4A4E; border-radius: 4px; padding: 1px 5px; }
+  label { display: flex; gap: 8px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><b>φ</b> afono nullpoint</div>
+  <div class="row"><span><span class="dot" id="dot"></span><span id="conn">Checking Nullpoint…</span></span><span class="muted" id="count"></span></div>
+  <div class="row">
+    <button type="button" id="hints">Show numbers</button>
+    <button type="button" id="bar">Command bar</button>
+  </div>
+  <label><input type="checkbox" id="bridge"> Send page targets to Nullpoint on this computer</label>
+  <p class="muted">DOM Model v0. Shortcuts: <kbd>Alt+Shift+F</kbd> numbers, <kbd>Alt+Shift+K</kbd> command bar. Only button and link labels leave the page, and only to 127.0.0.1.</p>
+</div>
+<script src="popup.js"></script>
+</body>
+</html>
