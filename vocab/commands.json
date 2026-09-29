@@ -1,0 +1,32 @@
+{
+  "name": "Afono Tier 1 commands",
+  "version": 1,
+  "notes": "Words chosen to look different on the muscles: silent speech cannot sense voicing (pad/bad) and blurs lip sounds (p/b/m). Two-word phrases are used where a single short word is ambiguous.",
+  "groups": {
+    "action":   ["click", "open", "close", "back", "next", "stop", "enter", "undo", "copy", "paste", "select", "delete", "send", "search"],
+    "movement": ["up", "down", "left", "right", "scroll", "top", "bottom", "page"],
+    "zoom":     ["zoom in", "zoom out"],
+    "answer":   ["yes", "no", "cancel", "done"],
+    "numbers":  ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"],
+    "spelling": ["alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel", "india", "juliett", "kilo", "lima",
+                 "mike", "november", "oscar", "papa", "quebec", "romeo", "sierra", "tango", "uniform", "victor", "whiskey",
+                 "xray", "yankee", "zulu"],
+    "control":  ["afono", "sleep", "show", "hide", "tab"]
+  },
+  "grammar": [
+    "click <target | number>",
+    "scroll up | scroll down | page up | page down | top | bottom",
+    "zoom in | zoom out",
+    "back | next | stop | enter | undo | copy | paste | select | delete | send | tab",
+    "search <words>",
+    "show | hide            (number badges on the page)",
+    "afono (wake) | sleep   (ignore speech until woken)"
+  ],
+  "recording_protocol": {
+    "repetitions_per_item": 10,
+    "sessions": 3,
+    "order": "randomised, re-seated electrodes between sessions",
+    "prompt": "item shown on screen, 1 s countdown, mouth it silently within 2 s",
+    "split": "sessions 1-2 train, session 3 test (never mix a session across splits)"
+  }
+}
