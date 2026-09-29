@@ -1,0 +1,80 @@
+{"epoch": 1, "step": 380, "loss": 10.632428578326577, "sec": 109.0}
+{"epoch": 2, "step": 762, "loss": 5.09662394935548, "sec": 88.5}
+{"epoch": 3, "step": 1145, "loss": 2.969950463690895, "sec": 96.5}
+{"epoch": 4, "step": 1526, "loss": 2.9040388641707855, "sec": 104.6}
+{"epoch": 5, "step": 1908, "loss": 2.559320389288258, "sec": 109.4, "dev_wer": 0.9699547992555172, "dev_cer": 0.8036873668037865, "example": ["are we far from sunbury", "ewfftepm"]}
+{"epoch": 6, "step": 2289, "loss": 2.223487348694188, "sec": 114.5}
+{"epoch": 7, "step": 2670, "loss": 1.998967316832755, "sec": 116.9}
+{"epoch": 8, "step": 3050, "loss": 1.851992181414052, "sec": 117.5}
+{"epoch": 9, "step": 3430, "loss": 1.7386153406218479, "sec": 119.5}
+{"epoch": 10, "step": 3814, "loss": 1.6408291598781943, "sec": 119.9, "dev_wer": 0.8872640255251263, "dev_cer": 0.5754572037468405, "example": ["are we far from sunbury", "w fo frop me"]}
+{"epoch": 11, "step": 4194, "loss": 1.562278951155512, "sec": 118.0}
+{"epoch": 12, "step": 4579, "loss": 1.490373285714682, "sec": 118.1}
+{"epoch": 13, "step": 4964, "loss": 1.4264892782483782, "sec": 119.1}
+{"epoch": 14, "step": 5344, "loss": 1.3656825078161139, "sec": 119.0}
+{"epoch": 15, "step": 5723, "loss": 1.3183513986718371, "sec": 118.9, "dev_wer": 0.8622706726934326, "dev_cer": 0.5002725875997422, "example": ["are we far from sunbury", "we fifrompo ma"]}
+{"epoch": 16, "step": 6106, "loss": 1.2702111251671695, "sec": 118.8}
+{"epoch": 17, "step": 6485, "loss": 1.227441102659482, "sec": 119.8}
+{"epoch": 18, "step": 6867, "loss": 1.1868598341005634, "sec": 119.9}
+{"epoch": 19, "step": 7247, "loss": 1.1497818084139573, "sec": 120.2}
+{"epoch": 20, "step": 7629, "loss": 1.1149596425251187, "sec": 120.4, "dev_wer": 0.8372773198617389, "dev_cer": 0.45819497447588836, "example": ["are we far from sunbury", "we fierom pson ma"]}
+{"epoch": 21, "step": 8009, "loss": 1.0854456504708843, "sec": 120.7}
+{"epoch": 22, "step": 8389, "loss": 1.0521438986063003, "sec": 121.5}
+{"epoch": 23, "step": 8772, "loss": 1.0250828731464654, "sec": 121.6}
+{"epoch": 24, "step": 9154, "loss": 0.9948010656846131, "sec": 122.0}
+{"epoch": 25, "step": 9535, "loss": 0.9642452876085997, "sec": 122.5, "dev_wer": 0.8144110608880617, "dev_cer": 0.4164642910244338, "example": ["are we far from sunbury", "we fi from msot mar"]}
+{"epoch": 26, "step": 9916, "loss": 0.9407002838264926, "sec": 121.8}
+{"epoch": 27, "step": 10298, "loss": 0.9212391432667277, "sec": 120.9}
+{"epoch": 28, "step": 10679, "loss": 0.8932130432191483, "sec": 112.9}
+{"epoch": 29, "step": 11060, "loss": 0.8735264594473551, "sec": 108.1}
+{"epoch": 30, "step": 11440, "loss": 0.8495346577543962, "sec": 106.2, "dev_wer": 0.784897633608083, "dev_cer": 0.4023392972196065, "example": ["are we far from sunbury", "iwe fi frommsot ma"]}
+{"epoch": 31, "step": 11823, "loss": 0.8279369468788566, "sec": 106.1}
+{"epoch": 32, "step": 12206, "loss": 0.804887892294179, "sec": 106.4}
+{"epoch": 33, "step": 12586, "loss": 0.7846751082884638, "sec": 105.8}
+{"epoch": 34, "step": 12969, "loss": 0.7669609934480632, "sec": 107.2}
+{"epoch": 35, "step": 13351, "loss": 0.7457253223002269, "sec": 106.2, "dev_wer": 0.789417708056368, "dev_cer": 0.3857857957079843, "example": ["are we far from sunbury", "we five from msot may"]}
+{"epoch": 36, "step": 13734, "loss": 0.7295436829561975, "sec": 107.9}
+{"epoch": 37, "step": 14116, "loss": 0.7087238516014908, "sec": 108.0}
+{"epoch": 38, "step": 14496, "loss": 0.6917270171014887, "sec": 107.9}
+{"epoch": 39, "step": 14873, "loss": 0.6774428349274856, "sec": 110.0}
+{"epoch": 40, "step": 15254, "loss": 0.6604743153247934, "sec": 114.3, "dev_wer": 0.7777186918372773, "dev_cer": 0.3774099221886306, "example": ["are we far from sunbury", "i wa fi frommso ma"]}
+{"epoch": 41, "step": 15635, "loss": 0.6444091333804793, "sec": 115.9}
+{"epoch": 42, "step": 16016, "loss": 0.6307422072086435, "sec": 116.7}
+{"epoch": 43, "step": 16399, "loss": 0.6191090262122939, "sec": 117.8}
+{"epoch": 44, "step": 16780, "loss": 0.6018688656057273, "sec": 118.5}
+{"epoch": 45, "step": 17162, "loss": 0.5918652576769834, "sec": 119.1, "dev_wer": 0.763094921563414, "dev_cer": 0.36511869950934234, "example": ["are we far from sunbury", "a we fi fromm son may"]}
+{"epoch": 46, "step": 17543, "loss": 0.5744574617526037, "sec": 119.8}
+{"epoch": 47, "step": 17925, "loss": 0.5667033016057539, "sec": 119.8}
+{"epoch": 48, "step": 18305, "loss": 0.5537292892211362, "sec": 121.5}
+{"epoch": 49, "step": 18685, "loss": 0.5394463663822726, "sec": 121.4}
+{"epoch": 50, "step": 19072, "loss": 0.5311872266829784, "sec": 121.3, "dev_wer": 0.7646902419569264, "dev_cer": 0.3616494027853497, "example": ["are we far from sunbury", "i we fi from so mar"]}
+{"epoch": 51, "step": 19451, "loss": 0.5207770896933009, "sec": 121.4}
+{"epoch": 52, "step": 19833, "loss": 0.51173581424808, "sec": 121.3}
+{"epoch": 53, "step": 20212, "loss": 0.5029510070120125, "sec": 121.6}
+{"epoch": 54, "step": 20596, "loss": 0.49178453360218555, "sec": 120.7}
+{"epoch": 55, "step": 20978, "loss": 0.48107841708429194, "sec": 120.7, "dev_wer": 0.7575113001861207, "dev_cer": 0.3534222134113099, "example": ["are we far from sunbury", "irwe fi fromm so mar"]}
+{"epoch": 56, "step": 21362, "loss": 0.4780834987371539, "sec": 121.2}
+{"epoch": 57, "step": 21742, "loss": 0.4710569519745676, "sec": 121.1}
+{"epoch": 58, "step": 22122, "loss": 0.46322838518964615, "sec": 121.8}
+{"epoch": 59, "step": 22506, "loss": 0.45391226237795007, "sec": 121.3}
+{"epoch": 60, "step": 22884, "loss": 0.44673090195529674, "sec": 121.9, "dev_wer": 0.7564477532571124, "dev_cer": 0.35371958170193785, "example": ["are we far from sunbury", "irw we fi fromm so mar"]}
+{"epoch": 61, "step": 23268, "loss": 0.44045004978155095, "sec": 121.4}
+{"epoch": 62, "step": 23649, "loss": 0.4346453502891571, "sec": 121.2}
+{"epoch": 63, "step": 24034, "loss": 0.42601851940929114, "sec": 121.4}
+{"epoch": 64, "step": 24412, "loss": 0.42372612670931237, "sec": 122.1}
+{"epoch": 65, "step": 24795, "loss": 0.42042122275493166, "sec": 121.5, "dev_wer": 0.7553842063281042, "dev_cer": 0.35619765079050403, "example": ["are we far from sunbury", "irwe fi from so mary"]}
+{"epoch": 66, "step": 25175, "loss": 0.41384385800675344, "sec": 122.4}
+{"epoch": 67, "step": 25557, "loss": 0.41178705418453165, "sec": 121.2}
+{"epoch": 68, "step": 25941, "loss": 0.41314428043551743, "sec": 122.9}
+{"epoch": 69, "step": 26323, "loss": 0.4012600033305078, "sec": 121.7}
+{"epoch": 70, "step": 26702, "loss": 0.4044416743013664, "sec": 121.2, "dev_wer": 0.7503323584153151, "dev_cer": 0.3545621251920504, "example": ["are we far from sunbury", "arewe fi from so mar"]}
+{"epoch": 71, "step": 27082, "loss": 0.39819653361643614, "sec": 121.2}
+{"epoch": 72, "step": 27462, "loss": 0.3992220815859343, "sec": 119.5}
+{"epoch": 73, "step": 27841, "loss": 0.4011734710283833, "sec": 120.1}
+{"epoch": 74, "step": 28225, "loss": 0.39425114953580004, "sec": 119.9}
+{"epoch": 75, "step": 28609, "loss": 0.3909321714891121, "sec": 120.0, "dev_wer": 0.7551183195958522, "dev_cer": 0.354809932100907, "example": ["are we far from sunbury", "orwe fi from so mar"]}
+{"epoch": 76, "step": 28993, "loss": 0.3932350423419848, "sec": 120.5}
+{"epoch": 77, "step": 29372, "loss": 0.3929347640842121, "sec": 120.4}
+{"epoch": 78, "step": 29758, "loss": 0.3906689118304401, "sec": 120.3}
+{"epoch": 79, "step": 30141, "loss": 0.3938893942702221, "sec": 120.3}
+{"epoch": 80, "step": 30525, "loss": 0.38924368917165947, "sec": 120.8, "dev_wer": 0.754054772666844, "dev_cer": 0.35476037071913563, "example": ["are we far from sunbury", "arwe fi fromm so mary"]}

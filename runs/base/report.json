@@ -1,0 +1,322 @@
+{
+  "protocol": "v2",
+  "ckpt": "runs/base/best.pt",
+  "epoch": 70,
+  "params_m": 5.8,
+  "dataset": {
+    "name": "Gaddy & Klein 2020 silent speech EMG",
+    "doi": "10.5281/zenodo.4064408",
+    "speakers": 1,
+    "channels": 8,
+    "sample_rate_hz": 1000,
+    "test_split": "testset_largedev.json (official) for books; 10% hash split for dates (ours)",
+    "split_hash": {
+      "dev": "6d3af7bbf8b8e876",
+      "test": "3662ff6b042a467b",
+      "dates_dev": "7ef41f343b2ed2aa",
+      "dates_test": "6ff5a286890462de"
+    },
+    "n": {
+      "dev": 199,
+      "test": 98,
+      "dates_dev": 42,
+      "dates_test": 43
+    },
+    "open_test_oov_rate": 0.04077906269020085
+  },
+  "decoder": {
+    "type": "lexicon-constrained CTC prefix beam search + unigram prior",
+    "beam": 32,
+    "lm_weight": 1.0,
+    "word_bonus": 3.0,
+    "tuned_on": "dev (first 100 utterances)",
+    "dev_wer_at_tuning": 0.6512330145948666
+  },
+  "compute": {
+    "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "encoder_ms_per_utterance_median": 12.697100028162822,
+    "torch": "2.7.0+cu118",
+    "python": "3.13.6"
+  },
+  "tasks": {
+    "dates": {
+      "lexicon": {
+        "n_utterances": 43,
+        "n_words": 172,
+        "wer": 0.05232558139534884,
+        "wer_ci95": [
+          0.01818181818181818,
+          0.09147567984300525
+        ],
+        "cer": 0.03213610586011342,
+        "cer_ci95": [
+          0.01147147404659023,
+          0.05618272364696799
+        ],
+        "word_accuracy": 0.9476744186046512,
+        "word_accuracy_ci95": [
+          0.9085243201569948,
+          0.9818181818181818
+        ],
+        "sentence_accuracy": 0.8372093023255814,
+        "speaking_wpm": 83.08108456237522,
+        "correct_wpm": 78.7338185096928,
+        "vocab_size": 51,
+        "bits_per_word": 5.080912380552385,
+        "itr_bits_per_min": 422.1277111426919,
+        "real_time_factor": 0.019371755663950992
+      },
+      "greedy": {
+        "n_utterances": 43,
+        "n_words": 172,
+        "wer": 0.42441860465116277,
+        "wer_ci95": [
+          0.3454491341991342,
+          0.5088811188811189
+        ],
+        "cer": 0.10491493383742911,
+        "cer_ci95": [
+          0.0787981327615474,
+          0.1339033397559409
+        ],
+        "word_accuracy": 0.5755813953488372,
+        "word_accuracy_ci95": [
+          0.49111888111888113,
+          0.6545508658008659
+        ],
+        "sentence_accuracy": 0.16279069767441862,
+        "speaking_wpm": 83.08108456237522,
+        "correct_wpm": 47.81992657950667
+      },
+      "decode_ms_median": 39.95119995670393
+    },
+    "closed100": {
+      "lexicon": {
+        "n_utterances": 11,
+        "n_words": 150,
+        "wer": 0.6266666666666667,
+        "wer_ci95": [
+          0.48256270903010035,
+          0.7912499999999998
+        ],
+        "cer": 0.44004796163069543,
+        "cer_ci95": [
+          0.2894700654275954,
+          0.6388321526876564
+        ],
+        "word_accuracy": 0.3733333333333333,
+        "word_accuracy_ci95": [
+          0.2087500000000002,
+          0.5174372909698997
+        ],
+        "sentence_accuracy": 0.0,
+        "speaking_wpm": 141.3671776828349,
+        "correct_wpm": 52.77707966825835,
+        "vocab_size": 100,
+        "bits_per_word": 1.5362622019817795,
+        "itr_bits_per_min": 217.1770516749814,
+        "real_time_factor": 0.025031650542933218
+      },
+      "greedy": {
+        "n_utterances": 11,
+        "n_words": 150,
+        "wer": 0.7666666666666667,
+        "wer_ci95": [
+          0.6975308641975309,
+          0.8531543887147335
+        ],
+        "cer": 0.37889688249400477,
+        "cer_ci95": [
+          0.3398247016747481,
+          0.4256057601489725
+        ],
+        "word_accuracy": 0.23333333333333328,
+        "word_accuracy_ci95": [
+          0.14684561128526652,
+          0.30246913580246915
+        ],
+        "sentence_accuracy": 0.0,
+        "speaking_wpm": 141.3671776828349,
+        "correct_wpm": 32.98567479266147
+      },
+      "decode_ms_median": 104.37389998696744
+    },
+    "closed250": {
+      "lexicon": {
+        "n_utterances": 25,
+        "n_words": 438,
+        "wer": 0.5114155251141552,
+        "wer_ci95": [
+          0.44729875795449564,
+          0.580335731414868
+        ],
+        "cer": 0.30502092050209206,
+        "cer_ci95": [
+          0.26491154403214046,
+          0.34742948119040423
+        ],
+        "word_accuracy": 0.4885844748858448,
+        "word_accuracy_ci95": [
+          0.41966426858513195,
+          0.5527012420455044
+        ],
+        "sentence_accuracy": 0.0,
+        "speaking_wpm": 148.3739837398374,
+        "correct_wpm": 72.49322493224933,
+        "vocab_size": 250,
+        "bits_per_word": 2.895291756676208,
+        "itr_bits_per_min": 429.58597202716095,
+        "real_time_factor": 0.023306524396060103
+      },
+      "greedy": {
+        "n_utterances": 25,
+        "n_words": 438,
+        "wer": 0.7557077625570776,
+        "wer_ci95": [
+          0.6993564123038761,
+          0.8181818181818182
+        ],
+        "cer": 0.35355648535564854,
+        "cer_ci95": [
+          0.3254070504600083,
+          0.3845754909983633
+        ],
+        "word_accuracy": 0.2442922374429224,
+        "word_accuracy_ci95": [
+          0.18181818181818177,
+          0.30064358769612387
+        ],
+        "sentence_accuracy": 0.0,
+        "speaking_wpm": 148.3739837398374,
+        "correct_wpm": 36.24661246612467
+      },
+      "decode_ms_median": 132.9636000446044
+    },
+    "closed500": {
+      "lexicon": {
+        "n_utterances": 64,
+        "n_words": 1086,
+        "wer": 0.6031307550644567,
+        "wer_ci95": [
+          0.5475516109045849,
+          0.6612400211689115
+        ],
+        "cer": 0.3990114198056929,
+        "cer_ci95": [
+          0.3395448126571581,
+          0.4680941471228197
+        ],
+        "word_accuracy": 0.3968692449355433,
+        "word_accuracy_ci95": [
+          0.33875997883108855,
+          0.45244838909541507
+        ],
+        "sentence_accuracy": 0.0,
+        "speaking_wpm": 140.97061165149367,
+        "correct_wpm": 55.94690020423,
+        "vocab_size": 500,
+        "bits_per_word": 2.5908963150250806,
+        "itr_bits_per_min": 365.24023825468663,
+        "real_time_factor": 0.021807116900182128
+      },
+      "greedy": {
+        "n_utterances": 64,
+        "n_words": 1086,
+        "wer": 0.7532228360957642,
+        "wer_ci95": [
+          0.7221015567465837,
+          0.7857856548489586
+        ],
+        "cer": 0.3565706493949207,
+        "cer_ci95": [
+          0.3382374958506082,
+          0.3761690574558938
+        ],
+        "word_accuracy": 0.24677716390423576,
+        "word_accuracy_ci95": [
+          0.21421434515104143,
+          0.2778984432534163
+        ],
+        "sentence_accuracy": 0.0,
+        "speaking_wpm": 140.97061165149367,
+        "correct_wpm": 34.78832773720102
+      },
+      "decode_ms_median": 123.34545000339858
+    },
+    "open": {
+      "lexicon": {
+        "n_utterances": 98,
+        "n_words": 1643,
+        "wer": 0.5952525867315885,
+        "wer_ci95": [
+          0.5592058240597596,
+          0.6316450510631496
+        ],
+        "cer": 0.35421878553559244,
+        "cer_ci95": [
+          0.32398986869763213,
+          0.38637768735873296
+        ],
+        "word_accuracy": 0.40474741326841146,
+        "word_accuracy_ci95": [
+          0.3683549489368504,
+          0.4407941759402404
+        ],
+        "sentence_accuracy": 0.0,
+        "speaking_wpm": 143.8334578392007,
+        "correct_wpm": 58.2162200018676,
+        "vocab_size": 9139,
+        "bits_per_word": 4.352027822550715,
+        "itr_bits_per_min": 625.9672103298767,
+        "real_time_factor": 0.023654069740815093
+      },
+      "greedy": {
+        "n_utterances": 98,
+        "n_words": 1643,
+        "wer": 0.7443700547778455,
+        "wer_ci95": [
+          0.7175133272956918,
+          0.7699519436534521
+        ],
+        "cer": 0.3442119627018422,
+        "cer_ci95": [
+          0.32776502112861583,
+          0.35963644161566943
+        ],
+        "word_accuracy": 0.25562994522215454,
+        "word_accuracy_ci95": [
+          0.2300480563465479,
+          0.28248667270430816
+        ],
+        "sentence_accuracy": 0.0,
+        "speaking_wpm": 143.8334578392007,
+        "correct_wpm": 36.76813894854795
+      },
+      "decode_ms_median": 110.13069999171421
+    }
+  },
+  "closed_vocab_dates": {
+    "wer": 0.05232558139534884
+  },
+  "closed_n": {
+    "100": {
+      "word_accuracy": 0.3733333333333333,
+      "sentences": 11
+    },
+    "250": {
+      "word_accuracy": 0.4885844748858448,
+      "sentences": 25
+    },
+    "500": {
+      "word_accuracy": 0.3968692449355433,
+      "sentences": 64
+    }
+  },
+  "open_lexicon": {
+    "wer": 0.5952525867315885
+  },
+  "open_greedy": {
+    "cer": 0.3442119627018422,
+    "n": 98
+  }
+}
