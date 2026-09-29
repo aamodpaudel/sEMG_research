@@ -65,7 +65,7 @@ def train(model, train_ds, dev_ds, out_dir, epochs=80, lr=5e-4, max_samples=200_
                         persistent_workers=workers > 0)
     steps_per_epoch = len(sampler)
     total = epochs * steps_per_epoch
-    warmup = min(1000, total // 10)
+    warmup = max(1, min(1000, total // 10))
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
     sched = torch.optim.lr_scheduler.LambdaLR(
         opt, lambda s: min(1.0, (s + 1) / warmup) * 0.5 * (1 + math.cos(math.pi * min(1.0, s / total))))

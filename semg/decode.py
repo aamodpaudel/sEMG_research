@@ -32,13 +32,28 @@ class _Node:
 
 
 class Lexicon:
-    def __init__(self, words, counts=None):
+    """Allowed words (a trie over characters) plus a word prior.
+
+    With `bigrams` (Counter of (prev, word) pairs, "<s>" = sentence start) the prior is an
+    interpolated absolute-discount bigram model; otherwise it is an add-one unigram.
+    """
+
+    def __init__(self, words, counts=None, bigrams=None, discount=0.75):
         words = sorted({w for w in words if w and all(c in CHAR_TO_ID and c != " " for c in w)})
         self.words = words
         self.root = _Node()
         counts = counts or Counter()
         total = sum(counts[w] + 1 for w in words)
         self.logp = {w: math.log((counts[w] + 1) / total) for w in words}
+        self.uni = {w: (counts[w] + 1) / total for w in words}
+        self.bi, self.ctx, self.types, self.d = None, {}, {}, discount
+        if bigrams:
+            ws = set(words)
+            self.bi = Counter({k: c for k, c in bigrams.items() if k[1] in ws})
+            for (v, w), c in self.bi.items():
+                self.ctx[v] = self.ctx.get(v, 0) + c
+                self.types[v] = self.types.get(v, 0) + 1
+        self._cache = {}
         for w in words:
             node = self.root
             for c in w:
@@ -47,6 +62,29 @@ class Lexicon:
 
     def __len__(self):
         return len(self.words)
+
+    def score(self, prev, w):
+        """log P(w | prev)."""
+        if self.bi is None:
+            return self.logp[w]
+        key = (prev, w)
+        if key not in self._cache:
+            n = self.ctx.get(prev, 0)
+            if n == 0:
+                p = self.uni[w]
+            else:
+                p = max(self.bi.get(key, 0) - self.d, 0) / n + self.d * self.types[prev] / n * self.uni[w]
+            self._cache[key] = math.log(p)
+        return self._cache[key]
+
+
+def bigram_counts(texts):
+    """Counter of (previous word, word) pairs, with "<s>" before each sentence."""
+    c = Counter()
+    for t in texts:
+        ws = ["<s>"] + t.split()
+        c.update(zip(ws, ws[1:]))
+    return c
 
 
 def _lse(a, b):
@@ -89,7 +127,7 @@ def lexicon_beam_search(logprobs, lex, beam=32, lm_weight=1.0, word_bonus=2.0, p
                         continue
                     w = node.word
                     add((words + (w,), ()), NEG_INF, base, lex.root,
-                        lm + lm_weight * lex.logp[w] + word_bonus)
+                        lm + lm_weight * lex.score(words[-1] if words else "<s>", w) + word_bonus)
                 else:
                     child = node.children.get(c)
                     if child is not None:
@@ -102,7 +140,7 @@ def lexicon_beam_search(logprobs, lex, beam=32, lm_weight=1.0, word_bonus=2.0, p
         if part:
             if node.word is None:
                 continue                                                   # unfinished word
-            score += lm_weight * lex.logp[node.word] + word_bonus
+            score += lm_weight * lex.score(words[-1] if words else "<s>", node.word) + word_bonus
             words = words + (node.word,)
         if score > best_score:
             best, best_score = " ".join(words), score

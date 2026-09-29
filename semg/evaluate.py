@@ -21,7 +21,7 @@ import numpy as np
 import torch
 
 from .data import EMGDataset, load_index
-from .decode import Lexicon, greedy, lexicon_beam_search
+from .decode import Lexicon, bigram_counts, greedy, lexicon_beam_search
 from .metrics import score
 from .model import load_model
 from .registry import headline_metrics, log_run
@@ -94,6 +94,8 @@ def main():
     ap.add_argument("--vocab-sizes", default="100,250,500")
     ap.add_argument("--beam", type=int, default=32)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--lm", choices=["unigram", "bigram"], default="unigram",
+                    help="word prior; bigram is trained on training transcripts only")
     ap.add_argument("--notes", default="")
     args = ap.parse_args()
 
@@ -111,8 +113,10 @@ def main():
     secs = {k: [lp.shape[0] / 125.0 for lp in v] for k, v in lps.items()}  # 125 output frames per second
     enc_ms = model_ms_per_utt(model, sets["test"], args.cache, device)
 
-    open_lex = Lexicon(open_counts.keys(), open_counts)
-    dates_lex = Lexicon(date_counts.keys(), date_counts)
+    bi_open = bigram_counts(u.text for u in train if not u.closed_vocab) if args.lm == "bigram" else None
+    bi_dates = bigram_counts(u.text for u in train if u.closed_vocab) if args.lm == "bigram" else None
+    open_lex = Lexicon(open_counts.keys(), open_counts, bi_open)
+    dates_lex = Lexicon(date_counts.keys(), date_counts, bi_dates)
     params = tune(lps["dev"][:100], [u.text for u in sets["dev"][:100]], open_lex)
     kw = dict(beam=args.beam, lm_weight=params["lm_weight"], word_bonus=params["word_bonus"])
 
@@ -133,7 +137,7 @@ def main():
     for n in [int(x) for x in args.vocab_sizes.split(",")]:
         keep, vocab = closed_subset(sets["test"], n, open_counts)
         idx = {u.uid: i for i, u in enumerate(sets["test"])}
-        run_task(f"closed{n}", keep, [lps["test"][idx[u.uid]] for u in keep], Lexicon(vocab, open_counts), n)
+        run_task(f"closed{n}", keep, [lps["test"][idx[u.uid]] for u in keep], Lexicon(vocab, open_counts, bi_open), n)
     run_task("open", sets["test"], lps["test"], open_lex, len(open_lex))
     oov = sum(w not in open_lex.logp for u in sets["test"] for w in u.text.split()) / max(
         1, sum(len(u.text.split()) for u in sets["test"]))
@@ -146,7 +150,7 @@ def main():
                     "test_split": "testset_largedev.json (official) for books; 10% hash split for dates (ours)",
                     "split_hash": {k: split_hash(v) for k, v in sets.items()},
                     "n": {k: len(v) for k, v in sets.items()}, "open_test_oov_rate": oov},
-        "decoder": {"type": "lexicon-constrained CTC prefix beam search + unigram prior", **kw,
+        "decoder": {"type": f"lexicon-constrained CTC prefix beam search + {args.lm} word prior", "lm": args.lm, **kw,
                     "tuned_on": "dev (first 100 utterances)", "dev_wer_at_tuning": params["dev_wer"]},
         "compute": {"device": torch.cuda.get_device_name(0) if device.type == "cuda" else platform.processor(),
                     "encoder_ms_per_utterance_median": enc_ms, "torch": torch.__version__, "python": platform.python_version()},
@@ -167,10 +171,10 @@ def main():
               f"[{100*L['word_accuracy_ci95'][0]:.1f}, {100*L['word_accuracy_ci95'][1]:.1f}]  "
               f"ITR {L.get('itr_bits_per_min', 0):6.1f} bits/min  greedy CER {100*t['greedy']['cer']:.1f}%")
     run_id = os.path.basename(os.path.dirname(os.path.abspath(args.ckpt)))
-    out = args.out or os.path.join(os.path.dirname(args.ckpt), "report.json")
+    out = args.out or os.path.join(os.path.dirname(args.ckpt), "report.json" if args.lm == "unigram" else f"report_{args.lm}.json")
     with open(out, "w") as f:
         json.dump(report, f, indent=2)
-    pred_path = os.path.join(os.path.dirname(out), "predictions.jsonl")
+    pred_path = os.path.join(os.path.dirname(out), "predictions.jsonl" if args.lm == "unigram" else f"predictions_{args.lm}.jsonl")
     with open(pred_path, "w", encoding="utf-8") as f:
         for p in predictions:
             f.write(json.dumps(p) + "\n")
@@ -178,7 +182,7 @@ def main():
                                                         "n_utterances", "n_words", "itr_bits_per_min",
                                                         "correct_wpm", "real_time_factor", "vocab_size")}
                for name, t in tasks.items()}
-    log_run("evaluate", run_id, ckpt=args.ckpt, report=out, predictions=pred_path, protocol=PROTOCOL,
+    log_run("evaluate", run_id, ckpt=args.ckpt, report=out, predictions=pred_path, protocol=PROTOCOL, lm=args.lm,
             metrics=headline_metrics(report), tasks=summary, n_test=len(sets["test"]),
             closed_n_sentences={k: v["sentences"] for k, v in report["closed_n"].items()}, notes=args.notes)
     try:

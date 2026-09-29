@@ -31,7 +31,7 @@ def holdout_set(profile_name, index="data/index.json", which="profile"):
 
 def compare(profile, a, b, cache="data/cache", log=True, notes=""):
     utts, lex = holdout_set(profile)
-    build_cache(utts, cache, workers=2)
+    build_cache(utts, cache, workers=0)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     refs = [u.text for u in utts]
     hyps = {}
@@ -61,3 +61,23 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def compare_predictions(a_path, b_path, tasks=None, log=True, notes=""):
+    """Paired test between two predictions.jsonl files from semg.evaluate (same test utterances)."""
+    import json
+    def load(p):
+        with open(p, encoding="utf-8") as f:
+            return [json.loads(l) for l in f if l.strip()]
+    A, B = load(a_path), load(b_path)
+    out = {}
+    for task in sorted({r["task"] for r in A} if tasks is None else tasks):
+        a = {r["uid"]: r for r in A if r["task"] == task}
+        b = {r["uid"]: r for r in B if r["task"] == task}
+        ids = [u for u in a if u in b]
+        res = paired_bootstrap([a[u]["ref"] for u in ids], [a[u]["hyp"] for u in ids], [b[u]["hyp"] for u in ids])
+        out[task] = res
+        if log:
+            log_run("compare", f"{os.path.basename(os.path.dirname(os.path.abspath(b_path)))}:{task}", a=a_path, b=b_path,
+                    task=task, **res, notes=notes)
+    return out
