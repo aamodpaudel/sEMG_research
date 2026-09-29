@@ -44,6 +44,11 @@
   }
 
   /* ---------- headline: words blur in ---------- */
+  var heroFrame = document.getElementById("hero-frame");
+  if (heroFrame && !reduce) {
+    var flatten = function () { heroFrame.classList.toggle("flat", window.scrollY > 40); };
+    window.addEventListener("scroll", flatten, { passive: true }); flatten();
+  }
   var hl = document.getElementById("headline");
   if (hl && !reduce) {
     var words = hl.textContent.trim().split(/\s+/);
@@ -68,10 +73,10 @@
   function countUp(e) {
     var target = parseFloat(e.textContent), dec = (e.textContent.split(".")[1] || "").length;
     if (!isFinite(target) || reduce) return;
-    var t0 = null, dur = 1200;
+    var t0 = null, dur = 900;
     (function step(t) {
       if (t0 === null) t0 = t;
-      var k = Math.min(1, (t - t0) / dur), v = target * (1 - Math.pow(1 - k, 3));
+      var k = Math.min(1, (t - t0) / dur), v = target * (0.8 + 0.2 * (1 - Math.pow(1 - k, 3)));   // start near the real value
       e.textContent = v.toFixed(dec);
       if (k < 1) requestAnimationFrame(step); else e.textContent = target.toFixed(dec);
     })(performance.now());
