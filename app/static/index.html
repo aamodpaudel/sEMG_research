@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Afono Lab</title>
+<link rel="icon" href="/assets/afono-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/afono.css">
+<style>
+  body { font-size: 16px; }
+  header { border-bottom: 1px solid var(--line); background: var(--card); }
+  header .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; padding: 12px 24px; }
+  header .tag { font: 600 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+  header .grow { flex: 1; }
+  label.f { display: grid; gap: 4px; font: 600 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+  input[type=text], input[type=number], select, textarea { font: 400 16px var(--body); color: var(--ink); background: var(--paper);
+    border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 12px; min-height: 42px; }
+  textarea { width: 100%; resize: vertical; }
+  .layout { display: grid; grid-template-columns: 320px minmax(0, 1fr) 360px; gap: 0; min-height: calc(100vh - 70px); }
+  .col { padding: 22px; display: grid; gap: 18px; align-content: start; min-width: 0; }
+  .col + .col { border-left: 1px solid var(--line); }
+  h2 { font-size: 15px; font-family: var(--mono); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+  .list { display: grid; gap: 6px; max-height: 46vh; overflow: auto; padding-right: 4px; }
+  .item { text-align: left; border: 1.5px solid transparent; background: var(--card); border-radius: 10px; padding: 9px 12px; cursor: pointer;
+    font: 400 14px/1.35 var(--body); color: var(--ink); display: grid; gap: 2px; }
+  .item small { font: 400 11px var(--mono); color: var(--ink-2); }
+  .item[aria-pressed="true"] { border-color: var(--teal); box-shadow: inset 4px 0 0 var(--teal); }
+  .scope { background: #12262A; border-radius: 14px; overflow: hidden; }
+  .scope canvas { width: 100%; height: 200px; display: block; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .out { display: grid; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .out .k { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+  .out .v { font: 700 24px/1.3 var(--display); overflow-wrap: anywhere; }
+  .out .raw { font: 400 13px var(--mono); color: var(--ink-2); overflow-wrap: anywhere; }
+  .msg { font-size: 14px; color: var(--ink-2); min-height: 1.4em; }
+  .msg.err { color: var(--bad); }
+  .stat { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .stat div { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  .stat b { display: block; font: 800 26px var(--display); color: var(--teal); }
+  .stat span { font-size: 13px; color: var(--ink-2); }
+  pre.log { background: #12262A; color: #CFE3DF; font: 400 12px/1.5 var(--mono); border-radius: 12px; padding: 12px; max-height: 220px; overflow: auto; white-space: pre-wrap; margin: 0; }
+  .runs { display: grid; gap: 8px; }
+  .run { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 13px; display: grid; gap: 4px; }
+  .run .meta { font: 400 11px var(--mono); color: var(--ink-2); }
+  .w-ok { color: var(--teal); } .w-bad { color: var(--signal); text-decoration: underline wavy; text-underline-offset: 5px; }
+  @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } .col + .col { border-left: 0; border-top: 1px solid var(--line); } }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <span class="lockup" style="font-size: 26px"><svg viewBox="0 0 64 96" aria-hidden="true"><circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="9"></circle><line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="9" stroke-linecap="round"></line></svg><span>afono</span></span>
+    <span class="tag">Lab · local</span>
+    <span class="grow"></span>
+    <label class="f" for="profile">Profile<input type="text" id="profile" value="default" size="14" autocomplete="off"></label>
+    <label class="f" for="ckpt">Model<select id="ckpt"></select></label>
+    <span class="tag" id="device"></span>
+  </div>
+</header>
+<div class="layout">
+  <div class="col">
+    <h2>Recordings</h2>
+    <div class="tabs" role="group" aria-label="Source">
+      <button class="chip" type="button" data-src="closed-test" aria-pressed="true">Dates · test</button>
+      <button class="chip" type="button" data-src="open-test" aria-pressed="false">Sentences · test</button>
+      <button class="chip" type="button" data-src="mine" aria-pressed="false">My recordings</button>
+    </div>
+    <div class="list" id="list"></div>
+    <div id="mine-tools" hidden style="display: grid; gap: 10px">
+      <label class="f" for="file">Upload .npy or .csv (rows = samples at 1,000 Hz, columns = channels)<input type="file" id="file" accept=".npy,.csv,.tsv,.txt"></label>
+      <div class="row">
+        <button class="btn" type="button" id="serial">Connect sensor</button>
+        <button class="btn" type="button" id="rec" disabled>Hold to record</button>
+      </div>
+      <p class="msg" id="serial-msg">Sensor input uses Web Serial (Chrome or Edge): one line per sample, comma-separated channel values, 921,600 baud.</p>
+    </div>
+  </div>
+
+  <div class="col">
+    <h2>Decode</h2>
+    <div class="scope"><canvas id="scope" width="900" height="200" aria-label="EMG signal"></canvas></div>
+    <div class="row" role="group" aria-label="Vocabulary">
+      <button class="chip" type="button" data-vocab="dates" aria-pressed="true">Dates · 51</button>
+      <button class="chip" type="button" data-vocab="open" aria-pressed="false">Open · 9,139</button>
+      <button class="chip" type="button" data-vocab="personal" aria-pressed="false">Personal</button>
+      <button class="chip" type="button" data-vocab="custom" aria-pressed="false">Words on screen</button>
+    </div>
+    <label class="f" for="words" id="words-wrap" hidden>Words on screen (what the page lets you say)<textarea id="words" rows="2">search open back next close menu settings help</textarea></label>
+    <div class="row"><button class="btn primary" type="button" id="decode">Decode</button><span class="msg" id="msg"></span></div>
+    <div class="out" aria-live="polite">
+      <span class="k">Reference</span><span class="v" id="ref" style="color: var(--ink-2); font-weight: 600">—</span>
+      <span class="k">Afono read</span><span class="v" id="hyp">—</span>
+      <span class="k">Raw letters</span><span class="raw" id="raw">—</span>
+    </div>
+    <h2>Teach it</h2>
+    <label class="f" for="fix">What was actually said<input type="text" id="fix" autocomplete="off"></label>
+    <div class="row">
+      <button class="btn primary" type="button" id="save-fix" disabled>Save correction</button>
+      <span class="msg" id="fix-msg">Corrections change the Personal vocabulary at once and are used by the next calibration.</span>
+    </div>
+  </div>
+
+  <div class="col">
+    <h2>Profile</h2>
+    <div class="stat">
+      <div><b id="s-rec">0</b><span>recordings</span></div>
+      <div><b id="s-lab">0</b><span>labelled</span></div>
+      <div><b id="s-cor">0</b><span>corrections</span></div>
+      <div><b id="s-voc">0</b><span>personal words</span></div>
+    </div>
+    <div class="row">
+      <button class="btn" type="button" id="import">Add demo recordings</button>
+    </div>
+    <p class="msg">Adds labelled dataset recordings to this profile so you can try calibration before hardware exists.</p>
+    <h2>Calibrate</h2>
+    <div class="row">
+      <label class="f" for="epochs">Epochs<input type="number" id="epochs" value="12" min="1" max="60" style="width: 90px"></label>
+      <button class="btn primary" type="button" id="calibrate">Calibrate now</button>
+    </div>
+    <pre class="log" id="job-log">No calibration running.</pre>
+    <h2>Run log</h2>
+    <div class="runs" id="runs"></div>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var src = "closed-test", vocab = "dates", current = null, lastHyp = "", pollT = null;
+
+  function prof() { return ($("profile").value || "default").trim(); }
+  function api(path, opt) {
+    return fetch(path, opt).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok) throw new Error(j.detail || ("Request failed (" + r.status + ")"));
+        return j;
+      });
+    });
+  }
+  function post(path, body) { return api(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
+  function msg(id, t, err) { var e = $(id); e.textContent = t; e.classList.toggle("err", !!err); }
+  function press(sel, attr, val) { document.querySelectorAll(sel).forEach(function (b) { b.setAttribute("aria-pressed", b.dataset[attr] === val); }); }
+
+  function refreshStatus() {
+    return api("/api/status?profile=" + encodeURIComponent(prof())).then(function (s) {
+      $("device").textContent = s.device === "cpu" ? "CPU" : "GPU";
+      var sel = $("ckpt"); sel.textContent = "";
+      s.checkpoints.forEach(function (c) { var o = document.createElement("option"); o.value = c; o.textContent = c.replace("runs/", "").replace("/best.pt", ""); o.selected = c === s.ckpt; sel.appendChild(o); });
+      $("s-rec").textContent = s.profile.recordings; $("s-lab").textContent = s.profile.labelled;
+      $("s-cor").textContent = s.profile.corrections; $("s-voc").textContent = s.profile.vocabulary;
+      var runs = $("runs"); runs.textContent = "";
+      s.runs.forEach(function (r) {
+        var d = document.createElement("div"); d.className = "run";
+        var m = document.createElement("span"); m.className = "meta"; m.textContent = r.time.slice(0, 16).replace("T", " ") + " · " + r.kind + " · " + r.run_id;
+        var t = document.createElement("span");
+        if (r.kind === "calibrate" && r.before && r.after) t.textContent = "Held-out word accuracy " + Math.round(r.before.lexicon_word_acc * 1000) / 10 + "% → " + Math.round(r.after.lexicon_word_acc * 1000) / 10 + "% (" + r.train_recordings + " recordings)";
+        else if (r.kind === "evaluate" && r.metrics) t.textContent = "Dates " + Math.round(r.metrics.dates_word_acc * 1000) / 10 + "% · 500-word " + Math.round(r.metrics.closed500_word_acc * 1000) / 10 + "% · open WER " + Math.round(r.metrics.open_wer * 1000) / 10 + "%";
+        else if (r.kind === "train") t.textContent = "Trained " + r.params_m + "M params, dev CER " + Math.round(r.dev_cer * 1000) / 10 + "%";
+        d.appendChild(m); d.appendChild(t); runs.appendChild(d);
+      });
+      var job = s.jobs.length ? s.jobs[s.jobs.length - 1] : null;
+      if (job) { $("job-log").textContent = "[" + job.state + "] started " + job.started + "\n" + job.log; if (job.state === "running") schedulePoll(); }
+      return s;
+    }).catch(function (e) { msg("msg", e.message, true); });
+  }
+  function schedulePoll() { clearTimeout(pollT); pollT = setTimeout(refreshStatus, 3000); }
+
+  function loadList() {
+    var list = $("list"); list.textContent = "";
+    $("mine-tools").hidden = src !== "mine";
+    var url = src === "mine" ? "/api/recordings?profile=" + encodeURIComponent(prof()) : "/api/samples?set=" + src;
+    api(url).then(function (items) {
+      if (!items.length) { var p = document.createElement("p"); p.className = "msg"; p.textContent = src === "mine" ? "No recordings yet. Upload one, record one, or add demo recordings." : "No recordings found."; list.appendChild(p); }
+      items.forEach(function (it) {
+        var b = document.createElement("button"); b.type = "button"; b.className = "item"; b.setAttribute("aria-pressed", "false");
+        var t = document.createElement("span"); t.textContent = it.text || it.label || "(unlabelled)";
+        var sm = document.createElement("small"); sm.textContent = it.id;
+        b.appendChild(t); b.appendChild(sm);
+        b.addEventListener("click", function () {
+          list.querySelectorAll(".item").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+          current = { source: src === "mine" ? "recording" : "dataset", id: it.id };
+          $("save-fix").disabled = src !== "mine";
+          $("fix-msg").textContent = src === "mine" ? "Corrections change the Personal vocabulary at once and are used by the next calibration." : "Corrections are saved for your own recordings. Dataset recordings already have labels.";
+          if (src !== "mine") setVocab(src === "closed-test" ? "dates" : "open");
+          decode();
+        });
+        list.appendChild(b);
+      });
+    }).catch(function (e) { msg("msg", e.message, true); });
+  }
+
+  function drawScope(env) {
+    var cv = $("scope"), r = cv.getBoundingClientRect(), d = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d);
+    var ctx = cv.getContext("2d"), W = cv.width, H = cv.height, C = env.length, n = env[0].length, lane = H / C;
+    ctx.clearRect(0, 0, W, H);
+    for (var c = 0; c < C; c++) {
+      ctx.fillStyle = c % 2 ? "rgba(240,121,74,.85)" : "rgba(127,203,196,.9)";
+      var mid = lane * (c + 0.5), s = lane * 0.1;
+      for (var px = 0; px < W; px++) {
+        var e = env[c][Math.min(n - 1, Math.floor(px * n / W))];
+        var y1 = mid - e[1] * s, y2 = mid - e[0] * s; ctx.fillRect(px, y1, 1, Math.max(1, y2 - y1));
+      }
+    }
+  }
+
+  function words(ref, hyp) {
+    var out = $("hyp"); out.textContent = "";
+    var r = (ref || "").split(" "), set = {};
+    r.forEach(function (w) { set[w] = (set[w] || 0) + 1; });
+    (hyp || "").split(" ").filter(Boolean).forEach(function (w, i) {
+      if (i) out.appendChild(document.createTextNode(" "));
+      var s = document.createElement("span"); s.textContent = w;
+      if (ref) { s.className = set[w] ? "w-ok" : "w-bad"; if (set[w]) set[w]--; }
+      out.appendChild(s);
+    });
+    if (!hyp) out.textContent = "(nothing recognised)";
+  }
+
+  function decode() {
+    if (!current) { msg("msg", "Pick a recording first."); return; }
+    msg("msg", "Decoding…");
+    post("/api/decode", { source: current.source, id: current.id, profile: prof(), vocab: vocab, words: $("words").value, ckpt: $("ckpt").value })
+      .then(function (r) {
+        drawScope(r.preview);
+        $("ref").textContent = r.reference || "(no label yet)";
+        words(r.reference, r.text); lastHyp = r.text;
+        $("raw").textContent = r.greedy || "(empty)";
+        $("fix").value = r.reference || r.text;
+        msg("msg", r.seconds + " s of signal · model " + r.model_ms + " ms · decoding " + r.decode_ms + " ms · " + r.lexicon_size + " words" +
+          (r.word_accuracy != null ? " · word accuracy " + Math.round(r.word_accuracy * 100) + "%" : ""));
+      }).catch(function (e) { msg("msg", e.message, true); });
+  }
+
+  function setVocab(v) { vocab = v; press("[data-vocab]", "vocab", v); $("words-wrap").hidden = v !== "custom"; }
+
+  document.querySelectorAll("[data-src]").forEach(function (b) { b.addEventListener("click", function () { src = b.dataset.src; press("[data-src]", "src", src); loadList(); }); });
+  document.querySelectorAll("[data-vocab]").forEach(function (b) { b.addEventListener("click", function () { setVocab(b.dataset.vocab); if (current) decode(); }); });
+  $("decode").addEventListener("click", decode);
+  $("ckpt").addEventListener("change", function () { post("/api/model", { ckpt: $("ckpt").value }).then(function () { if (current) decode(); }).catch(function (e) { msg("msg", e.message, true); }); });
+  $("profile").addEventListener("change", function () { refreshStatus(); if (src === "mine") loadList(); });
+
+  $("save-fix").addEventListener("click", function () {
+    if (!current || current.source !== "recording") return;
+    post("/api/labels", { profile: prof(), id: current.id, text: $("fix").value, model_output: lastHyp }).then(function (r) {
+      msg("fix-msg", (r.saved.source === "confirmed" ? "Confirmed" : "Correction saved") + ": \"" + r.saved.text + "\". The Personal vocabulary now prefers these words.");
+      refreshStatus(); loadList();
+    }).catch(function (e) { msg("fix-msg", e.message, true); });
+  });
+
+  $("file").addEventListener("change", function () {
+    var f = $("file").files[0]; if (!f) return;
+    var fd = new FormData(); fd.append("file", f);
+    msg("serial-msg", "Uploading " + f.name + "…");
+    api("/api/recordings?profile=" + encodeURIComponent(prof()), { method: "POST", body: fd }).then(function (r) {
+      msg("serial-msg", "Saved " + r.samples + " samples × " + r.channels + " channels. Pick it in the list, decode, then save what you said.");
+      refreshStatus(); loadList();
+    }).catch(function (e) { msg("serial-msg", e.message, true); });
+  });
+
+  $("import").addEventListener("click", function () {
+    $("import").disabled = true;
+    post("/api/import", { profile: prof(), set: "closed-dev", limit: 200 }).then(function (r) {
+      msg("fix-msg", "Added " + r.imported + " labelled demo recordings to profile " + prof() + ".");
+      refreshStatus(); if (src === "mine") loadList();
+    }).catch(function (e) { msg("fix-msg", e.message, true); }).then(function () { $("import").disabled = false; });
+  });
+
+  $("calibrate").addEventListener("click", function () {
+    post("/api/calibrate", { profile: prof(), epochs: +$("epochs").value, base: $("ckpt").value }).then(function (j) {
+      $("job-log").textContent = "[" + j.state + "] started " + j.started + "\n" + j.log; schedulePoll();
+    }).catch(function (e) { $("job-log").textContent = e.message; });
+  });
+
+  /* Web Serial capture (Phase 4 hardware). One CSV line per sample. */
+  var port = null, reader = null, recording = false, buf = [], partial = "";
+  $("serial").addEventListener("click", function () {
+    if (!("serial" in navigator)) { msg("serial-msg", "This browser has no Web Serial. Use Chrome or Edge on a computer.", true); return; }
+    navigator.serial.requestPort().then(function (p) { port = p; return p.open({ baudRate: 921600 }); }).then(function () {
+      msg("serial-msg", "Sensor connected. Hold the button while you mouth a word or phrase.");
+      $("rec").disabled = false; readLoop();
+    }).catch(function (e) { msg("serial-msg", e.message, true); });
+  });
+  function readLoop() {
+    var dec = new TextDecoder(); reader = port.readable.getReader();
+    (function pump() {
+      reader.read().then(function (r) {
+        if (r.done) return;
+        partial += dec.decode(r.value, { stream: true });
+        var lines = partial.split("\n"); partial = lines.pop();
+        if (recording) lines.forEach(function (l) {
+          var v = l.trim().split(/[,\t ]+/).map(Number);
+          if (v.length && v.every(isFinite)) buf.push(v);
+        });
+        pump();
+      }).catch(function (e) { msg("serial-msg", "Sensor stopped: " + e.message, true); });
+    })();
+  }
+  function startRec() { buf = []; recording = true; $("rec").textContent = "Recording… release to stop"; }
+  function stopRec() {
+    if (!recording) return; recording = false; $("rec").textContent = "Hold to record";
+    var n = buf.length && buf[0].length, rows = buf.filter(function (r) { return r.length === n; });
+    if (rows.length < 500) { msg("serial-msg", "Too short (" + rows.length + " samples). Hold for at least half a second.", true); return; }
+    post("/api/recordings/stream", { profile: prof(), samples: rows }).then(function (r) {
+      msg("serial-msg", "Saved " + (r.samples / 1000).toFixed(1) + " s × " + r.channels + " channels."); refreshStatus(); if (src === "mine") loadList();
+    }).catch(function (e) { msg("serial-msg", e.message, true); });
+  }
+  $("rec").addEventListener("pointerdown", startRec);
+  $("rec").addEventListener("pointerup", stopRec);
+  $("rec").addEventListener("pointerleave", stopRec);
+  $("rec").addEventListener("keydown", function (e) { if ((e.key === " " || e.key === "Enter") && !recording) { e.preventDefault(); startRec(); } });
+  $("rec").addEventListener("keyup", function (e) { if (e.key === " " || e.key === "Enter") stopRec(); });
+
+  refreshStatus(); loadList();
+})();
+</script>
+</body>
+</html>
