@@ -13,9 +13,9 @@
   --good: #1F7A4D;
   --bad: #B3261E;
   --on-dark: #F3F5F2;
-  --display: "Geist", "Segoe UI", system-ui, sans-serif;
-  --body: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
-  --mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
   --wordmark: "Manrope", "Geist", system-ui, sans-serif;   /* logo only */
   --ease: cubic-bezier(.2, .8, .2, 1);
   --r: 14px;

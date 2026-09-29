@@ -25,9 +25,9 @@ Files: `site/assets/afono-symbol.svg`, `afono-symbol-light.svg` (dark background
 
 ## Type
 - Wordmark only: **Manrope** ExtraBold (800).
-- Display and interface: **Geist** 500–600, tight tracking (−3% to −4.5% on large sizes).
-- Body: **Atkinson Hyperlegible Next** (designed by the Braille Institute for low-vision readers), 16–17 px.
-- Data and labels: **Geist Mono**.
+- Display: **Bricolage Grotesque** 600–700, tight tracking (−3% to −4% on large sizes).
+- Body and interface: **Figtree** 400–600, 16–17 px.
+- Data and labels: **IBM Plex Mono**.
 All four are free on Google Fonts. Tokens live in `site/assets/afono.css`.
 
 ## Motion: the intro (about 4 s)
