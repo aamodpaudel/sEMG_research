@@ -1,0 +1,10 @@
+torch>=2.2
+numpy
+scipy
+tqdm
+onnx
+onnxruntime
+pytest
+fastapi
+uvicorn
+python-multipart

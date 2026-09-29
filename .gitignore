@@ -1,0 +1,15 @@
+/data/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.onnx
+!site/demo/model.onnx
+# runs: keep the registry, reports and logs; ignore checkpoints and job logs
+runs/*
+!runs/registry.jsonl
+!runs/*/
+runs/*/*
+!runs/*/report.json
+!runs/*/log.jsonl
+!runs/*/predictions.jsonl
+runs/jobs/
