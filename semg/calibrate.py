@@ -54,14 +54,14 @@ def import_dataset(profile: Profile, index_path: str, which: str, limit: int):
 
 
 def calibrate(profile_name="default", base="runs/base/best.pt", out=None, epochs=15, lr=1e-4,
-              replay=1.0, index="data/index.json", cache="data/cache", notes="", log=print):
+              replay=1.0, index="data/index.json", cache="data/cache", notes="", log=print, replay_pool=None):
     profile = Profile(profile_name)
     utts = profile.utterances()
     tr = [u for u in utts if u.split == "train"]
     ho = [u for u in utts if u.split == "dev"]
     if len(tr) < 5 or len(ho) < 1:
         raise RuntimeError(f"need at least 5 training and 1 held-out labelled recordings, have {len(tr)}/{len(ho)}")
-    build_cache(utts, cache, workers=2)
+    build_cache(utts, cache, workers=0)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model, ckpt = load_model(base, device)
     channels = {int(np.load(u.path + "_emg.npy", mmap_mode="r").shape[1]) for u in utts}
@@ -72,7 +72,13 @@ def calibrate(profile_name="default", base="runs/base/best.pt", out=None, epochs
         log(f"adapting model input from {model.config['n_channels']} to {n_ch} channels")
         model = adapt_channels(model, n_ch)
 
-    base_train = [u for u in load_index(index) if u.split == "train"]
+    if replay_pool is not None:
+        base_train = [u for u in replay_pool if u.uid not in {x.uid for x in utts}]
+        build_cache(base_train, cache, workers=0)
+    elif os.path.exists(index):
+        base_train = [u for u in load_index(index) if u.split == "train"]
+    else:
+        base_train = []
     counts = profile.word_counts()           # personal vocabulary = words this user has confirmed
     lexicon = Lexicon(counts.keys(), counts)
     before = measure(model, ho, cache, device, lexicon)
@@ -80,6 +86,7 @@ def calibrate(profile_name="default", base="runs/base/best.pt", out=None, epochs
 
     rng = random.Random(0)
     replay_utts = rng.sample(base_train, min(len(base_train), int(len(tr) * replay))) if replay > 0 else []
+    build_cache(replay_utts, cache, workers=0)
     run_id = "calib-%s-%s" % (profile_name, _dt.datetime.now().strftime("%Y%m%d-%H%M%S"))
     out = out or os.path.join("runs", run_id)
     t0 = time.time()

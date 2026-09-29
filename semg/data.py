@@ -28,10 +28,12 @@ class Utterance:
     book: str
     sentence_index: int
     split: str = "train"
+    mains_hz: int = 60
 
     @property
     def uid(self) -> str:
-        return hashlib.md5(self.path.encode()).hexdigest()[:16]
+        key = self.path if self.mains_hz == 60 else f"{self.path}@{self.mains_hz}"
+        return hashlib.md5(key.encode()).hexdigest()[:16]
 
 
 def _hash_frac(s: str) -> float:
@@ -77,22 +79,27 @@ def index_dataset(root: str, testset_file: str) -> list[Utterance]:
 
 
 def _cache_one(args):
-    u_path, out = args
+    u_path, out, mains = args
     if not os.path.exists(out):
-        x = preprocess(np.load(u_path + "_emg.npy"))
+        x = preprocess(np.load(u_path + "_emg.npy"), mains_hz=mains)
         np.save(out, x.astype(np.float16))
     return out
 
 
 def build_cache(utts: list[Utterance], cache_dir: str, workers: int = 6):
     os.makedirs(cache_dir, exist_ok=True)
-    jobs = [(u.path, os.path.join(cache_dir, u.uid + ".npy")) for u in utts]
+    jobs = [(u.path, os.path.join(cache_dir, u.uid + ".npy"), u.mains_hz) for u in utts]
     todo = [j for j in jobs if not os.path.exists(j[1])]
-    if todo:
-        from tqdm import tqdm
-        with Pool(workers) as p:
-            for _ in tqdm(p.imap_unordered(_cache_one, todo, chunksize=16), total=len(todo), desc="cache"):
-                pass
+    if not todo:
+        return
+    if workers <= 1 or len(todo) < 32:          # also the path used inside the packaged app
+        for j in todo:
+            _cache_one(j)
+        return
+    from tqdm import tqdm
+    with Pool(workers) as p:
+        for _ in tqdm(p.imap_unordered(_cache_one, todo, chunksize=16), total=len(todo), desc="cache"):
+            pass
 
 
 def save_index(utts, path):

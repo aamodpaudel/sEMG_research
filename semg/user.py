@@ -33,6 +33,27 @@ class Profile:
         os.makedirs(self.rec_dir, exist_ok=True)
         self.labels_path = os.path.join(self.dir, "labels.jsonl")
 
+    # settings ---------------------------------------------------------
+    DEFAULTS = {"mains_hz": 60}
+
+    def settings(self) -> dict:
+        path = os.path.join(self.dir, "settings.json")
+        out = dict(self.DEFAULTS)
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                out.update(json.load(f))
+        return out
+
+    def save_settings(self, **kw) -> dict:
+        cur = self.settings()
+        if "mains_hz" in kw:
+            if int(kw["mains_hz"]) not in (50, 60):
+                raise ValueError("mains_hz must be 50 or 60")
+            cur["mains_hz"] = int(kw["mains_hz"])
+        with open(os.path.join(self.dir, "settings.json"), "w", encoding="utf-8") as f:
+            json.dump(cur, f)
+        return cur
+
     # recordings -------------------------------------------------------
     def add_recording(self, emg: np.ndarray, rid: str | None = None) -> str:
         emg = np.asarray(emg, dtype=np.float32)
@@ -84,11 +105,11 @@ class Profile:
 
     def utterances(self) -> list[Utterance]:
         """Labelled recordings as Utterances; ~20% held out (by id hash) to measure improvement."""
-        utts = []
+        utts, mains = [], self.settings()["mains_hz"]
         for rid, r in sorted(self.labels().items()):
             frac = int(hashlib.md5(rid.encode()).hexdigest()[:8], 16) / 0xFFFFFFFF
             utts.append(Utterance(self.prefix(rid), r["text"], r["text"], True, False, f"user:{self.name}", 0,
-                                  "dev" if frac < 0.2 else "train"))
+                                  "dev" if frac < 0.2 else "train", mains))
         return utts
 
     def summary(self) -> dict:
