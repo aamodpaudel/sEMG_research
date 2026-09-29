@@ -1,0 +1,12 @@
+{"epoch": 1, "step": 20, "loss": 0.9721842736005784, "sec": 5.6}
+{"epoch": 2, "step": 40, "loss": 0.914931857585907, "sec": 4.3}
+{"epoch": 3, "step": 61, "loss": 0.8391321145352864, "sec": 4.5}
+{"epoch": 4, "step": 80, "loss": 0.8062500702707391, "sec": 4.3, "dev_wer": 0.7409326424870466, "dev_cer": 0.3523832684824903, "example": ["i saw and thought nothing of the other four martian monsters my attention was riveted upon the nearer incident", "i sa a thtnothing of the other for maton mones by anee wous reve bon the neara ente"]}
+{"epoch": 5, "step": 100, "loss": 0.7590597778558731, "sec": 4.6}
+{"epoch": 6, "step": 120, "loss": 0.7679841369390488, "sec": 4.4}
+{"epoch": 7, "step": 140, "loss": 0.7122992917895317, "sec": 4.3}
+{"epoch": 8, "step": 160, "loss": 0.7152397841215133, "sec": 4.3, "dev_wer": 0.7435233160621761, "dev_cer": 0.3516536964980545, "example": ["i saw and thought nothing of the other four martian monsters my attention was riveted upon the nearer incident", "i sa a thotnothing of the other for maton mones by anee wous reve pon the deara ante"]}
+{"epoch": 9, "step": 180, "loss": 0.686962540447712, "sec": 4.3}
+{"epoch": 10, "step": 200, "loss": 0.6921376690268517, "sec": 4.3}
+{"epoch": 11, "step": 220, "loss": 0.7000383600592613, "sec": 4.3}
+{"epoch": 12, "step": 240, "loss": 0.7084611475467681, "sec": 4.4, "dev_wer": 0.7383419689119171, "dev_cer": 0.34946498054474706, "example": ["i saw and thought nothing of the other four martian monsters my attention was riveted upon the nearer incident", "i sa a thotnothing of the other for maton mones by anee wouls reve pon the deara ente"]}
