@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Afono Research</title>
+<meta name="description" content="Benchmark card for Afono's silent-speech model: protocol, results with confidence intervals, limitations, and planned benchmarks.">
+<link rel="icon" href="assets/afono-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="assets/afono.css">
+<style>
+  .wrap { max-width: 980px; }
+  header.top { border-bottom: 1px solid var(--line); }
+  header.top .wrap { display: flex; justify-content: space-between; align-items: center; min-height: 68px; gap: 16px; }
+  header.top nav { display: flex; gap: 24px; font: 600 15px var(--display); }
+  main { padding-block: 64px 96px; }
+  article { display: grid; gap: 64px; }
+  .title { display: grid; gap: 14px; }
+  .title h1 { font-size: clamp(38px, 5.6vw, 60px); font-weight: 800; letter-spacing: -0.035em; }
+  .meta { font: 400 14px var(--mono); color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .abstract { font-size: 19px; max-width: 70ch; }
+  h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 18px; }
+  h2 .num { font: 600 14px var(--mono); color: var(--ink-2); margin-right: 10px; letter-spacing: 0; }
+  h3 { font-size: 19px; margin: 22px 0 8px; }
+  p + p { margin-top: 12px; }
+  .prose { max-width: 72ch; }
+  .prose p, .prose li { color: var(--ink); }
+  .muted { color: var(--ink-2); }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 760px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: 0; }
+  th { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); background: var(--paper-2); }
+  td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.hl { font-weight: 700; }
+  caption { caption-side: bottom; text-align: left; padding: 12px 14px; font-size: 14px; color: var(--ink-2); }
+  .fig { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 20px 12px; position: relative; }
+  .fig svg { display: block; width: 100%; height: auto; }
+  .fig figcaption { font-size: 14px; color: var(--ink-2); margin-top: 8px; }
+  .tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--paper); font: 400 13px/1.45 var(--body); padding: 8px 10px; border-radius: 8px; max-width: 260px; }
+  .callout { border: 1.5px solid var(--line); border-radius: 14px; padding: 20px 22px; background: var(--card); display: grid; gap: 8px; }
+  .callout .big { font: 800 30px var(--display); letter-spacing: -0.02em; color: var(--teal); font-variant-numeric: tabular-nums; }
+  code, pre { font-family: var(--mono); font-size: 14px; }
+  pre { background: var(--ink); color: #D6E6E3; padding: 16px 18px; border-radius: 12px; overflow-x: auto; margin: 0; line-height: 1.6; }
+  :root[data-theme="dark"] pre { background: #06110F; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) pre { background: #06110F; } }
+  .formula { font: 400 16px var(--mono); background: var(--paper-2); padding: 12px 16px; border-radius: 10px; overflow-x: auto; }
+  .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .card { border: 1px solid var(--line); border-radius: 14px; padding: 20px; background: var(--card); display: grid; gap: 8px; align-content: start; }
+  .card h3 { margin: 0; }
+  .card p, .card li { font-size: 15px; color: var(--ink-2); }
+  .card ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+  ol.log { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); display: grid; }
+  ol.log li { padding: 0 0 18px 20px; position: relative; display: grid; gap: 2px; }
+  ol.log li::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--paper); border: 2px solid var(--teal); }
+  ol.log .m { font: 400 12px var(--mono); color: var(--ink-2); }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="lockup" href="index.html" style="font-size: 28px" aria-label="Afono home">
+      <svg viewBox="0 0 64 96" aria-hidden="true"><circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="9"></circle><line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="9" stroke-linecap="round"></line></svg>
+      <span>afono</span>
+    </a>
+    <nav aria-label="Pages"><a href="index.html">Home</a><a href="brand.html">Brand</a></nav>
+  </div>
+</header>
+<main>
+<div class="wrap">
+<article>
+  <div class="title">
+    <p class="eyebrow">Research card · silent-speech model</p>
+    <h1>Silent speech to text with a vocabulary the interface already knows</h1>
+    <div class="meta"><span>Run <b data-r="run">base</b></span><span>Protocol <b data-r="protocol">v2</b></span><span>Measured <b data-r="date">2026-09-29</b></span><span><b data-r="params">5.8</b>M parameters</span></div>
+    <p class="abstract">We decode silent speech from 8-channel facial surface EMG with a 5.8M-parameter convolutional Transformer trained with CTC on characters. Restricting the decoder to the words an interface can accept raises word accuracy on a 51-word dates-and-times task from 57.6% to 94.8% (95% CI 90.9–98.2%). On free-form sentences the same model reaches 40.5% open-vocabulary word accuracy, well behind the published state of the art (87.8%). All results are from one speaker on lab hardware.</p>
+  </div>
+
+  <section aria-labelledby="r1">
+    <h2 id="r1"><span class="num">1</span>Results</h2>
+    <figure class="fig" id="fig1">
+      <svg id="ci-chart" viewBox="0 0 900 300" role="img" aria-label="Word accuracy with 95% confidence intervals for each task"></svg>
+      <figcaption>Word accuracy on silent test speech, lexicon-constrained decoding. Bars show 95% bootstrap confidence intervals over utterances; the dashed line is the 90% goal. Hover a dot for details.</figcaption>
+      <div class="tip" id="tip" hidden></div>
+    </figure>
+    <div class="tablewrap" style="margin-top: 20px">
+      <table>
+        <thead><tr><th scope="col">Task</th><th scope="col">Vocabulary</th><th scope="col">Utterances / words</th><th scope="col">Word accuracy [95% CI]</th><th scope="col">No lexicon</th><th scope="col">Correct words / min</th><th scope="col">Bits / word</th></tr></thead>
+        <tbody id="results-body">
+          <tr><td>Dates and times</td><td class="n">51</td><td class="n">43 / 172</td><td class="n hl">94.8% [90.9, 98.2]</td><td class="n">57.6%</td><td class="n">78.7</td><td class="n">5.08</td></tr>
+          <tr><td>Book sentences</td><td class="n">100</td><td class="n">11 / 150</td><td class="n hl">37.3% [20.9, 51.7]</td><td class="n">23.3%</td><td class="n">52.8</td><td class="n">1.54</td></tr>
+          <tr><td>Book sentences</td><td class="n">250</td><td class="n">25 / 438</td><td class="n hl">48.9% [42.0, 55.3]</td><td class="n">24.4%</td><td class="n">72.5</td><td class="n">2.90</td></tr>
+          <tr><td>Book sentences</td><td class="n">500</td><td class="n">64 / 1,086</td><td class="n hl">39.7% [33.9, 45.2]</td><td class="n">24.7%</td><td class="n">55.9</td><td class="n">2.59</td></tr>
+          <tr><td>Any sentence</td><td class="n">9,139</td><td class="n">98 / 1,643</td><td class="n hl">40.5% [36.8, 44.1]</td><td class="n">25.6%</td><td class="n">58.2</td><td class="n">4.35</td></tr>
+        </tbody>
+        <caption>"No lexicon" is greedy CTC decoding with no vocabulary constraint (an ablation). Correct words per minute use the recordings' natural reading pace. Bits per word follow Wolpaw et al. (2002); see section 5 for why they overstate large vocabularies.</caption>
+      </table>
+    </div>
+    <p class="muted" style="margin-top: 16px">Decoding runs faster than real time: model plus decoder take about <span data-r="rtf">2%</span> of the recording's duration on the GPU below. The in-browser int8 model agrees with PyTorch on <span data-r="agree">99.7%</span> of output frames.</p>
+  </section>
+
+  <section aria-labelledby="r2">
+    <h2 id="r2"><span class="num">2</span>Per-user calibration</h2>
+    <div class="callout">
+      <span class="big" id="paired-headline">−1.7 points WER, not significant</span>
+      <p id="paired-detail">Fine-tuning on 155 labelled silent recordings changed held-out WER from 60.6% to 58.9% (n = 44; paired bootstrap 95% CI −6.2 to +2.9 points; one-sided p = 0.25).</p>
+      <p class="muted">These recordings come from the same speaker the base model was trained on, so there was little to adapt to. The real test is a new person on new hardware, which is the next experiment.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="r3">
+    <h2 id="r3"><span class="num">3</span>Published baselines</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">System</th><th scope="col">Open-vocabulary WER, silent</th><th scope="col">Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Previous state of the art (as reported by Benster et al., 2024)</td><td class="n">28.8%</td><td>Gaddy (2020) benchmark</td></tr>
+          <tr><td>MONA LISA (Benster et al., 2024)</td><td class="n hl">12.2%</td><td>Cross-modal training + LLM rescoring</td></tr>
+          <tr><td>Afono, run <span data-r="run">base</span></td><td class="n hl"><span data-r="open_wer">59.5</span>%</td><td>Small on-device model, unigram prior, no LLM</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="r4" class="prose">
+    <h2 id="r4"><span class="num">4</span>Protocol</h2>
+    <h3>Data</h3>
+    <p>Gaddy &amp; Klein (2020) silent-speech EMG (DOI 10.5281/zenodo.4064408): one speaker, 8 facial channels, 1,000 Hz, about 18 hours in total. Book sentences use the official <code>testset_largedev.json</code> split; voiced recordings of test and dev sentences are excluded from training. The dates-and-times subset has no official split, so we hold out 10% dev and 10% test of its silent recordings by a hash of the file path. Split hashes: <code data-r="hashes">see report.json</code>.</p>
+    <h3>Signal and model</h3>
+    <p>Causal filtering (2 Hz high-pass, 60 Hz notch and harmonics, 450 Hz low-pass), per-utterance channel z-scoring. Three strided residual convolution blocks (1,000 → 125 Hz), a depthwise convolutional position embedding, six pre-norm Transformer layers (d = 256, 4 heads), and a character CTC head (29 symbols). Trained 80 epochs on silent and voiced EMG with a mode embedding, AdamW (lr 5×10⁻⁴, cosine), bf16, and augmentations for gain, noise, electrode dropout and time masks. The checkpoint with the lowest dev WER (epoch 70) is used.</p>
+    <h3>Decoding</h3>
+    <p>Lexicon-constrained CTC prefix beam search (beam 32) with a unigram word prior. The prior weight and word bonus are tuned on the first 100 dev utterances only. Test sentences never influence any setting. Closed-N tasks keep test sentences, in index order, while their combined vocabulary fits N words, then pad the lexicon to exactly N with the most frequent training words.</p>
+    <h3>Compute</h3>
+    <p><span data-r="device">NVIDIA GeForce RTX 4060 Laptop GPU</span>, PyTorch <span data-r="torch">2.7.0</span>. Median encoder time <span data-r="enc">12.7</span> ms per utterance at batch size 1.</p>
+  </section>
+
+  <section aria-labelledby="r5" class="prose">
+    <h2 id="r5"><span class="num">5</span>Metrics</h2>
+    <p><b>WER</b> is corpus-level: total word substitutions, insertions and deletions divided by total reference words. <b>Word accuracy</b> is 1 − WER. <b>CER</b> is the same over characters. Text is lowercased, numbers are spelled out, and punctuation is removed before scoring.</p>
+    <p><b>Confidence intervals</b> are 95% percentile bootstrap intervals over utterances (2,000 resamples, fixed seed). Model comparisons use a <b>paired</b> bootstrap on the same utterances.</p>
+    <p><b>Information transfer rate</b> treats each word as one selection from an N-word vocabulary (Wolpaw et al., 2002):</p>
+    <p class="formula">B = log₂N + P·log₂P + (1 − P)·log₂((1 − P)/(N − 1)) bits per word, ITR = B × words per minute</p>
+    <p class="muted">It assumes equally likely words and errors spread evenly over the other N − 1 words. Neither holds for sentences, and the formula rewards large N even at low accuracy, so we report it for comparison with BCI literature and lead with correct words per minute instead.</p>
+    <p><b>Correct words per minute</b> = reference words per minute of recording × word accuracy. <b>Real-time factor</b> = compute time ÷ recording duration.</p>
+  </section>
+
+  <section aria-labelledby="r6" class="prose">
+    <h2 id="r6"><span class="num">6</span>Limitations</h2>
+    <ul>
+      <li>One speaker, one session setup, lab-grade electrodes. Cross-speaker and low-cost hardware results do not exist yet.</li>
+      <li>The dates-and-times test split is ours, not official. Its 43 utterances give a wide interval.</li>
+      <li>Speaking rate comes from read speech. Real use adds pauses, corrections and interface time.</li>
+      <li>Closed-N tasks select sentences that fit the vocabulary, which is easier than a user choosing freely within N words.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="r7">
+    <h2 id="r7"><span class="num">7</span>The three-model program</h2>
+    <div class="cols">
+      <div class="card"><span class="pill active" style="justify-self: start">Training</span><h3>Silent-speech model</h3><p>Facial sEMG to text. Metrics above.</p></div>
+      <div class="card"><span class="pill next" style="justify-self: start">Next</span><h3>Gaze model</h3><ul><li>Webcam-only gaze estimation.</li><li>Angular error in degrees on MPIIFaceGaze, leave-one-subject-out.</li><li>Pointing accuracy on screen targets, in pixels and in hit rate.</li></ul></div>
+      <div class="card"><span class="pill next" style="justify-self: start">Prototype</span><h3>Page model</h3><ul><li>Detects actionable elements and their labels on any web page.</li><li>Precision and recall of clickable elements on the WebUI dataset.</li><li>Vocabulary it hands the decoder: median size per page.</li></ul></div>
+    </div>
+    <p class="muted" style="margin-top: 16px">The combined system will be scored on web tasks by success rate, time per task, and selections per minute with Wolpaw ITR, against keyboard, mouse and eye-gaze baselines.</p>
+  </section>
+
+  <section aria-labelledby="r8">
+    <h2 id="r8"><span class="num">8</span>Reproduce</h2>
+<pre>pip install -r requirements.txt
+python -m semg.prepare                      # index + cache (3.9 GB download first, see README)
+python -m semg.train --out runs/base --notes "baseline"
+python -m semg.evaluate --ckpt runs/base/best.pt --out runs/base/report.json
+python -m semg.compare --profile demo-open --a runs/base/best.pt --b runs/&lt;calib&gt;/best.pt</pre>
+    <p class="muted" style="margin-top: 12px">Every run appends to <code>runs/registry.jsonl</code>. Per-utterance predictions are in <code>runs/&lt;run&gt;/predictions.jsonl</code>.</p>
+  </section>
+
+  <section aria-labelledby="r9">
+    <h2 id="r9"><span class="num">9</span>Run log</h2>
+    <ol class="log" id="runlog"><li><span class="m">loading</span></li></ol>
+  </section>
+
+  <section aria-labelledby="r10">
+    <h2 id="r10"><span class="num">10</span>Cite</h2>
+<pre>@misc{afono2026silent,
+  title  = {Afono: silent speech to text with interface-constrained decoding},
+  author = {[Founder name] and Afono contributors},
+  year   = {2026},
+  note   = {Research card, protocol v2},
+  url    = {https://afono.org/research.html}
+}</pre>
+    <p class="muted" style="margin-top: 12px">References: Gaddy &amp; Klein, "Digital Voicing of Silent Speech", EMNLP 2020. Benster et al., "A Cross-Modal Approach to Silent Speech with LLM-Enhanced Recognition", arXiv:2403.05583, 2024. Wolpaw et al., "Brain-computer interfaces for communication and control", Clinical Neurophysiology 113, 2002.</p>
+  </section>
+</article>
+</div>
+</main>
+<script src="data/progress.js"></script>
+<script>
+(function () {
+  "use strict";
+  var P = window.AFONO_PROGRESS, R = P && P.research;
+  if (!R || !R.tasks) return;
+  function f1(x) { return (Math.round(x * 10) / 10).toFixed(1); }
+  function set(k, v) { document.querySelectorAll('[data-r="' + k + '"]').forEach(function (e) { e.textContent = v; }); }
+  set("run", R.run); set("protocol", R.protocol); set("date", R.date);
+  if (R.params_m) set("params", R.params_m);
+  if (R.compute) { set("device", R.compute.device); set("torch", (R.compute.torch || "").split("+")[0]); set("enc", f1(R.compute.encoder_ms_per_utterance_median)); }
+  if (R.dataset && R.dataset.split_hash) set("hashes", Object.keys(R.dataset.split_hash).map(function (k) { return k + " " + R.dataset.split_hash[k]; }).join(" · "));
+  if (P.demo && P.demo.int8_agreement) set("agree", f1(P.demo.int8_agreement * 100) + "%");
+  var open = R.tasks.filter(function (t) { return t.task === "open"; })[0];
+  if (open) { set("open_wer", f1(open.wer)); set("rtf", Math.round(open.rtf * 100) + "%"); }
+
+  var body = document.getElementById("results-body");
+  body.textContent = "";
+  R.tasks.forEach(function (t) {
+    var tr = document.createElement("tr");
+    [[t.label], [t.vocab.toLocaleString(), "n"], [t.n + " / " + t.words.toLocaleString(), "n"],
+     [f1(t.acc) + "% [" + f1(t.acc_ci[0]) + ", " + f1(t.acc_ci[1]) + "]", "n hl"], [f1(t.greedy_acc) + "%", "n"],
+     [f1(t.cwpm), "n"], [t.bits.toFixed(2), "n"]].forEach(function (c) {
+      var td = document.createElement("td"); td.textContent = c[0]; if (c[1]) td.className = c[1]; tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+
+  var pr = R.paired;
+  if (pr) {
+    var d = pr.delta_wer * 100, sig = pr.delta_ci95[1] < 0;
+    document.getElementById("paired-headline").textContent = (d < 0 ? "−" : "+") + f1(Math.abs(d)) + " points WER, " + (sig ? "significant" : "not significant");
+    document.getElementById("paired-detail").textContent = "Fine-tuning changed held-out WER from " + f1(pr.wer_a * 100) + "% to " + f1(pr.wer_b * 100) +
+      "% (n = " + pr.n_utterances + "; paired bootstrap 95% CI " + f1(pr.delta_ci95[0] * 100) + " to " + f1(pr.delta_ci95[1] * 100) +
+      " points; one-sided p = " + pr.p_b_not_better.toFixed(2) + ").";
+  }
+
+  var log = document.getElementById("runlog"); log.textContent = "";
+  (P.runs || []).forEach(function (r) {
+    var li = document.createElement("li"), m = document.createElement("span"), s = document.createElement("span");
+    m.className = "m"; m.textContent = r.date + " · " + r.kind + " · " + r.run_id; s.textContent = r.summary;
+    li.appendChild(m); li.appendChild(s); log.appendChild(li);
+  });
+
+  /* dot-and-whisker chart, drawn to one scale */
+  var svg = document.getElementById("ci-chart"), NS = "http://www.w3.org/2000/svg", tip = document.getElementById("tip");
+  var W = 900, left = 250, right = 80, top = 34, rowH = 48, H = top + R.tasks.length * rowH + 40;
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  function x(v) { return left + (W - left - right) * v / 100; }
+  function el(tag, a, text) { var e = document.createElementNS(NS, tag); for (var k in a) e.setAttribute(k, a[k]); if (text != null) e.textContent = text; svg.appendChild(e); return e; }
+  [0, 25, 50, 75, 100].forEach(function (v) {
+    el("line", { x1: x(v), x2: x(v), y1: top - 10, y2: H - 34, stroke: "var(--line)", "stroke-width": 1 });
+    el("text", { x: x(v), y: H - 12, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 13, "font-family": "JetBrains Mono, monospace" }, v + "%");
+  });
+  el("line", { x1: x(90), x2: x(90), y1: top - 16, y2: H - 34, stroke: "var(--ink-2)", "stroke-width": 1.5, "stroke-dasharray": "5 5" });
+  el("text", { x: x(90) - 6, y: top - 20, "text-anchor": "end", fill: "var(--ink-2)", "font-size": 13, "font-family": "JetBrains Mono, monospace" }, "goal 90%");
+  R.tasks.forEach(function (t, i) {
+    var y = top + i * rowH + rowH / 2;
+    el("text", { x: 0, y: y - 3, fill: "var(--ink)", "font-size": 16, "font-family": "Atkinson Hyperlegible, sans-serif" }, t.label);
+    el("text", { x: 0, y: y + 15, fill: "var(--ink-2)", "font-size": 12, "font-family": "JetBrains Mono, monospace" }, t.vocab.toLocaleString() + " words · n = " + t.n);
+    el("line", { x1: x(t.acc_ci[0]), x2: x(t.acc_ci[1]), y1: y, y2: y, stroke: "var(--chart)", "stroke-width": 2, "stroke-linecap": "round" });
+    [t.acc_ci[0], t.acc_ci[1]].forEach(function (v) { el("line", { x1: x(v), x2: x(v), y1: y - 6, y2: y + 6, stroke: "var(--chart)", "stroke-width": 2, "stroke-linecap": "round" }); });
+    el("circle", { cx: x(t.acc), cy: y, r: 6, fill: "var(--chart)", stroke: "var(--card)", "stroke-width": 2 });
+    el("text", { x: x(t.acc_ci[1]) + 10, y: y + 5, fill: "var(--ink)", "font-size": 14, "font-weight": 700, "font-family": "Manrope, sans-serif" }, f1(t.acc) + "%");
+    var hit = el("rect", { x: left - 10, y: y - rowH / 2, width: W - left - right + 20, height: rowH, fill: "transparent" });
+    hit.addEventListener("pointermove", function (e) {
+      var b = svg.getBoundingClientRect(), fb = svg.parentNode.getBoundingClientRect();
+      tip.hidden = false;
+      tip.textContent = t.label + ", " + t.vocab.toLocaleString() + " words: " + f1(t.acc) + "% (95% CI " + f1(t.acc_ci[0]) + "–" + f1(t.acc_ci[1]) + "%), " + t.words + " words in " + t.n + " utterances";
+      tip.style.left = Math.min(fb.width - 270, e.clientX - fb.left + 12) + "px";
+      tip.style.top = (e.clientY - fb.top + 14) + "px";
+    });
+    hit.addEventListener("pointerleave", function () { tip.hidden = true; });
+  });
+})();
+</script>
+</body>
+</html>

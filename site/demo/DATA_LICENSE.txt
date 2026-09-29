@@ -1,0 +1,8 @@
+samples.bin / samples.json contain 10 preprocessed silent-speech EMG recordings and their transcripts from:
+
+  David Gaddy and Dan Klein. "Digital Voicing of Silent Speech." EMNLP 2020.
+  Dataset: Silent Speech EMG, https://doi.org/10.5281/zenodo.4064408
+
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0),
+https://creativecommons.org/licenses/by/4.0/. Changes: signals were filtered and
+standardised (see semg/signal.py) and converted to float32.

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Afono Brand Guide</title>
+<meta name="description" content="Logo, colour, type, motion and voice for Afono.">
+<link rel="icon" href="assets/afono-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="assets/afono.css">
+<style>
+  header.top { border-bottom: 1px solid var(--line); }
+  header.top .wrap { display: flex; justify-content: space-between; align-items: center; min-height: 68px; gap: 16px; }
+  header.top a.back { font: 600 15px var(--display); }
+  section { padding-block: 72px; }
+  section + section { border-top: 1px solid var(--line); }
+  .head { display: grid; gap: 12px; max-width: 720px; margin-bottom: 36px; }
+  .head h2 { font-size: clamp(30px, 4vw, 44px); font-weight: 800; }
+  .head p { color: var(--ink-2); font-size: 19px; }
+  .stage { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 56px 32px; display: grid; justify-items: center; gap: 18px; }
+  .stage .lockup { font-size: clamp(60px, 10vw, 124px); }
+  .stage .sym-wrap { --af-shift: 1.3em; display: inline-flex; }
+  .meaning { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 36px; }
+  .meaning div { display: grid; gap: 8px; }
+  .meaning h3 { font-size: 21px; }
+  .meaning p { color: var(--ink-2); font-size: 16px; }
+  .spec-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .tile { border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: grid; gap: 14px; align-content: start; background: var(--card); }
+  .tile .art { min-height: 150px; display: grid; place-items: center; border-radius: 10px; }
+  .tile h3 { font-size: 18px; }
+  .tile p { font-size: 15px; color: var(--ink-2); }
+  .swatches { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+  .sw { border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--card); }
+  .sw .chip-c { height: 120px; }
+  .sw div.t { padding: 14px 16px; display: grid; gap: 2px; }
+  .sw b { font-family: var(--display); }
+  .sw span { font: 400 13px var(--mono); color: var(--ink-2); }
+  .type-row { display: grid; grid-template-columns: 220px 1fr; gap: 28px; padding: 24px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+  .type-row .k { font: 600 13px var(--mono); color: var(--ink-2); letter-spacing: .06em; }
+  table.motion { width: 100%; border-collapse: collapse; font-size: 16px; }
+  table.motion th, table.motion td { text-align: left; padding: 12px 12px 12px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.motion th { font: 600 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+  table.motion td:first-child { font: 600 14px var(--mono); color: var(--teal); white-space: nowrap; }
+  .voice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .voice .tile ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: var(--ink-2); }
+  .say { color: var(--good); } .dont { color: var(--bad); }
+  .files { display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .files a, .files span.row { display: grid; grid-template-columns: 1fr auto; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); text-decoration: none; }
+  .files .mono { color: var(--ink-2); }
+  @media (max-width: 860px) {
+    .spec-grid, .meaning { grid-template-columns: 1fr; }
+    .swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .type-row, .voice { grid-template-columns: 1fr; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="lockup" href="index.html" style="font-size: 28px" aria-label="Afono home">
+      <svg viewBox="0 0 64 96" aria-hidden="true"><circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="9"></circle><line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="9" stroke-linecap="round"></line></svg>
+      <span>afono</span>
+    </a>
+    <a class="back" href="index.html">Back to site</a>
+  </div>
+</header>
+<main>
+<section>
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Brand guide · v1</p>
+      <h2>One mark, three meanings.</h2>
+      <p>The Afono symbol is the Greek letter φ. It is also a finger held over the lips, and it looks like the electrodes that read the signal.</p>
+    </div>
+    <div class="stage">
+      <div class="lockup intro" id="intro" role="img" aria-label="Afono logo, animated">
+        <span class="sym-wrap">
+          <svg viewBox="0 0 64 96" aria-hidden="true">
+            <circle class="sym-ripple" cx="32" cy="48" r="22" fill="none" stroke-width="3"></circle>
+            <circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="9" pathLength="100" transform="rotate(-90 32 48)"></circle>
+            <line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="9" stroke-linecap="round"></line>
+          </svg>
+        </span>
+        <span aria-hidden="true"><span class="l">a</span><span class="l">f</span><span class="l">o</span><span class="l">n</span><span class="l">o</span></span>
+      </div>
+      <button class="btn" type="button" id="replay">Replay the intro</button>
+    </div>
+    <div class="meaning">
+      <div><h3>φ, the name</h3><p>Afono comes from the Greek <i>áphōnos</i>, "voiceless", which is spelled with φ.</p></div>
+      <div><h3>Shh, the gesture</h3><p>A finger over closed lips is the universal sign for silence. The bar is the finger, the ring is the mouth.</p></div>
+      <div><h3>The electrode</h3><p>Skin electrodes are round pads. The ring is the sensor, the bar is the signal passing through it.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head"><p class="eyebrow">Logo</p><h2>Construction and use</h2></div>
+    <div class="spec-grid">
+      <div class="tile">
+        <div class="art" style="background: var(--paper-2)">
+          <svg width="120" height="180" viewBox="-8 0 80 96" aria-label="Symbol construction">
+            <line x1="-8" y1="48" x2="72" y2="48" stroke="var(--ink-2)" stroke-width=".4" stroke-dasharray="2 2"></line>
+            <line x1="32" y1="0" x2="32" y2="96" stroke="var(--ink-2)" stroke-width=".4" stroke-dasharray="2 2"></line>
+            <circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="9"></circle>
+            <line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="9" stroke-linecap="round"></line>
+          </svg>
+        </div>
+        <h3>Symbol</h3>
+        <p>On a 64 × 96 grid: ring radius 22, stroke 9. Bar from 8 to 88 with round ends, same stroke. The bar always sits in front of the ring.</p>
+      </div>
+      <div class="tile">
+        <div class="art" style="background: var(--paper-2)"><span class="lockup" style="font-size: 54px; outline: 1.5px dashed var(--signal); outline-offset: 18px"><svg viewBox="0 0 64 96" aria-hidden="true"><circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="9"></circle><line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="9" stroke-linecap="round"></line></svg><span>afono</span></span></div>
+        <h3>Lockup and clear space</h3>
+        <p>Wordmark in Manrope ExtraBold, lowercase, tracking −4.5%. Keep clear space equal to the ring's width on every side.</p>
+      </div>
+      <div class="tile">
+        <div class="art" style="background: var(--paper-2); display: flex; gap: 22px; align-items: end; justify-content: center">
+          <img src="assets/afono-icon.svg" width="96" height="96" alt="App icon, 96 pixels">
+          <img src="assets/afono-icon.svg" width="48" height="48" alt="App icon, 48 pixels">
+          <img src="assets/afono-icon.svg" width="24" height="24" alt="App icon, 24 pixels">
+          <img src="assets/afono-symbol.svg" width="11" height="16" alt="Symbol, 16 pixels tall">
+        </div>
+        <h3>Icon and minimum size</h3>
+        <p>App icon on ink. The symbol alone works down to 16 px tall; the lockup needs at least 24 px of height.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head"><p class="eyebrow">Colour</p><h2>Teal speaks, orange signals.</h2><p>Use one orange element per view: the bar of the symbol, or one call to action. Everything else is teal, ink and paper.</p></div>
+    <div class="swatches">
+      <div class="sw"><div class="chip-c" style="background: #0F5E63"></div><div class="t"><b>Afono Teal</b><span>#0F5E63 · dark #5DB5AE</span></div></div>
+      <div class="sw"><div class="chip-c" style="background: #D9552B"></div><div class="t"><b>Signal Orange</b><span>#D9552B · dark #F0794A</span></div></div>
+      <div class="sw"><div class="chip-c" style="background: #12262A"></div><div class="t"><b>Ink</b><span>#12262A</span></div></div>
+      <div class="sw"><div class="chip-c" style="background: #F3F5F2"></div><div class="t"><b>Paper</b><span>#F3F5F2</span></div></div>
+      <div class="sw"><div class="chip-c" style="background: #E4EBE8"></div><div class="t"><b>Mist</b><span>#E4EBE8</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head"><p class="eyebrow">Type</p><h2>Built to be read by everyone.</h2><p>Body text uses Atkinson Hyperlegible, designed by the Braille Institute for readers with low vision.</p></div>
+    <div class="type-row"><span class="k">DISPLAY · MANROPE 800</span><span style="font: 800 clamp(34px, 5vw, 56px)/1.05 var(--display); letter-spacing: -0.03em">Speak without sound.</span></div>
+    <div class="type-row"><span class="k">BODY · ATKINSON HYPERLEGIBLE</span><span style="font-size: 20px; max-width: 60ch">Afono reads the faint electrical signals your face muscles make when you mouth words, and turns them into text on your screen.</span></div>
+    <div class="type-row"><span class="k">DATA · JETBRAINS MONO</span><span class="mono" style="font-size: 17px">8 channels · 1,000 Hz · 94.8% word accuracy</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head"><p class="eyebrow">Motion</p><h2>The intro tells the story in 3 seconds.</h2><p>A mouth opens, a finger says shh, the word appears, and a silent signal ripples out. Always skip it for people who ask for reduced motion.</p></div>
+    <table class="motion">
+      <thead><tr><th scope="col">Time</th><th scope="col">What happens</th><th scope="col">Easing</th></tr></thead>
+      <tbody>
+        <tr><td>0.2 – 1.0 s</td><td>The ring draws itself clockwise from the top: a mouth opening.</td><td>cubic-bezier(.6, 0, .2, 1)</td></tr>
+        <tr><td>1.0 – 1.5 s</td><td>The orange bar drops through the ring with a small overshoot: the finger.</td><td>cubic-bezier(.3, 1.6, .5, 1)</td></tr>
+        <tr><td>1.4 – 1.8 s</td><td>The symbol squashes and settles, like a gentle tap.</td><td>ease-out</td></tr>
+        <tr><td>1.8 – 2.6 s</td><td>The symbol slides left and "afono" rises in, 70 ms per letter.</td><td>cubic-bezier(.7, 0, .2, 1)</td></tr>
+        <tr><td>3.0 – 4.1 s</td><td>One thin ring ripples out and fades: a signal without sound.</td><td>ease-out</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head"><p class="eyebrow">Voice</p><h2>Plain, warm and exact.</h2></div>
+    <div class="voice">
+      <div class="tile"><h3 class="say">We say</h3><ul><li>"Reads the muscles of speech"</li><li>"94.8% on a 51-word vocabulary, one speaker"</li><li>"People with voice loss"</li><li>"Runs on your device"</li></ul></div>
+      <div class="tile"><h3 class="dont">We don't say</h3><ul><li>"Reads your mind" or "brain to text"</li><li>A percentage without its vocabulary size</li><li>"Suffers from", "the disabled"</li><li>"Cures" or any medical claim</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head"><p class="eyebrow">Files</p><h2>Logo files</h2></div>
+    <div class="files">
+      <a href="assets/afono-symbol.svg" target="_blank" rel="noopener"><span>Symbol, colour</span><span class="mono">assets/afono-symbol.svg</span></a>
+      <a href="assets/afono-symbol-light.svg" target="_blank" rel="noopener"><span>Symbol, for dark backgrounds</span><span class="mono">assets/afono-symbol-light.svg</span></a>
+      <a href="assets/afono-symbol-mono.svg" target="_blank" rel="noopener"><span>Symbol, one colour</span><span class="mono">assets/afono-symbol-mono.svg</span></a>
+      <a href="assets/afono-icon.svg" target="_blank" rel="noopener"><span>App icon</span><span class="mono">assets/afono-icon.svg</span></a>
+      <span class="row"><span>Design tokens (CSS)</span><span class="mono">assets/afono.css</span></span>
+    </div>
+  </div>
+</section>
+</main>
+<script>
+  (function () {
+    var intro = document.getElementById("intro"), b = document.getElementById("replay");
+    b.addEventListener("click", function () { intro.classList.remove("intro"); void intro.offsetWidth; intro.classList.add("intro"); });
+  })();
+</script>
+</body>
+</html>
