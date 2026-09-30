@@ -14,8 +14,8 @@
   function poll(load) {
     return NP.api("/api/voice/status" + (load ? "?load=1" : "")).then(function (s) {
       if (s.error) state("Speech model failed to load: " + s.error, true);
-      else if (s.ready) state("Ready: " + s.model.replace("openai/", "") + " on " + s.device + ".");
-      else if (s.loading) state("Loading the speech model (first time downloads about 290 MB)…");
+      else if (s.ready) state("Ready: " + s.model + " on " + s.device + (s.bundled ? ", works offline." : "."));
+      else if (s.loading) state(s.bundled ? "Loading the speech model…" : "Loading the speech model (first time downloads about 290 MB)…");
       $("v-page").textContent = (s.page ? "“" + s.page + "”: " : "No page connected, Tier 1 commands only: ") +
         s.n_candidates + " phrases. " + s.candidates.slice(0, 40).join(" · ") + (s.n_candidates > 40 ? " …" : "");
       $("v-test").disabled = !(s.ready && stream);

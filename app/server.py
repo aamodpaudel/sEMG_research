@@ -477,7 +477,8 @@ def voice_status(load: int = 0):
         VOICE.update(loading=True, error=None)
         threading.Thread(target=_load_voice, daemon=True).start()
     cands = v.candidates(CONTEXT.get("targets"))
-    return {"ready": ready, "loading": VOICE["loading"], "error": VOICE["error"], "model": v.MODEL_ID,
+    return {"ready": ready, "loading": VOICE["loading"], "error": VOICE["error"],
+            "model": os.path.basename(v.MODEL_ID.rstrip("/\\")), "bundled": os.path.isdir(v.MODEL_ID),
             "device": v._DECODER.device.type if ready else None, "n_candidates": len(cands),
             "page": CONTEXT.get("title") or None, "candidates": [c["say"] for c in cands[:200]]}
 

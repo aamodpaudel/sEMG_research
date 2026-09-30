@@ -29,6 +29,7 @@ from .text import normalize_text
 MODEL_ID = os.environ.get("AFONO_WHISPER_MODEL", "openai/whisper-base.en")
 SR = 16000
 MAX_SECONDS = 6.0
+FORMS = os.environ.get("AFONO_WHISPER_FORMS", "fast")      # "full" also tries Title Case spellings (slower)
 
 # Tier 1 command phrases that need no page target (see vocab/commands.json and extension/commands.js).
 COMMAND_PHRASES = ["scroll up", "scroll down", "page up", "page down", "top", "bottom", "zoom in", "zoom out",
@@ -92,7 +93,9 @@ def _surface_forms(say: str):
     """Spellings Whisper is likely to produce for a spoken phrase: capitalised, digits for numbers, with or
     without a full stop. The phrase's score is the best of them."""
     forms = {say, digitize(say)}
-    cased = {f[:1].upper() + f[1:] for f in forms} | {f.title() for f in forms}
+    cased = {f[:1].upper() + f[1:] for f in forms}
+    if FORMS == "full":
+        cased |= {f.title() for f in forms}
     return sorted({" " + f + p for f in cased for p in ("", ".")})
 
 
@@ -119,38 +122,57 @@ class Decoder:
         return self.model.model.encoder(feats.to(self.device, self.dtype)).last_hidden_state
 
     @torch.no_grad()
-    def _score(self, enc, texts, batch=48):
-        """Sum of log p(tokens + end-of-text | audio) for each text, teacher-forced."""
+    def _score(self, enc, texts, batch=256):
+        """Sum of log p(tokens + end-of-text | audio) for each text, teacher-forced.
+
+        The prompt tokens and the cross-attention keys/values over the audio are the same for every text, so they
+        are computed once and shared across the batch; recomputing the audio projections per text was over 90% of
+        the cost (15 s -> well under 1 s per clip on CPU, identical scores)."""
+        from transformers.cache_utils import EncoderDecoderCache
         seqs = [self.tok.encode(t, add_special_tokens=False) + [self.eot] for t in texts]
+        pre = self.model(encoder_outputs=(enc,), decoder_input_ids=torch.tensor([self.prefix], device=self.device),
+                         use_cache=True)
+        lp0 = torch.log_softmax(pre.logits[0, -1].float(), -1).cpu()        # first token, given the prompt
+        legacy = pre.past_key_values.to_legacy_cache()                    # per layer: self k, v, cross k, v
         scores = []
         for i in range(0, len(seqs), batch):
             chunk = seqs[i:i + batch]
-            L = max(len(s) for s in chunk)
-            inp = torch.full((len(chunk), len(self.prefix) + L - 1), self.eot, dtype=torch.long)
-            tgt = torch.full((len(chunk), L), -1, dtype=torch.long)
+            B, L = len(chunk), max(len(s) for s in chunk)
+            first = torch.tensor([lp0[s[0]] for s in chunk])
+            if L == 1:
+                scores += first.tolist(); continue
+            inp = torch.full((B, L - 1), self.eot, dtype=torch.long)
+            tgt = torch.full((B, L - 1), -1, dtype=torch.long)
             for j, s in enumerate(chunk):
-                full = self.prefix + s
-                inp[j, :len(full) - 1] = torch.tensor(full[:-1])
-                tgt[j, :len(s)] = torch.tensor(s)
-            inp = inp.to(self.device)
-            out = self.model(encoder_outputs=(enc.expand(len(chunk), -1, -1),), decoder_input_ids=inp)
-            lp = torch.log_softmax(out.logits.float(), -1)[:, len(self.prefix) - 1:, :]
+                inp[j, :len(s) - 1] = torch.tensor(s[:-1])
+                tgt[j, :len(s) - 1] = torch.tensor(s[1:])
+            # Filled at batch 1, then widened with expand(): a view, so the audio keys are never copied per text.
+            cache = EncoderDecoderCache.from_legacy_cache(legacy)
+            for part in (cache.self_attention_cache, cache.cross_attention_cache):
+                for layer in part.layers:
+                    layer.keys, layer.values = layer.keys.expand(B, -1, -1, -1), layer.values.expand(B, -1, -1, -1)
+            out = self.model(encoder_outputs=(enc.expand(B, -1, -1),), decoder_input_ids=inp.to(self.device),
+                             past_key_values=cache, use_cache=True)
+            lp = torch.log_softmax(out.logits.float(), -1)
             mask = tgt >= 0
             g = lp.gather(-1, tgt.clamp(min=0).to(self.device).unsqueeze(-1)).squeeze(-1).cpu()
-            scores += (g * mask).sum(1).tolist()
+            scores += (first + (g * mask).sum(1)).tolist()
         return scores
 
     @torch.no_grad()
     def transcribe(self, enc):
         """Greedy free transcription (the garbage model); short, since commands are short."""
-        ids = list(self.prefix)
+        ids, feed, past = [], list(self.prefix), None
         for _ in range(24):
-            out = self.model(encoder_outputs=(enc,), decoder_input_ids=torch.tensor([ids], device=self.device))
+            out = self.model(encoder_outputs=(enc,), decoder_input_ids=torch.tensor([feed], device=self.device),
+                             past_key_values=past, use_cache=True)
+            past = out.past_key_values
             nxt = int(out.logits[0, -1].argmax())
             if nxt == self.eot:
                 break
             ids.append(nxt)
-        return self.tok.decode(ids[len(self.prefix):], skip_special_tokens=True).strip()
+            feed = [nxt]
+        return self.tok.decode(ids, skip_special_tokens=True).strip()
 
     def decode(self, audio, cands, gaze=None, gaze_weight=1.0, margin=4.0, min_p=0.7):
         """Pick the most likely allowed phrase.
@@ -208,7 +230,7 @@ def get_decoder():
     global _DECODER
     with _DLOCK:
         if _DECODER is None:
-            _DECODER = Decoder()
+            _DECODER = Decoder(device=os.environ.get("AFONO_WHISPER_DEVICE") or None)
         return _DECODER
 
 

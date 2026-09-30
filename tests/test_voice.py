@@ -19,6 +19,6 @@ def test_candidates_cover_labels_clicks_numbers_and_commands():
     assert len(say) == len(c)                                   # no duplicate phrases
 
 
-def test_surface_forms_include_digits_and_title_case():
+def test_surface_forms_include_digits():
     f = V._surface_forms("click reply two")
-    assert " Click reply 2" in f and " Click Reply 2." in f
+    assert " Click reply 2" in f and " Click reply two." in f

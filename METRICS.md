@@ -286,9 +286,14 @@ it (character similarity >= 0.75, so homophones like "reply to" / "reply two" ag
 Thresholds were set on synthetic clips, not on test data from people.
 
 **Pipeline check (SYNTHETIC, not a measurement):** Windows SAPI text-to-speech in a normal voice, 36 prompts on
-three page-like phrase sets (median 62 phrases): 36/36 top choice correct, 1 rejected (British "colour" heard as
-"Color"). Off-page speech (4 sentences), silence and two noise levels: all rejected. About 0.3-0.6 s per clip on
-the RTX 4060. This shows the pipeline works; it says nothing about whispers or real voices.
+three page-like phrase sets (median 62 phrases): 36/36 top choice correct, none rejected. Off-page speech
+(4 sentences), silence and two noise levels: all rejected. Median 1.1 s per clip on the laptop CPU (as in the
+desktop build), 0.3-0.6 s on the RTX 4060. This shows the pipeline works; it says nothing about whispers or real
+voices.
+
+Speed: the prompt tokens and the cross-attention keys and values over the audio are computed once per clip and
+shared by every phrase (scores identical to scoring each phrase separately, checked to 1e-5). Scoring against only
+the encoder frames covering the clip was tried and rejected: CPU accuracy on the same check fell to 28/36.
 
 **Self-test (the measurement):** Nullpoint's Whisper tab draws 20 prompts from the connected page's phrases.
 It logs, per session, top-choice accuracy, accuracy when accepted, rejection rate, speaking style (whisper,

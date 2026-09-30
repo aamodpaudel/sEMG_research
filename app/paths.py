@@ -27,7 +27,13 @@ def setup():
     os.makedirs(os.path.join(DATA, "data", "user"), exist_ok=True)
     os.environ.setdefault("AFONO_REGISTRY", os.path.join(DATA, "runs", "registry.jsonl"))
     os.environ.setdefault("AFONO_USER_ROOT", os.path.join(DATA, "data", "user"))
+    # Whisper mode: use the speech model bundled with the app, and never reach for the network.
+    if os.path.isdir(WHISPER_MODEL):
+        os.environ.setdefault("AFONO_WHISPER_MODEL", WHISPER_MODEL)
+        os.environ.setdefault("HF_HUB_OFFLINE", "1")
+        os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
     os.chdir(DATA)
 
 
 BASE_MODEL = res("models", "semg-base.pt") if FROZEN else os.path.join(REPO, "runs", "base", "best.pt")
+WHISPER_MODEL = res("models", "whisper-base.en") if FROZEN else os.path.join(REPO, "packaging", "models", "whisper-base.en")

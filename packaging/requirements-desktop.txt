@@ -6,4 +6,6 @@ fastapi
 uvicorn
 python-multipart
 tqdm
+transformers>=4.44,<5
+safetensors
 pyinstaller
