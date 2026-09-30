@@ -1,0 +1,165 @@
+{
+ "page": "bbc-news",
+ "viewport": [
+  1280,
+  800
+ ],
+ "scope": "first viewport (scroll 0) at 1280x800, network blocked",
+ "definition": "every visible, enabled element a sighted mouse user could click or type into; one entry per control (outermost native control when nested)",
+ "annotator": "Claude (AI agent), 2026-09-29, from the rendered screenshot plus a broad DOM candidate list (all links/buttons/inputs/roles/handlers/pointer-cursor elements) and point probes for visually clickable areas; not an independent human annotation",
+ "notes": "The Sign In link wraps a button: one target. Consent overlay removed at capture (see SOURCES.json).",
+ "targets": [
+  {
+   "path": "#bbc-header > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+   "name": "Open menu"
+  },
+  {
+   "path": "#bbc-header > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Watch Live"
+  },
+  {
+   "path": "#bbc-header > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "British Broadcasting Corporation"
+  },
+  {
+   "path": "#bbc-header > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > button:nth-of-type(1)",
+   "name": "Subscribe"
+  },
+  {
+   "path": "#bbc-header > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Sign In"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Home"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(2) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "News"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(3) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Sport"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(4) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Business"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(5) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Technology"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(6) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Health"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(7) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Culture"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(8) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Arts"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(9) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Travel"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(10) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Earth"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(11) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Audio"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(12) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Video"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(13) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Live"
+  },
+  {
+   "path": "#main-navigation-container > section:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(14) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Documentaries"
+  },
+  {
+   "path": "#main-navigation-container > nav:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "US & Canada"
+  },
+  {
+   "path": "#main-navigation-container > nav:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(2) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "UK"
+  },
+  {
+   "path": "#main-navigation-container > nav:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(3) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Africa"
+  },
+  {
+   "path": "#main-navigation-container > nav:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(4) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Asia"
+  },
+  {
+   "path": "#main-navigation-container > nav:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(5) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Australia"
+  },
+  {
+   "path": "#main-navigation-container > nav:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(6) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Europe"
+  },
+  {
+   "path": "#main-navigation-container > nav:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(7) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Latin America"
+  },
+  {
+   "path": "#main-navigation-container > nav:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(8) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Middle East"
+  },
+  {
+   "path": "#main-navigation-container > nav:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(9) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "In Pictures"
+  },
+  {
+   "path": "#main-navigation-container > nav:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(10) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "BBC InDepth"
+  },
+  {
+   "path": "#main-navigation-container > nav:nth-of-type(1) > nav:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(11) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "BBC Verify"
+  },
+  {
+   "path": "#bbc-main > article:nth-of-type(1) > section:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "One of the five men arrested near RAF Fairford called 999 hi"
+  },
+  {
+   "path": "#bbc-main > article:nth-of-type(1) > section:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Moonshot AI logo on a smartphone Chinese AI tool told resear"
+  },
+  {
+   "path": "#bbc-main > article:nth-of-type(1) > section:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Watch: Moment a government building collapses into a river i"
+  },
+  {
+   "path": "#bbc-main > article:nth-of-type(1) > section:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "President Donald Trump pictured leaning towards Meta boss Ma"
+  },
+  {
+   "path": "#bbc-main > article:nth-of-type(1) > section:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "A man in a silver cloak stands near a blazing furnace holdin"
+  },
+  {
+   "path": "#bbc-main > article:nth-of-type(1) > section:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "A man wearing a cap seen spraying a substance on a counter t"
+  },
+  {
+   "path": "#bbc-main > article:nth-of-type(1) > section:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Manchester City celebration winning the Premier League title"
+  },
+  {
+   "path": "#bbc-main > article:nth-of-type(1) > section:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "hero image link (display: contents)"
+  }
+ ]
+}

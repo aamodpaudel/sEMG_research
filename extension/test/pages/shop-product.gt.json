@@ -1,0 +1,141 @@
+{
+ "page": "shop-product",
+ "viewport": [
+  1280,
+  800
+ ],
+ "scope": "first viewport (scroll 0) at 1280x800, network blocked",
+ "definition": "every visible, enabled element a sighted mouse user could click or type into; one entry per control (outermost native control when nested)",
+ "annotator": "Claude (AI agent), 2026-09-29, from the rendered screenshot plus a broad DOM candidate list (all links/buttons/inputs/roles/handlers/pointer-cursor elements) and point probes for visually clickable areas; not an independent human annotation",
+ "notes": "'Select a size' is disabled and not a target; crossed-out sizes are enabled buttons and are targets.",
+ "targets": [
+  {
+   "path": "#shopify-section-sections--16476871000144__global-banner > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+   "name": ""
+  },
+  {
+   "path": "#shopify-section-sections--16476871000144__global-banner > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2)",
+   "name": ""
+  },
+  {
+   "path": "#shopify-section-sections--16476871000144__header > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Allbirds"
+  },
+  {
+   "path": "#shopify-section-sections--16476871000144__header > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > a:nth-of-type(1)",
+   "name": "New Arrivals"
+  },
+  {
+   "path": "#shopify-section-sections--16476871000144__header > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > a:nth-of-type(2)",
+   "name": "Shop All"
+  },
+  {
+   "path": "#shopify-section-sections--16476871000144__header > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1)",
+   "name": "Men"
+  },
+  {
+   "path": "#shopify-section-sections--16476871000144__header > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(2)",
+   "name": "Women"
+  },
+  {
+   "path": "#shopify-section-sections--16476871000144__header > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > ul:nth-of-type(2) > li:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Search"
+  },
+  {
+   "path": "#shopify-section-sections--16476871000144__header > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > ul:nth-of-type(2) > li:nth-of-type(2) > button:nth-of-type(1)",
+   "name": "View Cart"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1) > ol:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Home"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1) > ol:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1)",
+   "name": "mens"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > button:nth-of-type(1)",
+   "name": "Men's Tree Runner - Jet Black (White Sole)"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(2) > button:nth-of-type(1)",
+   "name": "Men's Tree Runner - Jet Black (White Sole)"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(3) > button:nth-of-type(1)",
+   "name": "Men's Tree Runner - Jet Black (White Sole)"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(4) > button:nth-of-type(1)",
+   "name": "Men's Tree Runner - Jet Black (White Sole)"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Women's Sizes"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1)",
+   "name": "Men's Tree Runner - Mist (White Sole) swatch"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(2)",
+   "name": "Men's Tree Runner - Jet Black (Black Sole) swatch"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(3)",
+   "name": "Men's Tree Runner - Jet Black (White Sole) swatch"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(4)",
+   "name": "Men's Tree Runner - Navy Night (White Sole) swatch"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(5)",
+   "name": "Men's Tree Runner - Wheat (Beige Sole) swatch"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(6)",
+   "name": "Men's Tree Runner - Kaikoura White (White Sole) swatch"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(7)",
+   "name": "Men's Tree Runner - Blizzard/Hanami Night (Blizzard Sole) sw"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Women's Sizes"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(1) > button:nth-of-type(1)",
+   "name": "Select size 8"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(2) > button:nth-of-type(1)",
+   "name": "Select size 9"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(3) > button:nth-of-type(1)",
+   "name": "Select size 10"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(4) > button:nth-of-type(1)",
+   "name": "Select size 11"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(5) > button:nth-of-type(1)",
+   "name": "Select size 12"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(6) > button:nth-of-type(1)",
+   "name": "Select size 13"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(7) > button:nth-of-type(1)",
+   "name": "Select size 14"
+  },
+  {
+   "path": "#shopify-section-template--16476865953872__main_product_QqEJXU > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1)",
+   "name": "Fit Guide"
+  }
+ ]
+}

@@ -2,29 +2,17 @@
 <html lang="en">
 <head><meta charset="utf-8"><title>DOM-0 benchmark</title></head>
 <body style="margin: 0">
+<!-- Manual run in a normal browser (start Chrome with --allow-file-access-from-files, or serve this folder).
+     The scored run is `python -m semg.dom_eval`, which loads fixture.html directly at 1280x800. -->
 <pre id="out">running</pre>
-<iframe id="f" src="fixture.html" style="width: 1180px; height: 900px; border: 0"></iframe>
+<iframe id="f" src="fixture.html" style="width: 1280px; height: 800px; border: 0"></iframe>
 <script src="../dom-model.js"></script>
 <script src="../commands.js"></script>
+<script src="score.js"></script>
 <script>
 document.getElementById("f").addEventListener("load", function () {
-  var doc = this.contentDocument, found = AfonoDOM.detect(doc);
-  var gt = Array.prototype.slice.call(doc.querySelectorAll("[data-gt]"));
-  var tp = 0, labelOk = 0, fp = [];
-  found.forEach(function (t) {
-    var g = t.el.closest("[data-gt]") || t.el.querySelector("[data-gt]");
-    if (g && gt.indexOf(g) >= 0) { tp++; if (t.label === g.getAttribute("data-gt")) labelOk++; else fp.push("label:" + t.label + "|" + g.getAttribute("data-gt")); }
-    else fp.push(t.label);
-  });
-  var cmd = [["click two", "news"], ["click sign in", "sign in"], ["open project", "open project"], ["scroll down", null], ["zoom in", null]];
-  var cmdOk = cmd.filter(function (c) {
-    var a = AfonoCommands.parse(c[0], found);
-    return c[1] ? (a.type === "click" && a.target.label === c[1]) : a.type !== "unknown";
-  }).length;
-  var res = { targets_found: found.length, ground_truth: gt.length, true_positives: tp,
-    precision: tp / Math.max(1, found.length), recall: tp / Math.max(1, gt.length),
-    label_accuracy: labelOk / Math.max(1, tp), commands_ok: cmdOk, commands_total: cmd.length,
-    vocabulary_size: AfonoDOM.vocabulary(found).length, false_positives: fp };
+  var res = AfonoEval.fixture(this.contentDocument);
+  delete res.targets;
   document.getElementById("out").textContent = "RESULT " + JSON.stringify(res);
 });
 </script>

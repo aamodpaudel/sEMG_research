@@ -4,22 +4,39 @@
 <meta charset="utf-8">
 <title>DOM-0 fixture</title>
 <style>
-  body { font: 16px system-ui, sans-serif; margin: 24px; width: 1100px; }
-  .card { display: inline-block; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; margin: 6px; cursor: pointer; }
-  .cover { position: absolute; left: 20px; top: 520px; width: 200px; height: 60px; background: #eee; z-index: 5; }
-  .under { position: absolute; left: 30px; top: 530px; }
+  body { font: 14px system-ui, sans-serif; margin: 12px 24px; width: 1200px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  section { border-top: 1px solid #ddd; padding-top: 4px; }
+  h1 { font-size: 18px; margin: 4px 0; } h2 { font-size: 13px; margin: 2px 0; color: #666; }
+  .card { display: inline-block; padding: 6px 10px; border: 1px solid #ccc; border-radius: 8px; margin: 3px; cursor: pointer; }
+  .cover { position: absolute; left: 700px; top: 8px; width: 200px; height: 40px; background: #eee; z-index: 5; }
+  .under { position: absolute; left: 710px; top: 14px; }
   nav a { margin-right: 12px; }
-  .icon { width: 28px; height: 28px; display: inline-block; background: #333; border-radius: 50%; }
+  .icon { width: 22px; height: 22px; display: inline-block; background: #333; border-radius: 50%; vertical-align: middle; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .fancy input { opacity: 0; position: absolute; }
+  .fancy span::before { content: ""; display: inline-block; width: 14px; height: 14px; border: 2px solid #333; margin-right: 4px; }
+  .comment { padding: 2px 0; } .comment button { margin-right: 6px; }
+  .product { border: 1px solid #ccc; padding: 6px; border-radius: 8px; width: 260px; }
+  .scroller { height: 36px; overflow: auto; border: 1px solid #ccc; width: 240px; }
 </style>
 </head>
 <body>
-<!-- Ground truth: data-gt holds the expected spoken label of every element a person can act on. -->
+<!-- Ground truth: data-gt holds the expected spoken label of every element a person can act on;
+     data-name holds the expected accessible name where the accname rules are what is under test.
+     Anything without data-gt that the model returns is a false positive. -->
+<a class="sr-only" href="#main">Skip to content</a>
 <nav>
   <a href="#home" data-gt="home">Home</a>
   <a href="#news" data-gt="news">News</a>
-  <a href="#about" data-gt="about us">About us</a>
+  <a href="#about" data-gt="about">About us</a>
 </nav>
-<h1>Fixture</h1>
+<div class="cover"></div>
+<button class="under">Covered button</button>
+<h1 id="main">Fixture</h1>
+<div class="cols">
+<div>
+<section><h2>DOM-0 (original)</h2>
 <p>Plain text that is <span>not clickable</span>.</p>
 <button data-gt="sign in">Sign in</button>
 <button aria-label="Close dialog" data-gt="close dialog"><span class="icon"></span></button>
@@ -29,25 +46,91 @@
 <a href="#x" data-gt="read more"><span>Read</span> <b>more</b></a>
 <div role="button" tabindex="0" data-gt="save draft">Save draft</div>
 <div class="card" id="js-card" data-gt="open project">Open project</div>
-<div class="card" id="js-card2" data-gt="delete project">Delete project</div>
+<div class="card" id="js-card2" data-gt="delete project">Delete project</div><br>
 <label for="email">Email address</label>
-<input id="email" type="email" data-gt="email address">
-<input type="search" placeholder="Search products" data-gt="search products">
-<input type="hidden" name="token" value="x">
-<select name="country" data-gt="country"><option>Nepal</option><option>Canada</option></select>
-<textarea placeholder="Your message" data-gt="your message"></textarea>
-<input type="submit" value="Send message" data-gt="send message">
-<label><input type="checkbox" data-gt="remember me"> Remember me</label>
-<a href="#img" data-gt="company logo"><img alt="Company logo" width="40" height="20" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></a>
+<input id="email" type="email" data-gt="email address" data-name="Email address">
+<input type="search" placeholder="Search products" data-gt="search products" data-name="Search products">
+<input type="hidden" name="token" value="x"><br>
+<select name="country" aria-label="Country" data-gt="country"><option>Nepal</option><option>Canada</option></select>
+<textarea placeholder="Your message" rows="1" data-gt="message"></textarea>
+<input type="submit" value="Send message" data-gt="send message" data-name="Send message">
+<label><input type="checkbox" data-gt="remember" data-name="Remember me"> Remember me</label>
+<a href="#img" data-gt="company logo" data-name="Company logo"><img alt="Company logo" width="40" height="20" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></a>
 <div aria-hidden="true"><button>Hidden from assistive tech</button></div>
-<div class="cover"></div>
-<button class="under">Covered button</button>
 <details><summary data-gt="more options">More options</summary><p>Inside</p></details>
+</section>
+
+<section><h2>Naming (accname)</h2>
+<span id="dl1">Download</span> <span id="dl2">report</span>
+<button aria-labelledby="dl1 dl2" data-gt="download report" data-name="Download report"><span class="icon"></span></button>
+<div id="arch" hidden>Archive mail</div>
+<button aria-labelledby="arch" data-gt="archive mail" data-name="Archive mail"><span class="icon"></span></button>
+<button aria-labelledby="missing-id" title="Print page" data-gt="print page" data-name="Print page"><span class="icon"></span></button><br>
+<label>Pay <input id="amt" value="20" size="3" data-gt="pay dollars" data-name="Pay dollars"> dollars</label>
+<label id="qlbl" for="qty">Quantity</label>
+<input id="qty" type="number" aria-labelledby="qlbl units" value="1" size="2" data-gt="quantity boxes" data-name="Quantity boxes"><span id="units">boxes</span><br>
+<button title="Settings" data-gt="settings" data-name="Settings"><svg width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6"/></svg></button>
+<button data-gt="notifications" data-name="Notifications"><svg width="16" height="16"><title>Notifications</title><rect width="12" height="12"/></svg></button>
+<a href="#tw" aria-label="Share on Twitter" data-gt="share twitter" data-name="Share on Twitter">🐦</a>
+<input type="image" alt="Go" width="24" height="18" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-gt="go" data-name="Go">
+<div contenteditable="true" aria-label="Comment box" style="display:inline-block;width:120px;border:1px solid #999" data-gt="comment box">&nbsp;</div><br>
+<fieldset style="display:inline-block"><legend>Size</legend>
+  <label><input type="radio" name="sz" data-gt="small"> Small</label>
+  <label><input type="radio" name="sz" data-gt="large"> Large</label>
+</fieldset>
+<label class="fancy"><input type="checkbox" data-gt="subscribe newsletter" data-name="Subscribe to newsletter"><span>Subscribe to newsletter</span></label>
+<a href="#p2" data-gt="page two" data-name="Page 2">Page 2</a>
+<a href="#star" data-gt="star" data-name="Star 12.3k">Star <b>12.3k</b></a>
+</section>
+</div>
+
+<div>
+<section><h2>Duplicates (numbered in reading order)</h2>
+<div class="comment">Ana: nice work <button data-gt="reply one">Reply</button><button data-gt="share one">Share</button></div>
+<div class="comment">Bo: agreed <button data-gt="reply two">Reply</button><button data-gt="share two">Share</button></div>
+<div class="comment">Cy: +1 <button data-gt="reply three">Reply</button><button data-gt="share three" aria-label="Share">⤴</button></div>
+<button data-gt="button one"><svg width="16" height="16" aria-hidden="true"><rect width="12" height="12"/></svg></button>
+<button data-gt="button two"><svg width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6"/></svg></button>
+</section>
+
+<section><h2>Nesting</h2>
+<div class="product" onclick="void 0" data-gt="trail shoe">Trail shoe, $80
+  <button data-gt="like">Like</button></div>
+<div class="card" id="js-card3"><a href="#article" data-gt="article title">Article title</a> <small>by someone</small></div>
+<a href="#prod" data-gt="product title"><b>Product title</b> <button tabindex="-1">Add</button></a>
+<button data-gt="menu"><span style="cursor:pointer">Menu</span></button>
+<a href="#dc" style="display:contents" data-gt="contents page"><span style="display:inline-block;padding:2px 4px;border:1px solid #ccc">Contents page</span></a>
+</section>
+
+<section><h2>Shadow DOM and frames</h2>
+<afono-player id="player"></afono-player>
+<afono-closed id="closed"></afono-closed>
+<iframe data-oos="iframes are out of scope" style="width:180px;height:34px;border:1px solid #ccc" srcdoc="<button>Inside frame</button>"></iframe>
+</section>
+
+<section><h2>Decoys</h2>
+<div class="scroller" tabindex="0">A scrollable region with focus for keyboard users. It is long enough to scroll inside its little box. More text.</div>
+<a name="old-anchor">Old named anchor</a>
+<span role="button" aria-disabled="true">Disabled span button</span>
+<button style="opacity:0">Transparent button</button>
+<div inert><button>Inert button</button></div>
+</section>
+</div>
+</div>
 <div style="height: 1400px"></div>
 <button>Far below the fold</button>
 <script>
   document.getElementById("js-card").addEventListener("click", function () {});
   document.getElementById("js-card2").addEventListener("click", function () {});
+  document.getElementById("js-card3").addEventListener("click", function () {});
+  customElements.define("afono-player", class extends HTMLElement {
+    constructor() { super(); this.attachShadow({ mode: "open" }).innerHTML =
+      "<button data-gt='play video' data-name='Play video'><slot></slot>Play video</button> <a href='#cc' data-gt='captions'>Captions</a>"; }
+  });
+  // closed shadow roots are invisible to page scripts; the extension can open them with chrome.dom (not in this harness)
+  customElements.define("afono-closed", class extends HTMLElement {
+    constructor() { super(); this.attachShadow({ mode: "closed" }).innerHTML = "<button>Closed shadow button</button>"; }
+  });
 </script>
 </body>
 </html>

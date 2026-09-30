@@ -4,14 +4,17 @@
   "use strict";
   var NUMS = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
                eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17,
-               eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50 };
+               eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70,
+               eighty: 80, ninety: 90 };
 
   function number(words) {
     if (!words.length) return null;
     if (/^\d+$/.test(words[0])) return parseInt(words[0], 10);
-    var n = 0, used = false;
-    for (var i = 0; i < words.length && i < 2; i++) {
+    var n = 0, used = false;                                     // "one hundred forty two" -> 142
+    for (var i = 0; i < words.length && i < 4; i++) {
+      if (words[i] === "hundred" && used) { n = n * 100; continue; }
       if (!(words[i] in NUMS)) break;
+      if (used && n % 10 !== 0 && NUMS[words[i]] < 10) break;    // "two three" is not 5
       n += NUMS[words[i]]; used = true;
     }
     return used ? n : null;

@@ -1,0 +1,105 @@
+{
+ "page": "bing-search",
+ "viewport": [
+  1280,
+  800
+ ],
+ "scope": "first viewport (scroll 0) at 1280x800, network blocked",
+ "definition": "every visible, enabled element a sighted mouse user could click or type into; one entry per control (outermost native control when nested)",
+ "annotator": "Claude (AI agent), 2026-09-29, from the rendered screenshot plus a broad DOM candidate list (all links/buttons/inputs/roles/handlers/pointer-cursor elements) and point probes for visually clickable areas; not an independent human annotation",
+ "notes": "Skip links and the 'Default Profile Picture' span are invisible until focus; URL lines sit inside their result links.",
+ "targets": [
+  {
+   "path": "#sb_form > a:nth-of-type(1)",
+   "name": "Back to Bing search"
+  },
+  {
+   "path": "#sb_form_go",
+   "name": "Search"
+  },
+  {
+   "path": "#sb_form_q",
+   "name": "Enter your search here - Search suggestions will show as you"
+  },
+  {
+   "path": "#sb_sbi",
+   "name": "Search using an image"
+  },
+  {
+   "path": "#id_rh_w",
+   "name": "Microsoft Rewards"
+  },
+  {
+   "path": "#id_l",
+   "name": "Sign in Default Profile Picture"
+  },
+  {
+   "path": "#b-scopeListItem-web > a:nth-of-type(1)",
+   "name": "All"
+  },
+  {
+   "path": "#b-scopeListItem-copilotsearch > a:nth-of-type(1)",
+   "name": "Search"
+  },
+  {
+   "path": "#b-scopeListItem-images > a:nth-of-type(1)",
+   "name": "Images"
+  },
+  {
+   "path": "#b-scopeListItem-video > a:nth-of-type(1)",
+   "name": "Videos"
+  },
+  {
+   "path": "#b-scopeListItem-local > a:nth-of-type(1)",
+   "name": "Maps"
+  },
+  {
+   "path": "#b-scopeListItem-news > a:nth-of-type(1)",
+   "name": "News"
+  },
+  {
+   "path": "#b-scopeListItem-menu > a:nth-of-type(1)",
+   "name": "More"
+  },
+  {
+   "path": "#b_results > li:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "clevelandclinic.org"
+  },
+  {
+   "path": "#b_results > li:nth-of-type(1) > h2:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "EMG (Electromyography): What It Is, Purpose, Procedure & Res"
+  },
+  {
+   "path": "#b_results > li:nth-of-type(2) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "hopkinsmedicine.org"
+  },
+  {
+   "path": "#b_results > li:nth-of-type(2) > h2:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Electromyography (EMG) - Johns Hopkins Medicine"
+  },
+  {
+   "path": "#b_results > li:nth-of-type(3) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "mayoclinic.org"
+  },
+  {
+   "path": "#b_results > li:nth-of-type(3) > h2:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Electromyography (EMG) - Mayo Clinic"
+  },
+  {
+   "path": "#b_results > li:nth-of-type(4) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "wikipedia.org"
+  },
+  {
+   "path": "#b_results > li:nth-of-type(4) > h2:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Electromyography - Wikipedia"
+  },
+  {
+   "path": "#b_results > li:nth-of-type(5) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "healthline.com"
+  },
+  {
+   "path": "#b_results > li:nth-of-type(5) > h2:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Electromyography (EMG): Purpose, Procedure, and Results"
+  }
+ ]
+}

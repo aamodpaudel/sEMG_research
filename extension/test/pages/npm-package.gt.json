@@ -1,0 +1,105 @@
+{
+ "page": "npm-package",
+ "viewport": [
+  1280,
+  800
+ ],
+ "scope": "first viewport (scroll 0) at 1280x800, network blocked",
+ "definition": "every visible, enabled element a sighted mouse user could click or type into; one entry per control (outermost native control when nested)",
+ "annotator": "Claude (AI agent), 2026-09-29, from the rendered screenshot plus a broad DOM candidate list (all links/buttons/inputs/roles/handlers/pointer-cursor elements) and point probes for visually clickable areas; not an independent human annotation",
+ "notes": "The readme permalink anchor (hover-only, invisible) is not a target.",
+ "targets": [
+  {
+   "path": "#banner-notification > a:nth-of-type(1)",
+   "name": "Learn how to prepare for the npm bypass 2FA token deprecatio"
+  },
+  {
+   "path": "#app > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+   "name": "Close notification"
+  },
+  {
+   "path": "#app > div:nth-of-type(1) > div:nth-of-type(2) > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > button:nth-of-type(1)",
+   "name": "Light mode — click for dark"
+  },
+  {
+   "path": "#nav-pro-link",
+   "name": "Pro"
+  },
+  {
+   "path": "#nav-teams-link",
+   "name": "Teams"
+  },
+  {
+   "path": "#nav-pricing-link",
+   "name": "Pricing"
+  },
+  {
+   "path": "#nav-docs-link",
+   "name": "Documentation"
+  },
+  {
+   "path": "#app > div:nth-of-type(1) > div:nth-of-type(2) > header:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Npm"
+  },
+  {
+   "path": "#app > div:nth-of-type(1) > div:nth-of-type(2) > header:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > form:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > input:nth-of-type(1)",
+   "name": "Search packages"
+  },
+  {
+   "path": "#app > div:nth-of-type(1) > div:nth-of-type(2) > header:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > form:nth-of-type(1) > button:nth-of-type(1)",
+   "name": "Search"
+  },
+  {
+   "path": "#signup",
+   "name": "Sign Up"
+  },
+  {
+   "path": "#signin",
+   "name": "Sign In"
+  },
+  {
+   "path": "#top > div:nth-of-type(1) > h1:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "DefinitelyTyped icon, indicating that this package has TypeS"
+  },
+  {
+   "path": "#package-tab-readme",
+   "name": "Readme"
+  },
+  {
+   "path": "#package-tab-code",
+   "name": "Code Beta"
+  },
+  {
+   "path": "#package-tab-dependencies",
+   "name": "0 Dependencies"
+  },
+  {
+   "path": "#package-tab-dependents",
+   "name": "216392 Dependents"
+  },
+  {
+   "path": "#package-tab-versions",
+   "name": "2,959 Versions"
+  },
+  {
+   "path": "#readme > p:nth-of-type(3) > a:nth-of-type(1)",
+   "name": "production build"
+  },
+  {
+   "path": "#top > aside:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1) > span:nth-of-type(1) > button:nth-of-type(1)",
+   "name": "Copy install command line"
+  },
+  {
+   "path": "#top > aside:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Repository github.com/react/react"
+  },
+  {
+   "path": "#top > aside:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Homepage react.dev/"
+  },
+  {
+   "path": "#top > aside:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1)",
+   "name": "Showing weekly downloads"
+  }
+ ]
+}

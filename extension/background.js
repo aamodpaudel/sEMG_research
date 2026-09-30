@@ -16,7 +16,8 @@ chrome.runtime.onMessage.addListener(function (m, sender, reply) {
     enabled().then(function (on) {
       if (!on) return;
       fetch(NULLPOINT + "/api/context", { method: "POST", headers: HEADERS,
-        body: JSON.stringify({ url: m.url, title: m.title, targets: m.targets, vocabulary: m.vocabulary }) })
+        body: JSON.stringify({ url: m.url, title: m.title, targets: m.targets, vocabulary: m.vocabulary,
+                               lexicon: m.lexicon, model: m.model }) })
         .then(function (r) { state.connected = r.ok; }).catch(function () { state.connected = false; });
     });
     return;

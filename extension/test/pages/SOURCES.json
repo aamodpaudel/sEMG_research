@@ -1,0 +1,178 @@
+{
+ "wikipedia-article": {
+  "url": "https://en.wikipedia.org/wiki/Electromyography",
+  "title": "Electromyography - Wikipedia",
+  "kb": 401,
+  "css_kb": 115,
+  "shadow_roots": 0,
+  "fetched_css": 0,
+  "date": "2026-09-29"
+ },
+ "wikipedia-main": {
+  "url": "https://en.wikipedia.org/wiki/Main_Page",
+  "title": "Wikipedia, the free encyclopedia",
+  "kb": 325,
+  "css_kb": 93,
+  "shadow_roots": 0,
+  "fetched_css": 0,
+  "date": "2026-09-29"
+ },
+ "github-repo": {
+  "url": "https://github.com/psf/requests",
+  "title": "GitHub - psf/requests: A simple, yet elegant, HTTP library. \u00b7 GitHub",
+  "kb": 805,
+  "css_kb": 498,
+  "shadow_roots": 27,
+  "fetched_css": 0,
+  "date": "2026-09-29"
+ },
+ "github-login": {
+  "url": "https://github.com/login",
+  "title": "Sign in to GitHub \u00b7 GitHub",
+  "kb": 194,
+  "css_kb": 158,
+  "shadow_roots": 1,
+  "fetched_css": 0,
+  "date": "2026-09-29"
+ },
+ "hackernews": {
+  "url": "https://news.ycombinator.com/",
+  "title": "Hacker News",
+  "kb": 36,
+  "css_kb": 2,
+  "shadow_roots": 0,
+  "fetched_css": 0,
+  "date": "2026-09-29"
+ },
+ "hackernews-login": {
+  "url": "https://news.ycombinator.com/login",
+  "title": "",
+  "kb": 1,
+  "css_kb": 0,
+  "shadow_roots": 0,
+  "fetched_css": 0,
+  "date": "2026-09-29"
+ },
+ "bbc-news": {
+  "url": "https://www.bbc.com/news",
+  "title": "BBC News - Breaking news, video and the latest top stories from the U.S. and around the world",
+  "kb": 211,
+  "css_kb": 51,
+  "shadow_roots": 0,
+  "fetched_css": 0,
+  "date": "2026-09-29",
+  "overlay_dismissed": true
+ },
+ "bing-search": {
+  "url": "https://www.bing.com/search?q=electromyography",
+  "title": "electromyography - Search",
+  "kb": 233,
+  "css_kb": 180,
+  "shadow_roots": 0,
+  "fetched_css": 102,
+  "date": "2026-09-29"
+ },
+ "ddg-search": {
+  "url": "https://html.duckduckgo.com/html/?q=electromyography",
+  "title": "electromyography at DuckDuckGo",
+  "kb": 136,
+  "css_kb": 0,
+  "shadow_roots": 0,
+  "fetched_css": 1,
+  "date": "2026-09-29",
+  "overlay_dismissed": false
+ },
+ "python-docs": {
+  "url": "https://docs.python.org/3/library/json.html",
+  "title": "json \u2014 JSON encoder and decoder \u2014 Python 3.14.7 documentation",
+  "kb": 135,
+  "css_kb": 20,
+  "shadow_roots": 0,
+  "fetched_css": 0,
+  "date": "2026-09-29"
+ },
+ "mdn-docs": {
+  "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button",
+  "title": "<button> HTML button element - HTML | MDN",
+  "kb": 253,
+  "css_kb": 56,
+  "shadow_roots": 40,
+  "fetched_css": 0,
+  "date": "2026-09-29"
+ },
+ "npm-package": {
+  "url": "https://www.npmjs.com/package/react",
+  "title": "react - npm",
+  "kb": 636,
+  "css_kb": 0,
+  "shadow_roots": 0,
+  "fetched_css": 1,
+  "date": "2026-09-29",
+  "overlay_dismissed": false
+ },
+ "usa-gov": {
+  "url": "https://www.usa.gov/",
+  "title": "Making government services easier to find | USAGov",
+  "kb": 358,
+  "css_kb": 323,
+  "shadow_roots": 0,
+  "fetched_css": 0,
+  "date": "2026-09-29"
+ },
+ "craigslist": {
+  "url": "https://sfbay.craigslist.org/",
+  "title": "craigslist: SF bay area jobs, apartments, for sale, services, community, and events",
+  "kb": 90,
+  "css_kb": 26,
+  "shadow_roots": 0,
+  "fetched_css": 0,
+  "date": "2026-09-29"
+ },
+ "weather-gov": {
+  "url": "https://forecast.weather.gov/MapClick.php?lat=37.7749&lon=-122.4194",
+  "title": "7-Day Forecast 37.77N 122.41W",
+  "kb": 86,
+  "css_kb": 43,
+  "shadow_roots": 0,
+  "fetched_css": 1,
+  "date": "2026-09-29",
+  "overlay_dismissed": false
+ },
+ "shop-product": {
+  "url": "https://www.allbirds.com/products/mens-tree-runners",
+  "title": "Men's Tree Runners - Black - Everyday Sneakers | Allbirds",
+  "kb": 660,
+  "css_kb": 228,
+  "shadow_roots": 2,
+  "fetched_css": 2,
+  "date": "2026-09-29",
+  "overlay_dismissed": true
+ },
+ "books-product": {
+  "url": "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html",
+  "title": "A Light in the Attic | Books to Scrape - Sandbox",
+  "kb": 17,
+  "css_kb": 9,
+  "shadow_roots": 0,
+  "fetched_css": 0,
+  "date": "2026-09-29"
+ },
+ "stackoverflow": {
+  "url": "https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array",
+  "error": "bot check: empty body in headless Chrome; excluded"
+ },
+ "old-reddit": {
+  "url": "https://old.reddit.com/r/programming/",
+  "error": "redirected to a web-component login wall that does not render faithfully without scripts; excluded"
+ },
+ "arxiv-abs": {
+  "url": "https://arxiv.org/abs/2106.01933",
+  "title": "[2106.01933] An Improved Model for Voicing Silent Speech",
+  "kb": 70,
+  "css_kb": 26,
+  "shadow_roots": 0,
+  "fetched_css": 1,
+  "date": "2026-09-29",
+  "overlay_dismissed": false
+ }
+}

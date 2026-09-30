@@ -1,0 +1,89 @@
+{
+ "page": "usa-gov",
+ "viewport": [
+  1280,
+  800
+ ],
+ "scope": "first viewport (scroll 0) at 1280x800, network blocked",
+ "definition": "every visible, enabled element a sighted mouse user could click or type into; one entry per control (outermost native control when nested)",
+ "annotator": "Claude (AI agent), 2026-09-29, from the rendered screenshot plus a broad DOM candidate list (all links/buttons/inputs/roles/handlers/pointer-cursor elements) and point probes for visually clickable areas; not an independent human annotation",
+ "notes": "",
+ "targets": [
+  {
+   "path": "#usagov-banner > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+   "name": "Here's how you know"
+  },
+  {
+   "path": "#header > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "vote.gov"
+  },
+  {
+   "path": "#extended-logo > em:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "USAGov Logo"
+  },
+  {
+   "path": "#header > div:nth-of-type(2) > div:nth-of-type(2) > a:nth-of-type(1)",
+   "name": "Español"
+  },
+  {
+   "path": "#top-phone > a:nth-of-type(1)",
+   "name": "Call us at 1-844-USAGOV1"
+  },
+  {
+   "path": "#search-field-small",
+   "name": "Search"
+  },
+  {
+   "path": "#usagov_all_gov-desktop > button:nth-of-type(1)",
+   "name": "Search"
+  },
+  {
+   "path": "#header > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "All topics and services"
+  },
+  {
+   "path": "#header > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1)",
+   "name": "The U.S. and its government"
+  },
+  {
+   "path": "#header > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(3) > a:nth-of-type(1)",
+   "name": "Government benefits"
+  },
+  {
+   "path": "#header > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(4) > a:nth-of-type(1)",
+   "name": "Immigration and U.S. citizenship"
+  },
+  {
+   "path": "#header > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(5) > a:nth-of-type(1)",
+   "name": "Money and credit"
+  },
+  {
+   "path": "#header > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(6) > a:nth-of-type(1)",
+   "name": "Travel"
+  },
+  {
+   "path": "#header > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(7) > a:nth-of-type(1)",
+   "name": "Voting and elections"
+  },
+  {
+   "path": "#block-usagov-content > div:nth-of-type(1) > div:nth-of-type(4) > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Check my voter registration"
+  },
+  {
+   "path": "#block-usagov-content > div:nth-of-type(1) > div:nth-of-type(4) > ul:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1)",
+   "name": "Get or renew a passport"
+  },
+  {
+   "path": "#block-usagov-content > div:nth-of-type(1) > div:nth-of-type(4) > ul:nth-of-type(1) > li:nth-of-type(3) > a:nth-of-type(1)",
+   "name": "Get housing help"
+  },
+  {
+   "path": "#block-usagov-content > div:nth-of-type(1) > div:nth-of-type(4) > ul:nth-of-type(1) > li:nth-of-type(4) > a:nth-of-type(1)",
+   "name": "Find unclaimed money"
+  },
+  {
+   "path": "#block-usagov-content > div:nth-of-type(1) > div:nth-of-type(5) > a:nth-of-type(1)",
+   "name": "Jump to all topics and services"
+  }
+ ]
+}

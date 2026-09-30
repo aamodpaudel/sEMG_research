@@ -30,9 +30,18 @@
   function refresh() {
     targets = D.detect(document); dirty = false;
     if (hintsOn) drawBadges();
+    // "vocabulary" stays a flat word list (Nullpoint's page lexicon); "lexicon" splits it for newer readers.
+    var lex = D.lexicon(targets.slice(0, 150), { doc: document });
     chrome.runtime.sendMessage({ type: "targets", url: location.href, title: document.title,
-      targets: targets.slice(0, 150).map(function (t) { return { n: t.n, label: t.label, kind: t.kind }; }),
-      vocabulary: D.vocabulary(targets) }).catch(function () {});
+      targets: targets.slice(0, 150).map(function (t) { return { n: t.n, label: t.label, kind: t.kind, name: (t.name || "").slice(0, 120), rect: screenRect(t.rect) }; }),
+      vocabulary: lex.all, lexicon: { labels: lex.labels, commands: lex.commands, numbers: lex.numbers },
+      model: D.version }).catch(function () {});
+  }
+  // Screen CSS px, as the Track Model expects (same window-frame estimate as app/static/track-ui.js).
+  function screenRect(r) {
+    var fs = !!document.fullscreenElement, border = fs ? 0 : Math.max(0, (outerWidth - innerWidth) / 2);
+    var x = fs ? 0 : screenX + border, y = fs ? 0 : screenY + Math.max(0, outerHeight - innerHeight - border);
+    return { left: Math.round(r.left + x), top: Math.round(r.top + y), width: Math.round(r.width), height: Math.round(r.height) };
   }
   function drawBadges() {
     badges.textContent = "";
@@ -44,7 +53,7 @@
   }
   function setHints(on) { hintsOn = on; if (on) { refresh(); } else badges.textContent = ""; }
   function flash(t) {
-    var r = t.el.getBoundingClientRect();
+    var r = (t.click || t.el).getBoundingClientRect();
     hl.hidden = false; hl.style.left = r.left - 3 + "px"; hl.style.top = r.top - 3 + "px"; hl.style.width = r.width + 6 + "px"; hl.style.height = r.height + 6 + "px";
     setTimeout(function () { hl.hidden = true; }, 500);
   }
@@ -82,8 +91,12 @@
         if (box) { box.el.focus(); box.el.value = a.query; box.el.dispatchEvent(new Event("input", { bubbles: true })); if (box.el.form && box.el.form.requestSubmit) box.el.form.requestSubmit(); }
         else toast("No search box on this page"); break;
       case "click":
-        flash(a.target); toast("click " + a.target.n + " · " + a.target.label);
-        setTimeout(function () { if (a.target.kind === "field") a.target.el.focus(); else a.target.el.click(); dirty = true; }, 180); break;
+        flash(a.target); toast("click " + a.target.n + " · " + (a.target.display || a.target.label));
+        setTimeout(function () {
+          var k = a.target.kind;
+          if (k === "field" || k === "searchbox" || k === "combobox") a.target.el.focus(); else (a.target.click || a.target.el).click();
+          dirty = true;
+        }, 180); break;
       default: toast("Did not understand “" + text + "”");
     }
     chrome.runtime.sendMessage({ type: "ran", text: text, action: a.type, from: from }).catch(function () {});

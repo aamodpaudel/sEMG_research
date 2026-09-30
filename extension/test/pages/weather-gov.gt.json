@@ -1,0 +1,109 @@
+{
+ "page": "weather-gov",
+ "viewport": [
+  1280,
+  800
+ ],
+ "scope": "first viewport (scroll 0) at 1280x800, network blocked",
+ "definition": "every visible, enabled element a sighted mouse user could click or type into; one entry per control (outermost native control when nested)",
+ "annotator": "Claude (AI agent), 2026-09-29, from the rendered screenshot plus a broad DOM candidate list (all links/buttons/inputs/roles/handlers/pointer-cursor elements) and point probes for visually clickable areas; not an independent human annotation",
+ "notes": "Forecast tombstones have no click signal and are not targets; the hazard period (li[onclick]) and hazard headline (div[onclick]) are.",
+ "targets": [
+  {
+   "path": "#header-noaa",
+   "name": "National Oceanic and Atmospheric Administration"
+  },
+  {
+   "path": "#header-nws",
+   "name": "National Weather Service"
+  },
+  {
+   "path": "#header-doc",
+   "name": "United States Department of Commerce"
+  },
+  {
+   "path": "#top-nav > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "HOME"
+  },
+  {
+   "path": "#top-nav > ul:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1)",
+   "name": "FORECAST"
+  },
+  {
+   "path": "#top-nav > ul:nth-of-type(1) > li:nth-of-type(3) > a:nth-of-type(1)",
+   "name": "PAST WEATHER"
+  },
+  {
+   "path": "#top-nav > ul:nth-of-type(1) > li:nth-of-type(4) > a:nth-of-type(1)",
+   "name": "SAFETY"
+  },
+  {
+   "path": "#top-nav > ul:nth-of-type(1) > li:nth-of-type(5) > a:nth-of-type(1)",
+   "name": "INFORMATION"
+  },
+  {
+   "path": "#top-nav > ul:nth-of-type(1) > li:nth-of-type(6) > a:nth-of-type(1)",
+   "name": "EDUCATION"
+  },
+  {
+   "path": "#top-nav > ul:nth-of-type(1) > li:nth-of-type(7) > a:nth-of-type(1)",
+   "name": "NEWS"
+  },
+  {
+   "path": "#top-nav > ul:nth-of-type(1) > li:nth-of-type(8) > a:nth-of-type(1)",
+   "name": "SEARCH"
+  },
+  {
+   "path": "#top-nav > ul:nth-of-type(1) > li:nth-of-type(9) > a:nth-of-type(1)",
+   "name": "ABOUT"
+  },
+  {
+   "path": "#inputstring",
+   "name": ""
+  },
+  {
+   "path": "#btnSearch",
+   "name": "Go"
+  },
+  {
+   "path": "#txtHelp > a:nth-of-type(1)",
+   "name": "View Location Examples"
+  },
+  {
+   "path": "#getfcst-headOffice > a:nth-of-type(1)",
+   "name": "San Francisco Bay Area/Monterey, CA"
+  },
+  {
+   "path": "#localnews > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Student Volunteer Applications Open Through October 30th"
+  },
+  {
+   "path": "body:nth-of-type(1) > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)",
+   "name": "Coastal Flood Advisory until October 1, 05:00 PM PDT"
+  },
+  {
+   "path": "#localWFO",
+   "name": "Local Forecast Office"
+  },
+  {
+   "path": "#moreWx",
+   "name": "More Local Wx"
+  },
+  {
+   "path": "#current_conditions_station > div:nth-of-type(1) > p:nth-of-type(2) > a:nth-of-type(3)",
+   "name": "3 Day History"
+  },
+  {
+   "path": "#wxGraph",
+   "name": "Hourly WeatherForecast"
+  },
+  {
+   "path": "#headline-info",
+   "name": "Click here for hazard details and duration"
+  },
+  {
+   "path": "#seven-day-forecast-list > li:nth-of-type(1)",
+   "name": "NOW until 5:00pm Thu Coastal Flood Advisory"
+  }
+ ]
+}

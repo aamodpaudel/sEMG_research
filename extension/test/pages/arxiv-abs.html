@@ -1,0 +1,841 @@
+<!doctype html>
+<!-- Afono DOM-1 test snapshot of https://arxiv.org/abs/2106.01933 taken 2026-09-29 with headless Chrome at 1280x800. Scripts removed, CSS inlined and pruned, images blanked. Content belongs to its owners; kept only as a small test fixture. -->
+<html lang="en" class="js"><head>  <title>[2106.01933] An Improved Model for Voicing Silent Speech</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/browse/0.3.4/images/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/browse/0.3.4/images/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/browse/0.3.4/images/icons/favicon-16x16.png">
+  <link rel="manifest" href="/static/browse/0.3.4/images/icons/site.webmanifest">
+  <link rel="mask-icon" href="/static/browse/0.3.4/images/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+  
+  
+  
+  
+  
+  
+  
+  <link rel="canonical" href="https://arxiv.org/abs/2106.01933">
+  <meta name="description" content="Abstract page for arXiv paper 2106.01933: An Improved Model for Voicing Silent Speech"><meta property="og:type" content="website">
+<meta property="og:site_name" content="arXiv.org">
+<meta property="og:title" content="An Improved Model for Voicing Silent Speech">
+<meta property="og:url" content="https://arxiv.org/abs/2106.01933v2">
+<meta property="og:image" content="/static/browse/0.3.4/images/arxiv-logo-fb.png">
+<meta property="og:image:secure_url" content="/static/browse/0.3.4/images/arxiv-logo-fb.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="700">
+<meta property="og:image:alt" content="arXiv logo">
+<meta property="og:description" content="In this paper, we present an improved model for voicing silent speech, where audio is synthesized from facial electromyography (EMG) signals. To give our model greater flexibility to learn its own input features, we directly use EMG signals as input in the place of hand-designed features used by prior work. Our model uses convolutional layers to extract features from the signals and Transformer layers to propagate information across longer distances. To provide better signal for learning, we also introduce an auxiliary task of predicting phoneme labels in addition to predicting speech audio features. On an open vocabulary intelligibility evaluation, our model improves the state of the art for this task by an absolute 25.8%.">
+<meta name="twitter:site" content="@arxiv">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="An Improved Model for Voicing Silent Speech">
+<meta name="twitter:description" content="In this paper, we present an improved model for voicing silent speech, where audio is synthesized from facial electromyography (EMG) signals. To give our model greater flexibility to learn its own...">
+<meta name="twitter:image" content="https://static.arxiv.org/icons/twitter/arxiv-logo-twitter-square.png">
+<meta name="twitter:image:alt" content="arXiv logo">
+      
+  
+  
+  
+  <meta name="citation_title" content="An Improved Model for Voicing Silent Speech"><meta name="citation_author" content="Gaddy, David"><meta name="citation_author" content="Klein, Dan"><meta name="citation_date" content="2021/06/03"><meta name="citation_online_date" content="2021/06/21"><meta name="citation_pdf_url" content="https://arxiv.org/pdf/2106.01933"><meta name="citation_arxiv_id" content="2106.01933"><meta name="citation_abstract" content="In this paper, we present an improved model for voicing silent speech, where audio is synthesized from facial electromyography (EMG) signals. To give our model greater flexibility to learn its own input features, we directly use EMG signals as input in the place of hand-designed features used by prior work. Our model uses convolutional layers to extract features from the signals and Transformer layers to propagate information across longer distances. To provide better signal for learning, we also introduce an auxiliary task of predicting phoneme labels in addition to predicting speech audio features. On an open vocabulary intelligibility evaluation, our model improves the state of the art for this task by an absolute 25.8%.">
+<style>@media screen {
+body { margin: 0px; padding: 0px; background-color: rgb(255, 255, 255); color: rgb(0, 0, 0); font-family: "Lucida Grande", helvetica, arial, verdana, sans-serif; }
+a:link, a:visited, a:active { text-decoration: none; font-weight: normal; }
+a:hover { text-decoration: underline; }
+img { border: 0px; }
+em { color: rgb(204, 0, 0); font-weight: bold; font-style: normal; }
+.primary-subject { font-weight: bold; }
+main { flex-grow: 1; }
+.flex-wrap-footer { display: flex; min-height: 100vh; flex-direction: column; }
+.flex-wrap-footer .ds-site-footer { padding-left: 10px; padding-right: 10px; }
+.flex-wrap-footer .ds-site-footer-grid { max-width: none; }
+footer { background-color: rgb(242, 242, 242); color: rgb(0, 0, 0); padding: 1em 2em; font-size: 0.9rem; -webkit-font-smoothing: antialiased; margin-top: 6rem; }
+footer a, footer a:visited { color: rgb(0, 0, 0); text-decoration: none; border-bottom: 1px solid transparent; line-height: 1.75em; }
+footer a:hover, footer a:active { color: rgb(0, 94, 157); border-bottom: 1px dotted rgb(0, 94, 157); text-decoration: none; }
+.endorsers .help { position: relative; top: 4rem; }
+@media screen and (min-width: 990px) {
+.endorsers .help { top: 5rem; }
+}
+@media screen and (min-width: 769px) {
+.columns { display: flex; flex-direction: row; }
+}
+.help { font-family: "Lucida Grande", "Helvetica Neue", Helvetica, Arial, sans-serif; display: block; font-size: 0.75rem; margin-top: 0.25rem; }
+#content, #content-inner { margin: 0.7em; font-size: 90%; }
+#content-inner { }
+#abs-outer, #abs { margin: -0.7em; }
+#abs-outer .leftcolumn { margin: 0px 0px 1em; padding: 0px; width: calc(100% - 18em); float: left; }
+#abs-outer .mobile-submission-download { display: none; }
+#abs-outer .extra-services { float: right; margin: 0px; width: 18em; }
+#abs-outer .extra-services button.bib-cite-button { color: rgb(0, 0, 238); font-weight: bold; padding: 0.35em; display: block; text-transform: capitalize; background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; font-size: inherit; font-family: inherit; text-align: left; }
+#abs-outer .extra-services button.bib-cite-button:hover, #abs-outer .extra-services button.bib-cite-button:focus { text-decoration: underline; cursor: pointer; }
+.bib-modal { position: fixed; z-index: 10; left: 0px; top: 0px; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.4); }
+.bib-modal-content { position: absolute; float: left; left: 50%; top: 50%; transform: translate(-50%, -50%); background-color: rgb(254, 254, 254); padding: 20px; border: 1px solid rgb(136, 136, 136); width: 80%; max-width: 600px; }
+.bib-modal-content .bib-citation-content { width: 100%; min-height: 200px; }
+.bib-modal-title h2 { margin-top: 0px; margin-bottom: 0.3em; display: inline-block; }
+.bib-modal-close { color: rgb(170, 170, 170); float: right; font-size: 28px; font-weight: bold; }
+.bib-modal-close:hover, .bib-modal-close:focus { color: black; text-decoration: none; cursor: pointer; }
+#catalyzex-output { padding: 7px; margin-bottom: 10px; }
+#labstabs { clear: both; margin: 1em 1.5em; }
+#labstabs .labstabs { display: flex; flex-wrap: wrap; white-space: normal; justify-content: flex-start; }
+#labstabs .labstabs > label { order: 1; display: block; padding: 0.75em 1.5em; font-size: 0.85em; color: rgb(74, 74, 74); margin-right: 0.2rem; cursor: pointer; font-weight: bold; transition: background 0.2s; border-radius: 6px 6px 0px 0px; background-color: rgb(238, 245, 249); }
+#labstabs .labstabs .tab { order: 99; flex-grow: 1; width: 100%; display: none; padding: 1rem; border: 1px solid rgb(130, 130, 130); z-index: 1; top: -1px; position: relative; }
+#labstabs .labstabs .tab h1 { font-size: 1.25em; font-weight: normal; }
+#labstabs .labstabs .tab p { font-size: 0.85rem; }
+#labstabs .labstabs .tab #coreRecommenderOutput { padding: 0px; margin: 0px; }
+#labstabs .labstabs .tab .icon-labs { text-align: center; }
+#labstabs .labstabs .tab .icon-labs svg { width: 130px; }
+#labstabs .labstabs input[type="radio"] { position: absolute; opacity: 0; width: 1px; height: 1px; margin: -1px; padding: 0px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); border: 0px; }
+#labstabs .labstabs input[type="radio"]:focus-visible + label { outline: rgb(0, 94, 162) solid 2px; outline-offset: 2px; }
+#labstabs .labstabs input[type="radio"]:checked + label { background: rgb(255, 255, 255); border-width: 1px 1px 0px; border-style: solid solid none; border-color: rgb(130, 130, 130) rgb(130, 130, 130) currentcolor; border-image: none; z-index: 2; color: black; }
+#labstabs .labstabs input[type="radio"]:checked + label + .tab { display: block; }
+@media screen and (max-width: 768px) {
+.column.is-full-mobile { flex: 0 0 auto !important; width: 100% !important; }
+}
+@media (max-width: 45em) {
+#labstabs { padding-bottom: 1em; margin: 1em; }
+#labstabs .labstabs .tab, #labstabs .labstabs label { order: initial; width: 100%; margin-right: 0px; margin-top: 0.2rem; border-radius: 0px; }
+#labstabs .labstabs > label { font-size: 0.8em; }
+#labstabs .labstabs .tab { border-width: 0px 2px 2px; border-style: none solid solid; border-color: currentcolor rgb(184, 184, 184) rgb(184, 184, 184); border-image: none; background-color: rgb(255, 255, 255); margin-top: -10px !important; }
+#labstabs .labstabs label { background-color: rgb(238, 245, 249); color: black; padding: 1em 0.5em; }
+#labstabs .labstabs .labs-display-bib label { background: transparent; color: black; padding: 0px; }
+#labstabs .labstabs input[type="radio"]:checked + label { background-color: rgb(172, 210, 232); color: black; border-width: 2px 2px 0px; border-style: solid solid none; border-color: rgb(184, 184, 184) rgb(184, 184, 184) currentcolor; border-image: none; padding: 1em 0.5em; }
+#labstabs .labstabs input[type="radio"]:hover, #labstabs .labstabs input[type="radio"]:active { background-color: rgb(171, 180, 185); }
+}
+#labstabs .toggle { border: 1px dotted rgb(199, 211, 219); padding: 0.5em; background-color: rgb(238, 245, 249); }
+#labstabs .toggle .columns.lab-row { align-items: center; }
+#labstabs .toggle .columns.lab-row .column { padding: 0.5rem 0.25rem; }
+#labstabs .column.lab-name { flex-basis: auto; flex-grow: 0; font-size: 0.75rem; }
+#labstabs .tab a { display: inline; }
+#labstabs .column.lab-name em { font-size: 11px; color: black; }
+#labstabs .column.lab-name em a { line-height: 18px; text-decoration: none; padding: 0px; border: 0px; font-style: normal; font-size: 11px; }
+#labstabs .column.lab-switch { flex-grow: 0; }
+#labstabs .toggle .lab-switch label.switch { position: relative; display: inline-block; width: 38px; height: 20px; padding: 0px; background-color: transparent; margin: 0px; }
+#labstabs .toggle .lab-switch .switch input { opacity: 0; width: 0px; height: 0px; }
+#labstabs .toggle .lab-switch .slider { position: absolute; cursor: pointer; inset: 0px; border-radius: 24px; background-color: rgb(204, 204, 204); transition: 0.4s; }
+#labstabs .toggle .lab-switch .slider::before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; border-radius: 50%; background-color: white; transition: 0.4s; }
+#abs-outer .subheader { background-color: rgb(238, 238, 238); color: rgb(0, 0, 0); padding: 0.25em 0px; border-bottom: 1px solid rgb(204, 204, 204); }
+#abs-outer .subheader h1 { margin: 0px; font-size: 1.1em; padding: 0px 0px 0.2em 20px; font-weight: bold; font-style: normal; }
+#abs .descriptor { display: none; }
+#abs-outer .extra-services .descriptor { display: none; }
+#abs-outer #coreRecommenderOutput { max-width: 100%; }
+#abs h1.title { margin: 0.5em 0px 0.5em 20px; font-size: x-large; font-weight: bold; line-height: 120%; }
+#abs .authors { margin: 0.5em 0px 0.5em 20px; font-size: medium; line-height: 150%; }
+#abs .authors a { font-size: medium; }
+#abs .dateline { margin: 0.5em 0px 0.5em 20px; font-style: italic; font-size: small; }
+#abs blockquote.abstract { line-height: 1.55; font-size: 1.05em; margin-bottom: 1.5em; }
+#abs .comments { }
+#abs .metatable { font-size: 0.92em; line-height: 1.5; margin: 0px 0px 1.5em 20px; }
+#abs .tablecell { padding: 0.1em 0.5em 0em 0em; vertical-align: top; }
+#abs .subjects { }
+#abs .arxivid a { font-weight: normal; }
+#abs .arxividv { }
+#abs-outer .submission-history { margin: 1.5em 0px 1.5em 20px; font-size: 90%; line-height: 1.5em; }
+#abs-outer .submission-history h2 { font-size: 120%; margin: 0px 0px 0.25em; font-weight: bold; }
+#abs-outer .endorsers { margin: 1em 0px 1.5em 20px; font-size: small; font-style: italic; clear: both; }
+#abs-outer .header-breadcrumbs-mobile { display: none; }
+#abs-outer #abs .dateline { margin-top: 15px; margin-bottom: 0px; }
+#abs-outer #abs h1.title { margin-top: 0.25em; }
+.endorsers .help { display: inline-block; }
+@media screen and (max-width: 768px) {
+#abs-outer .header-breadcrumbs-mobile { display: block; color: black; font-size: 0.85em; margin: 0.25em 0px 0.5em 1em; }
+#abs-outer #abs a.mobile-submission-download { display: flex; justify-content: center; margin: 0.7em 0.25em; border-radius: 10px; background-color: rgb(64, 139, 208); padding: 0.25em 1em; font-weight: 800; color: white; text-decoration: none; font-size: 20px; text-align: center; }
+#abs-outer .extra-services h2 { font-size: 15px; margin-bottom: 0.5em; }
+#abs-outer .extra-services h3 { font-size: 14px; }
+#abs-outer .leftcolumn, #abs-outer .extra-services { width: 100%; float: left; }
+#abs-outer .extra-services, #abs-outer .extra-services .full-text, #abs-outer .extra-services .ancillary, #abs-outer .extra-services .browse, #abs-outer .extra-services .extra-ref-cite { border: 0px; font-size: 12px; }
+#abs-outer .extra-services { box-shadow: rgb(173, 173, 173) 0px 8px 15px 0px inset; background-color: rgb(230, 230, 230); margin: 0px 0px 1em; padding: 1em 0px; }
+#abs-outer .extra-ref-cite ul li { float: left; height: 50px; }
+#abs-outer .extra-services .full-text ul, #abs-outer .extra-services .extra-ref-cite ul { list-style: none; margin: 0px; padding: 0px; }
+#abs-outer .extra-services .full-text ul li, #abs-outer .extra-services .extra-ref-cite ul li { display: inline-block; margin: 0px 0px 0.25em; padding: 0px; }
+#abs-outer .extra-services .bookmarks { margin: 1em 0px 0px; border-left: 0px; padding: 0.25em 0.5em 0px 1em; border-top: 2px solid rgb(204, 204, 204); font-size: 1em; }
+#abs-outer .extra-services .bookmarks .abs-button-small { margin-top: 0.25em; }
+#abs-outer .extra-services .browse { margin-top: 0.5em; border-top: 2px solid rgb(204, 204, 204); padding-top: 1em; }
+#abs-outer .extra-services .prevnext { margin-top: 0.5em; }
+#abs-outer .extra-services .browse .current { color: rgb(171, 75, 2); display: inline; }
+.abs-switch-cat { margin: 0px 0px 1em; }
+.browse .abs-switch-cat .switch { display: inline; }
+.browse .abs-switch-cat .switch a { font-weight: bold; }
+.browse .abs-switch-cat .switch .subclass { padding: 0px; margin-left: -3px; }
+.abs-switch-cat .subclass::before { content: ", "; }
+.abs-button { display: inline-block; border-radius: 5px; border: 1px solid rgb(4, 107, 175); font-size: 1.25em; padding: 0.5em; background: rgb(230, 230, 230); margin-right: 0.3em; color: rgb(4, 107, 175) !important; }
+.abs-button-small { font-size: 1em; padding: 0.25em 1em; margin: 0.75em 0.5em 0px 0px; }
+.abs-button-grey { border: 1px solid rgb(102, 102, 102); color: rgb(102, 102, 102) !important; }
+#abs-outer .extra-services button.bib-cite-button { margin: 0.5em 0.5em 0px 0px; border-radius: 5px; background: rgb(230, 230, 230); border: 1px solid rgb(4, 107, 175); padding: 0.25em 1em; font-weight: normal; text-transform: capitalize; display: inline-block !important; font-size: 1em !important; }
+#abs-outer .extra-services .extra-ref-cite ul li { margin: 0.5em 0px; padding: 0px; height: auto; }
+#abs-outer .extra-services .extra-ref-cite ul li a { margin: 0.25em 0.5em 0.25em 0px; }
+#abs-outer .subheader { background-color: rgb(254, 254, 254); padding: 0.25em 0px; border-bottom: 1px solid rgb(204, 204, 204); }
+#abs-outer .subheader h1 { margin: 0px; font-size: 0.75em; padding: 0.2em 0px 0.2em 1em; font-weight: normal; font-style: normal; color: rgb(181, 92, 6); }
+#abs-outer #abs .dateline { color: rgb(118, 118, 118); font-size: 0.85em; font-style: normal; margin: 2em 0px 0px 1em; }
+#abs-outer .submission-history { padding: 1em; margin: 0px; background-color: rgb(245, 245, 245); box-shadow: rgb(219, 219, 219) 0px -6px 15px 0px inset; }
+#abs-outer #abs h1.title { margin: 0px 0.25em 0px 0.5em; font-size: 1.5em; }
+#abs-outer #abs .authors { margin: 1em 0.25em 0px 1em; font-size: 0.9em; line-height: 1.5em; }
+#abs-outer #abs .authors a { font-size: inherit; }
+#abs-outer #abs blockquote.abstract { margin: 0px 1em; }
+#abs-outer #abs .metatable { margin: 0.75em 0px 1.5em 1.5em; }
+#abs-outer #abs a, #abs-outer a, #abs-outer .endorsers a { color: rgb(23, 119, 188); }
+#abs-outer .abs-license a, #abs-outer .submission-history a, #abs-outer .extra_services a, #abs-outer .extra_services .browse a, #abs-outer .abs-switch-cat .switch a, #abs-outer .extra-services .full-text .abs-license a { color: rgb(4, 107, 175); }
+#abs-outer .endorsers { display: block; float: left; border: 1px solid rgb(238, 238, 238); padding: 1em; margin: 1em; }
+#abs-outer .endorsers .help { display: none; }
+}
+.extra-services { border-bottom: 0.35em solid rgb(221, 221, 221); }
+.extra-services h3 { font-size: medium; font-weight: normal; margin: 0px 0px 0.3em; padding-top: 0.3em; }
+.full-text { margin: 0px; padding: 0.5em 1em; font-size: 110%; font-weight: normal; border-bottom: solid rgb(221, 221, 221); border-left: 0.35em solid rgb(221, 221, 221); }
+.full-text h2 { font-size: 140%; font-weight: bold; margin: 0.1em 0px 0px; }
+.full-text ul { margin: 0.3em 0px 0px 1em; padding: 0px; list-style-type: none; }
+.extra-ref-cite { margin: 0px; padding: 0px 1em; font-size: 90%; border-bottom: solid rgb(221, 221, 221); border-left: 0.35em solid rgb(221, 221, 221); }
+.extra-ref-cite ul { font-weight: normal; margin: 0.3em 0px 0px 20px; padding-left: 0px; padding-bottom: 0.3em; list-style-type: none; }
+.browse { padding: 0px 1em; font-size: 90%; border-bottom: solid rgb(221, 221, 221); border-left: 0.35em solid rgb(221, 221, 221); }
+.browse .current { padding: 0px; font-weight: bold; }
+.browse .prevnext { padding: 0.2em 0px 0px; }
+.browse .prevnext a { }
+.browse .list { padding: 0.2em 0px 0.5em; font-weight: normal; }
+.browse .switch { font-weight: normal; padding: 0.2em 0em 0.7em; }
+.browse .switch .subclass { padding-left: 1.5em; }
+.bookmarks { clear: both; margin: 0px; padding: 0px 1em 0.5em; font-size: 90%; border-left: 0.35em solid rgb(221, 221, 221); }
+.abs-license { font-size: xx-small; padding-top: 0.3em; }
+@media screen and (max-width: 768px) {
+.is-hidden-mobile { display: none !important; }
+.columns.is-mobile { display: flex; }
+}
+.is-sr-only { border-width: medium !important; border-style: none !important; border-color: currentcolor !important; border-image: none !important; clip: rect(0px, 0px, 0px, 0px) !important; height: 0.01em !important; overflow: hidden !important; padding: 0px !important; position: absolute !important; white-space: nowrap !important; width: 0.01em !important; }
+.browse-context-heading { font-size: 1em; font-weight: normal; margin: 0px; display: inline; }
+.column { display: block; flex: 1 1 0px; padding: 0.75rem; }
+@media screen and (min-width: 769px), print {
+.column.is-narrow, .column.is-narrow-tablet { flex: 0 0 auto; }
+.columns:not(.is-desktop) { display: flex; }
+}
+}
+@media print {
+#cu-identity, .extra-services, .search-block, footer .columns { display: none; }
+.subheader h1 { font-size: 14px; font-weight: bold; }
+}
+@media screen {
+}
+@media screen {
+:root { --arxiv-open-blue: #a5d6fe; --arxiv-link-blue: #1565c0; --arxiv-link-hover: #1050a0; --arxiv-grey-dis: #b0aba6; --arxiv-grey: #6b6459; --arxiv-ink: #1c1a17; --arxiv-warm-wash: #f9f7f7; --arxiv-card-grey: #f0eeec; --arxiv-active-bg: #d6e8f7; --arxiv-pill-border: #e4e0db; --arxiv-border-light: #ddd8d2; --arxiv-focus-ring-dark: #64b5f6; --arxiv-font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.is-sr-only { width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border: 0px; position: absolute !important; }
+.ds-site-footer { clear: both; border-top: 1px solid var(--arxiv-pill-border); background: var(--arxiv-warm-wash); padding: 24px 24px 28px; margin: 0px; font-family: var(--arxiv-font-sans); }
+.ds-site-footer a, .ds-site-footer a:hover, .ds-site-footer a:active { border-bottom: 0px; }
+.ds-site-footer-grid { display: flex; gap: 24px 32px; align-items: center; justify-content: space-between; flex-wrap: wrap; max-width: 1200px; margin: 0px auto; }
+.ds-site-footer-main { flex: 1 1 320px; min-width: 280px; max-width: 720px; }
+.ds-site-footer-ack { font-size: 0.875rem; color: var(--arxiv-ink); margin-bottom: 14px; line-height: 1.6; }
+.ds-site-footer-ack a { font-size: 0.8125rem; color: var(--arxiv-ink); text-decoration: underline; }
+.ds-site-footer-ack a:hover { text-decoration-style: dotted; }
+.ds-site-footer-ack strong { color: var(--arxiv-ink); font-weight: 600; }
+.ds-site-footer-links { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.8125rem; line-height: 1.8; }
+.ds-site-footer-links a { font-size: 0.8125rem; color: var(--arxiv-link-hover); text-decoration: none; }
+.ds-site-footer-links a:hover { color: var(--arxiv-ink); text-decoration: underline; }
+.ds-site-footer-sep { color: var(--arxiv-grey); margin: 0px 4px; }
+.ds-site-footer-funders { flex-shrink: 0; text-align: center; }
+.ds-site-footer-funders-label { font-size: 0.875rem; font-weight: 600; color: var(--arxiv-ink); margin-bottom: 12px; line-height: 1.4; }
+.ds-site-footer-funders-logos { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.ds-site-footer a.ds-funder-link { display: inline-flex; align-items: center; justify-content: center; padding: 4px 8px; border: 1px solid var(--arxiv-pill-border); border-radius: 3px; background: rgb(255, 255, 255); transition: border-color 0.15s; }
+.ds-site-footer a.ds-funder-link:hover { border-color: var(--arxiv-link-blue); }
+.ds-funder-logo { display: block; height: 48px; width: auto; flex-shrink: 0; }
+@media (max-width: 720px) {
+.ds-site-footer-funders { width: 100%; margin-top: 8px; }
+.ds-site-footer-funders-logos { gap: 10px; }
+.ds-site-footer a.ds-funder-link { width: 220px; max-width: 100%; padding: 10px 14px; }
+.ds-funder-logo { height: 44px; max-width: 100%; }
+}
+@media print {
+.ds-site-footer { display: none !important; }
+}
+.ds-skip-link { position: absolute; top: -100px; left: 8px; z-index: 200; background: var(--arxiv-ink); color: rgb(255, 255, 255); padding: 10px 16px; border-radius: 4px; text-decoration: none; font-family: var(--arxiv-font-sans); font-weight: 600; }
+.ds-site-header { display: flex; align-items: center; gap: 12px; padding: 0px 24px; height: 52px; background: var(--arxiv-ink); font-family: var(--arxiv-font-sans); }
+.ds-site-header-logo { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; margin-right: auto; }
+.ds-site-header-logo img { height: 39px; width: auto; }
+.ds-site-header-nav { display: flex; align-items: center; gap: 4px; }
+.ds-site-header-nav a, .ds-site-header-nav button { font-family: var(--arxiv-font-sans); font-size: 0.8125rem; font-weight: 500; color: var(--arxiv-grey-dis); text-decoration: none; padding: 6px 10px; border-radius: 4px; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; background: none; cursor: pointer; white-space: nowrap; transition: background 0.12s, color 0.12s; display: inline-flex; align-items: center; gap: 5px; }
+.ds-site-header-nav a:visited { color: var(--arxiv-grey-dis); }
+.ds-site-header-nav a:hover, .ds-site-header-nav button:hover { background: rgb(48, 44, 40); color: var(--arxiv-card-grey); }
+.ds-site-header-nav .ds-nav-icon { width: 16px; height: 16px; opacity: 0.65; flex-shrink: 0; }
+.ds-site-header-divider { width: 1px; height: 20px; background: rgb(74, 67, 61); margin: 0px 4px; flex-shrink: 0; }
+.ds-site-header-login { font-weight: 600 !important; color: var(--arxiv-card-grey) !important; }
+.ds-site-header-nav-toggle { display: none; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0px; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; background: none; border-radius: 4px; color: var(--arxiv-grey-dis); cursor: pointer; flex-shrink: 0; transition: background 0.12s, color 0.12s; }
+.ds-site-header-nav-toggle:hover { background: rgb(48, 44, 40); color: var(--arxiv-card-grey); }
+.ds-site-header-nav-toggle svg { width: 22px; height: 22px; display: block; }
+@media (max-width: 599px) {
+.ds-site-header { flex-wrap: wrap; height: auto; min-height: 52px; padding: 6px 12px; }
+.ds-site-header-nav { flex-wrap: wrap; row-gap: 2px; width: 100%; }
+.ds-site-header-nav a, .ds-site-header-nav button { padding: 6px 8px; }
+.ds-site-header.is-collapsible { flex-wrap: nowrap; height: 52px; position: relative; }
+.ds-site-header.is-collapsible .ds-site-header-nav-toggle { display: inline-flex; }
+.ds-site-header.is-collapsible .ds-site-header-nav { display: none; position: absolute; top: 52px; left: 0px; right: 0px; flex-flow: column; align-items: stretch; width: auto; gap: 0px; padding: 0px; background: var(--arxiv-ink); border-top: 1px solid rgb(74, 67, 61); box-shadow: rgba(0, 0, 0, 0.12) 0px 6px 16px; z-index: 60; }
+.ds-site-header.is-collapsible .ds-site-header-nav a, .ds-site-header.is-collapsible .ds-site-header-nav button { width: 100%; justify-content: flex-start; padding: 12px 16px; min-height: 44px; box-sizing: border-box; border-radius: 0px; font-size: 0.875rem; border-bottom: 1px solid rgb(74, 67, 61); }
+.ds-site-header.is-collapsible .ds-site-header-nav > :last-child { border-bottom-width: medium; border-bottom-style: none; border-bottom-color: currentcolor; }
+.ds-site-header.is-collapsible .ds-site-header-divider { display: none; }
+}
+@media print {
+.ds-announcement, .ds-site-header, .ds-skip-link { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+.ds-site-header-nav a, .ds-site-header-nav button, .ds-site-header-nav-toggle, .ds-announcement-close { transition: none; }
+}
+.arxiv-search-overlay { display: none; position: fixed; inset: 0px; z-index: 200; background: rgba(28, 26, 23, 0.3); align-items: flex-start; justify-content: center; }
+.arxiv-search-overlay[hidden] { display: none; }
+.arxiv-search-panel { margin-top: 52px; width: 100%; max-width: 640px; background: rgb(255, 255, 255); border-radius: 0px 0px 8px 8px; box-shadow: rgba(0, 0, 0, 0.15) 0px 8px 32px; padding: 20px 24px; }
+.arxiv-search-panel input[type="text"] { width: 100%; font-family: var(--arxiv-font-sans); font-size: 16px; padding: 10px 14px; border: 2px solid var(--arxiv-pill-border); border-radius: 6px; outline: none; color: var(--arxiv-ink); box-sizing: border-box; }
+.arxiv-search-panel input[type="text"]:focus { border-color: var(--arxiv-link-blue); box-shadow: rgba(21, 101, 192, 0.1) 0px 0px 0px 3px; }
+.arxiv-search-panel input[type="text"]::placeholder { color: var(--arxiv-grey); }
+.arxiv-search-hint { font-family: var(--arxiv-font-sans); font-size: 12px; color: var(--arxiv-grey); margin-top: 8px; }
+.arxiv-search-hint a { color: var(--arxiv-link-blue); font-size: 12px; }
+}
+@media screen {
+.visually-hidden { clip-path: inset(100%); clip: rect(1px, 1px, 1px, 1px); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
+.button-and-tooltip { position: relative; display: inline; }
+.button-and-tooltip button { background: transparent; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; box-shadow: none; position: relative; padding: 0px 0px 0px 6px; }
+[role="tooltip"] { display: none; position: absolute; top: -6px; left: 28px; width: 250px; background-color: rgb(247, 250, 252); border: 1px solid black; padding: 4px 10px; border-radius: 5px; }
+button:hover + [role="tooltip"], button:focus + [role="tooltip"] { display: block; }
+.left-corner { width: 0px; height: 0px; border-width: 5px; border-style: solid; border-color: transparent rgb(0, 0, 0) transparent transparent; left: -10px; top: 8px; position: absolute; }
+td.tablecell.arxivdoi, td.tablecell.doi { display: inline-flex; align-items: center; }
+@media screen and (max-width: 480px) {
+[role="tooltip"] { width: 250px; left: -273px; }
+.left-corner { border-right: 5px solid transparent; border-left: 5px solid rgb(0, 0, 0); left: auto; right: -10px; }
+}
+}
+
+@media screen {
+.references-citations{margin:1.5em;font-size:90%;line-height:1.5em}.references-citations h2{font-size:120%;margin:0 0 .25em;font-weight:700}.arrow{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent}.arrow .up{border-bottom:8px solid #000}.arrow .down{border-top:8px solid #000}.bib-col2{display:-ms-flexbox;display:flex;-ms-flex-pack:space-evenly;justify-content:space-evenly;margin:0 20px}.bib-col2 h2{text-align:center}.bib-col2 a{text-decoration:none;color:#000}.bib-col{margin:0 20px 20px;max-width:650px;width:50%;padding:10px}.bib-col-divider{width:1px;background-color:#dfdfdf}.bib-col-header{margin:0}.bib-col-title{font-size:large;font-weight:700}.bib-col-aside{font-size:small}.bib-col-center{display:table;margin:0 auto}.bib-branding{display:-ms-flexbox;display:flex;margin-top:6px;-ms-flex-pack:center;justify-content:center}.bib-branding a{text-decoration:underline;color:blue}.bib-star{color:red}.bib-branding-logo img{margin-left:8px}.bib-utils{display:-ms-flexbox;display:flex;-ms-flex-flow:row wrap;flex-flow:row wrap;-ms-flex-pack:center;justify-content:center;margin-top:1em;margin:.7em auto 1.5em}.bib-utils>div{margin-right:1em;margin-bottom:.25em}.bib-pager{min-width:300px}.bib-page-list{list-style:none;padding:0;display:inline}.bib-page-list>li{display:inline-block;margin-left:.25em;margin-right:.25em;min-width:1.2em;text-align:center}.bib-sorter{margin-top:.25em}.bib-sorter>label{margin-right:.1em}.bib-sort-arrow{margin-left:.2em;margin-right:.2em}.bib-sort-arrow a{text-decoration:none}.bib-sort-arrow a:hover{text-decoration:none;cursor:pointer}.bib-filter{margin-top:.25em}.bib-filter>label{margin:.1em}.bib-fiter-input{width:100%;padding:12px 20px;margin:8px 0;-webkit-box-sizing:border-box;box-sizing:border-box}.bib-paper-container{margin-bottom:1.5em;-ms-flex-direction:row;flex-direction:row;-ms-flex-wrap:nowrap;flex-wrap:nowrap;-ms-flex-pack:left;justify-content:left}.bib-paper-container,.bib-paper-overhang{display:-ms-flexbox;display:flex;-ms-flex-align:stretch;align-items:stretch}.bib-paper-overhang{-ms-flex-direction:column;flex-direction:column;-ms-flex-wrap:wrap;flex-wrap:wrap;-ms-flex-pack:justify;justify-content:space-between}.bib-cite{min-width:18px;width:18px;top:-4px;left:-4px;position:relative}.bib-paper{color:#000}.bib-paper .jinfo{padding-left:.7em;font-size:.9em}.bib-paper .venue{padding-right:.5em;text-transform:capitalize;font-style:italic;color:#777}.bib-paper .venue:empty{display:none}.bib-paper .year{padding-right:.5em;font-weight:700}.bib-paper .year:empty{display:none}.bib-paper .citations{padding-right:.5em}.bib-paper .citations:empty{display:none}.bib-paper a,.bib-paper span{color:#000;position:relative}.bib-paper-links{display:-ms-flexbox;display:flex;-ms-flex-direction:column;flex-direction:column;-ms-flex-pack:center;justify-content:center;min-width:110px;max-width:111px;position:relative}.bib-paper-links>span{display:none}.bib-citation-count{margin-left:.7em;font-size:.9em}.bib-authors{margin-left:.7em}.bib-authors a{font-size:.9em;color:#555;margin-right:.5em}.bib-authors a:after{content:","}.bib-authors a:last-of-type:after{content:""}.bib-authors a.nolink{text-decoration:none}.bib-outbound{display:inline-block;margin-top:3px}.bib-outbound a{font-weight:700;font-size:1em;text-decoration:none;margin-right:.5em}.bib-outbound .exitarrow{color:#000;font-weight:700;display:inline;margin:0;padding:0}.bib-outbound .movearrow{top:-6px;position:relative}.center{display:-ms-flexbox;display:flex;-ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center}.disabled{color:#bbb}.bold{font-weight:700}h1.bib-header{margin-bottom:0;margin-top:0;text-align:center;position:relative;z-index:1}h1.bib-header:before{border-top:2px solid #dfdfdf;content:"";margin:0 auto;position:absolute;top:50%;left:0;right:0;bottom:0;width:95%;z-index:-1}h1.bib-header span{background:#fff;padding:0 15px}.bib-sidebar{padding:0 1em;font-size:90%;border-bottom:medium solid #ddd}.nodisplay{display:none}.bib-sidebar-msg{font-size:16px}.bib-sidebar-msgs p{margin:0}.bib-sidebar-msgs .msgs{padding-left:0;margin:0}.bib-sidebar-msgs .msg{color:#000;font-size:100%;font-weight:400;margin-left:1.5em}.bib-sidebar-msgs .msg:hover .hover{visibility:visible}.bib-sidebar-paper>div{margin:0;padding:0;margin-bottom:.5em}.bib-sidebar-paper>div:first-of-type{padding-top:.3em}.bib-sidebar-badge{padding:.5em 0 0}.bib-sidebar-title a{position:relative;font-weight:700;font-size:14px}.bib-sidebar-authors{list-style-position:inside;margin:0;padding:0;margin-bottom:.5em;padding-left:1em}.topborder{border-top-style:solid;border-top-color:#dfdfdf;border-top-width:2px}.bib-sidebar-source span{position:relative;margin-right:.2em;margin-left:.2em}.bib-sidebar-source img{height:18px;width:auto;padding:3px;margin-right:3px;position:relative}.bib-selected{font-weight:700;color:#000}.bib-pulse-container{display:-ms-flexbox;display:flex;-ms-flex-direction:row;flex-direction:row;-ms-flex-pack:center;justify-content:center}.bib-pulse>div{display:inline-block;width:30px;height:30px;background-color:#000;border-radius:30px;opacity:0;margin-left:10px;margin-right:10px;-webkit-animation:pulsate 1.5s ease-out;animation:pulsate 1.5s ease-out;-webkit-animation-iteration-count:infinite;animation-iteration-count:infinite}.bib-pulse>div:nth-of-type(2){-webkit-animation-delay:.18s;-moz-animation-delay:.18s}.bib-pulse>div:nth-of-type(3){-webkit-animation-delay:.36s;-moz-animation-delay:.36s}@-webkit-keyframes pulsate{0%{-webkit-transform:scale(.1);transform:scale(.1);opacity:0}30%{opacity:1}60%{-webkit-transform:scale(.8);transform:scale(.8);opacity:0}}@keyframes pulsate{0%{-webkit-transform:scale(.1);transform:scale(.1);opacity:0}30%{opacity:1}60%{-webkit-transform:scale(.8);transform:scale(.8);opacity:0}}.tooltiptext{opacity:1;width:120px;background-color:#000;color:#fff;font-weight:700;text-align:center;padding:5px 0;width:240px;bottom:150%;left:90%;margin-left:-90px;position:absolute;z-index:1}.tooltiptext div{display:-ms-flexbox;display:flex;-ms-flex-pack:space-evenly;justify-content:space-evenly}.tooltiptext a{color:#8080ff}.tooltiptext a.green{color:#1bcc44}.tooltiptext:after{opacity:1;content:" ";position:absolute;top:100%;left:50%;margin-left:-5px;border-width:5px;border-style:solid;border-color:#000 transparent transparent}.modal{position:fixed;z-index:1;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:#000;background-color:rgba(0,0,0,.4)}.modal-content{position:absolute;float:left;left:50%;top:50%;-webkit-transform:translate(-50%,-50%);-ms-transform:translate(-50%,-50%);transform:translate(-50%,-50%);background-color:#fefefe;padding:20px;border:1px solid #888}.modal-title h2{margin-top:0;margin-bottom:.3em;display:inline-block}.modal-close{color:#aaa;float:right;font-size:28px;font-weight:700}.modal-close:focus,.modal-close:hover{color:#000;text-decoration:none;cursor:pointer}.modal-buttons{display:-ms-flexbox;display:flex;-ms-flex-direction:row;flex-direction:row;-ms-flex-wrap:nowrap;flex-wrap:nowrap;-ms-flex-pack:left;justify-content:left}.modal-buttons .disabled{color:gray}.modal h4{margin-top:.3em;margin-bottom:0}.modal-button-group{padding-right:5em;padding-bottom:.5em}.modal-button-close{display:-ms-flexbox;display:flex;-ms-flex-positive:0;flex-grow:0;background-color:#fff;color:#000;padding:0;font-size:2em}.modal textarea{border-width:2px}.cite:hover{cursor:pointer}@media only screen and (max-width:800px){.bib-col2{-ms-flex-direction:column;flex-direction:column}.bib-col{width:100%}}.bib-hr{margin-bottom:1em;border-width:1px 0 0;border-color:#555;border-style:solid}.bib-ds-select{margin-right:0}
+
+}
+#MathJax_Message { position: fixed; left: 1em; bottom: 1.5em; background-color: rgb(230, 230, 230); border: 1px solid rgb(149, 149, 149); margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap; }
+#abs { font-family: "Lucida Grande", Helvetica, Arial, sans-serif !important; }
+#abs h1.title { display: block; font-weight: 700; margin-block: 12px; margin: 12px 0px 12px 20px; margin-inline: 20px 0px; font-size: 1.8em !important; }
+#abs .descriptor { display: none; }
+#abs div.authors { font-size: 1.2em; line-height: 24px; margin: 8px 0px 8px 20px; }
+#abs div.dateline { font-size: 0.9em; font-style: italic; margin: 6.5px 0px 6.5px 20px; }
+#abs blockquote.abstract { font-size: 1.05em; margin-block: 14.4px 21.6px; margin-bottom: 21.6px; margin-inline: 40px; background-color: white; border-left: 0px; padding: 0px; }
+#abs div.metatable { margin: 0px 0px 19px 20px; border: 0px; padding: 0px; font-size: 0.95em !important; }
+#abs div.metatable tbody { vertical-align: middle; }
+#abs tr { margin-top: 0px; margin-bottom: 0px; }
+#abs td.tablecell { padding: 0px 6.5px 0px 0px; vertical-align: top; margin-top: 0px; margin-bottom: 0px; border: 0px; font-size: 0.95em !important; }
+#abs td.tablecell.label { font-weight: 400 !important; }
+#abs span.primary-subject { font-weight: 700; }
+#abs span.arxivid { font-weight: 700; }
+</style></head>
+
+<body><div id="MathJax_Message" style="display: none;"></div><div class="flex-wrap-footer">
+    <a href="#content" class="ds-skip-link">Skip to main content</a>
+  
+  
+  
+<header class="ds-site-header is-collapsible">
+  <a aria-hidden="true" tabindex="-1" href="https://arxiv.org/IgnoreMe" class="is-sr-only"></a>
+
+  <a href="https://arxiv.org/" class="ds-site-header-logo" aria-label="archive home">
+    <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="archive" style="width: 86.6719px !important; height: 39px !important;">
+  </a>
+
+  <button type="button" id="ds-nav-toggle" class="ds-site-header-nav-toggle" aria-label="Open menu" aria-controls="ds-site-header-nav" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+
+  <nav class="ds-site-header-nav" id="ds-site-header-nav" aria-label="Main navigation"><a id="arxiv-search-toggle" href="https://arxiv.org/search" aria-controls="arxiv-search-overlay" aria-expanded="false">
+      <svg class="ds-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      Search
+    </a>
+    <a href="https://arxiv.org/user/create">Submit</a>
+    <a href="https://info.arxiv.org/about/donate.html">Donate</a>
+    <span class="ds-site-header-divider" aria-hidden="true"></span>
+      <a href="https://arxiv.org/login" class="ds-site-header-login">Log in</a>
+  </nav>
+</header>
+
+<div class="arxiv-search-overlay" id="arxiv-search-overlay" hidden="">
+  <div class="arxiv-search-panel" role="search">
+    <form method="GET" action="https://arxiv.org/search">
+      <label for="arxiv-search-input" class="is-sr-only">Search arXiv</label>
+      <input type="text" name="query" id="arxiv-search-input" autocomplete="off" placeholder="Search papers by title, author, abstract, or ID...">
+      <input type="hidden" name="searchtype" value="all">
+      <input type="hidden" name="source" value="header">
+    </form>
+    <div class="arxiv-search-hint">
+      Press Enter to search · <a href="https://arxiv.org/search/advanced">Advanced search</a>
+    </div>
+  </div>
+</div>
+    <main>
+      <div id="content">
+<div id="abs-outer">
+
+  <div class="leftcolumn">
+    <div class="subheader">
+      <h1>Electrical Engineering and Systems Science &gt; Audio and Speech Processing</h1>
+    </div>
+
+    <div class="header-breadcrumbs-mobile">
+      <strong>arXiv:2106.01933</strong> (eess)
+    </div>
+
+<div id="content-inner">
+  <div id="abs">
+    <div class="dateline">
+  [Submitted on 3 Jun 2021 (<a href="https://arxiv.org/abs/2106.01933v1">v1</a>), last revised 21 Jun 2021 (this version, v2)]</div>
+    <h1 class="title mathjax"><span class="descriptor">Title:</span>An Improved Model for Voicing Silent Speech</h1>
+    <div class="authors"><span class="descriptor">Authors:</span><a href="https://arxiv.org/search/eess?searchtype=author&amp;query=Gaddy,+D" rel="nofollow">David Gaddy</a>, <a href="https://arxiv.org/search/eess?searchtype=author&amp;query=Klein,+D" rel="nofollow">Dan Klein</a></div>            <div id="download-button-info" hidden="">View a PDF of the paper titled An Improved Model for Voicing Silent Speech, by David Gaddy and Dan Klein</div>
+    <a class="mobile-submission-download" href="/pdf/2106.01933">View PDF</a>
+    <a class="mobile-submission-download" href="https://arxiv.org/html/2106.01933v2">HTML (experimental)</a>
+
+
+
+    <blockquote class="abstract mathjax">
+            <span class="descriptor">Abstract:</span>In this paper, we present an improved model for voicing silent speech, where audio is synthesized from facial electromyography (EMG) signals. To give our model greater flexibility to learn its own input features, we directly use EMG signals as input in the place of hand-designed features used by prior work. Our model uses convolutional layers to extract features from the signals and Transformer layers to propagate information across longer distances. To provide better signal for learning, we also introduce an auxiliary task of predicting phoneme labels in addition to predicting speech audio features. On an open vocabulary intelligibility evaluation, our model improves the state of the art for this task by an absolute 25.8%.
+    </blockquote>
+
+    
+    <div class="metatable">
+      <table summary="Additional metadata">        <tbody><tr>
+          <td class="tablecell label">Comments:</td>
+          <td class="tablecell comments mathjax">ACL 2021</td>
+        </tr>
+<tr>
+          <td class="tablecell label">Subjects:</td>
+          <td class="tablecell subjects">
+            <span class="primary-subject">Audio and Speech Processing (eess.AS)</span>; Computation and Language (cs.CL); Machine Learning (cs.LG); Sound (cs.SD)</td>
+        </tr><tr>
+          <td class="tablecell label">Cite as:</td>
+          <td class="tablecell arxivid"><span class="arxivid"><a href="https://arxiv.org/abs/2106.01933">arXiv:2106.01933</a> [eess.AS]</span></td>
+        </tr>
+        <tr>
+          <td class="tablecell label">&nbsp;</td>
+          <td class="tablecell arxividv">(or <span class="arxivid">
+              <a href="https://arxiv.org/abs/2106.01933v2">arXiv:2106.01933v2</a> [eess.AS]</span> for this version)
+          </td>
+        </tr>
+        <tr>
+          <td class="tablecell label">&nbsp;</td>
+          <td class="tablecell arxivdoi">              <a href="https://doi.org/10.48550/arXiv.2106.01933" id="arxiv-doi-link">https://doi.org/10.48550/arXiv.2106.01933</a><div class="button-and-tooltip">
+              <button class="more-info" aria-describedby="more-info-desc-1">
+                <svg height="15" role="presentation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z" class=""></path></svg>
+                <span class="visually-hidden">Focus to learn more</span>
+              </button>
+              
+              <div role="tooltip" id="more-info-desc-1">
+                <span class="left-corner"></span>                  arXiv-issued DOI via DataCite</div>
+            </div>
+          </td>
+        </tr></tbody></table>
+    </div>
+  </div>
+</div>
+    <div class="submission-history">
+      <h2>Submission history</h2> From: David Gaddy [<a href="/show-email/67df176c/2106.01933" rel="nofollow">view email</a>]      <br>            <strong><a href="/abs/2106.01933v1" rel="nofollow">[v1]</a></strong>
+        Thu, 3 Jun 2021 15:33:23 UTC (141 KB)<br>
+    <strong>[v2]</strong>
+        Mon, 21 Jun 2021 15:36:10 UTC (141 KB)<br>
+</div>
+  </div>
+  
+<div class="extra-services">    <div class="full-text">
+      <a name="other"></a>
+      <span class="descriptor">Full-text links:</span>
+      <h2>Access Paper:</h2>
+      <ul>
+  <div id="download-button-info" hidden="">
+View a PDF of the paper titled An Improved Model for Voicing Silent Speech, by David Gaddy and Dan Klein</div><li><a href="/pdf/2106.01933" aria-describedby="download-button-info" accesskey="f" class="abs-button download-pdf">View PDF</a></li><li><a href="https://arxiv.org/html/2106.01933v2" class="abs-button" id="latexml-download-link">HTML (experimental)</a></li><li><a href="/src/2106.01933" class="abs-button download-eprint">TeX Source
+ </a></li></ul>
+      <div class="abs-license"><a href="http://arxiv.org/licenses/nonexclusive-distrib/1.0/" title="Rights to this article">view license</a></div>
+    </div>
+        <div class="browse">
+    <h3 class="browse-context-heading">Current browse context:</h3>
+  <div class="current">eess.AS</div>
+
+  <div class="prevnext">
+<span class="arrow">
+      <a class="abs-button prev-url" href="/prevnext?id=2106.01933&amp;function=prev&amp;context=eess.AS" accesskey="p" title="previous in eess.AS (accesskey p)" rel="nofollow">&lt;&nbsp;prev</a>
+    </span>
+    <span class="is-hidden-mobile">&nbsp; | &nbsp;</span>    <span class="arrow">
+      <a class="abs-button next-url" href="/prevnext?id=2106.01933&amp;function=next&amp;context=eess.AS" accesskey="n" title="next in eess.AS (accesskey n)" rel="nofollow">next&nbsp;&gt;</a>
+    </span><br>
+  </div><div class="list">
+    <a class="abs-button abs-button-grey abs-button-small context-new" href="/list/eess.AS/new" rel="nofollow">new</a>
+    <span class="is-hidden-mobile"> | </span>
+    <a class="abs-button abs-button-grey abs-button-small context-recent" href="/list/eess.AS/recent" rel="nofollow">recent</a>
+    <span class="is-hidden-mobile"> | </span><a class="abs-button abs-button-grey abs-button-small context-id" href="/list/eess.AS/2021-06" rel="nofollow">2021-06</a>
+  </div><div class="abs-switch-cat">
+    Change to browse by:
+    <div class="switch context-change">
+        <a href="/abs/2106.01933?context=cs" rel="nofollow">cs</a><br class="is-hidden-mobile">
+        <a class="subclass" href="/abs/2106.01933?context=cs.CL" rel="nofollow">cs.CL</a><br class="is-hidden-mobile">
+        <a class="subclass" href="/abs/2106.01933?context=cs.LG" rel="nofollow">cs.LG</a><br class="is-hidden-mobile">
+        <a class="subclass" href="/abs/2106.01933?context=cs.SD" rel="nofollow">cs.SD</a><br class="is-hidden-mobile">
+        <a href="/abs/2106.01933?context=eess" rel="nofollow">eess</a><br class="is-hidden-mobile">
+    </div>
+  </div>
+
+    </div>
+      <div class="extra-ref-cite">
+        <h3>References &amp; Citations</h3>
+        <ul>
+          <li><a class="abs-button abs-button-small cite-ads" href="https://ui.adsabs.harvard.edu/abs/arXiv:2106.01933">NASA ADS</a></li><li><a class="abs-button abs-button-small cite-google-scholar" href="https://scholar.google.com/scholar_lookup?arxiv_id=2106.01933" target="_blank" rel="noopener">Google Scholar</a></li>
+          <li><a class="abs-button abs-button-small cite-semantic-scholar" href="https://api.semanticscholar.org/arXiv:2106.01933" target="_blank" rel="noopener">Semantic Scholar</a></li>
+        </ul>
+        <div style="clear:both;"></div>
+      </div>
+
+<div class="extra-ref-cite">
+    <button type="button" id="bib-cite-trigger" class="bib-cite-button abs-button">export BibTeX citation</button>
+    <span id="bib-cite-loading" hidden="true">Loading...</span>
+</div>
+
+<div id="bib-cite-modal" class="bib-modal" hidden="true">
+    <div class="bib-modal-content">
+        <div class="bib-modal-title">
+            <h2>BibTeX formatted citation</h2>
+            <button type="button" class="bib-modal-close" aria-label="Close">×</button>
+        </div>
+        <div>
+            <textarea id="bib-cite-target" class="bib-citation-content" aria-label="loading the citation">loading...</textarea>
+        </div>
+        <div>
+            <span>Data provided by: </span>
+            <a id="bib-cite-source-api"></a>
+        </div>
+    </div>
+</div><div class="bookmarks">
+  <div><h3>Bookmark</h3></div><a class="abs-button abs-button-grey abs-button-small" href="http://www.bibsonomy.org/BibtexHandler?requTask=upload&amp;url=https://arxiv.org/abs/2106.01933&amp;description=An Improved Model for Voicing Silent Speech" title="Bookmark on BibSonomy">
+    <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="BibSonomy" style="width: 16px !important; height: 16px !important;">
+  </a>
+  <a class="abs-button abs-button-grey abs-button-small" href="https://reddit.com/submit?url=https://arxiv.org/abs/2106.01933&amp;title=An Improved Model for Voicing Silent Speech" title="Bookmark on Reddit">
+    <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="Reddit" style="width: 18px !important; height: 18px !important;">
+  </a>
+</div>  </div>
+  
+
+<div id="labstabs">
+  <div class="labstabs" role="tablist" aria-label="arXivLabs tools"><input type="radio" name="tabs" id="tabone" checked="checked" class="labs-tab-input">
+    <label for="tabone" role="tab" aria-selected="true" aria-controls="tabpanel-one" id="tab-label-one">Bibliographic Tools</label>
+    <div class="tab labs-display-bib" role="tabpanel" id="tabpanel-one" aria-labelledby="tab-label-one">
+      <h1>Bibliographic and Citation Tools</h1>
+      <div class="toggle">
+        <div class="columns is-mobile lab-row">
+          <div class="column lab-switch">
+            <label class="switch">
+              <input id="bibex-toggle" type="checkbox" class="lab-toggle" data-script-url="/static/browse/0.3.4/bibex/bibex.js?20241202">
+              <span class="slider"></span>
+              <span class="is-sr-only">Bibliographic Explorer Toggle</span>
+            </label>
+          </div>
+          <div class="column lab-name">
+            <span id="label-for-bibex">Bibliographic Explorer</span> <em>(<a href="https://info.arxiv.org/labs/showcase.html#arxiv-bibliographic-explorer">What is the Explorer?</a>)</em>
+          </div>
+        </div>
+        <div class="columns is-mobile lab-row">
+          <div class="column lab-switch">
+            <label class="switch">
+              <input id="connectedpapers-toggle" type="checkbox" class="lab-toggle" data-script-url="/static/browse/0.3.4/js/connectedpapers.js" aria-labelledby="label-for-connected-papers">
+              <span class="slider"></span>
+              <span class="is-sr-only">Connected Papers Toggle</span>
+            </label>
+          </div>
+          <div class="column lab-name">
+            <span id="label-for-connected-papers">Connected Papers</span> <em>(<a href="https://www.connectedpapers.com/about" target="_blank">What is Connected Papers?</a>)</em>
+          </div>
+        </div><div class="columns is-mobile lab-row">
+          <div class="column lab-switch">
+            <label class="switch">
+              <input id="litmaps-toggle" type="checkbox" class="lab-toggle" data-script-url="/static/browse/0.3.4/js/litmaps.js?20210617" aria-labelledby="label-for-litmaps">
+              <span class="slider"></span>
+              <span class="is-sr-only">Litmaps Toggle</span>
+            </label>
+          </div>
+          <div class="column lab-name">
+            <span id="label-for-litmaps">Litmaps</span> <em>(<a href="https://www.litmaps.co/" target="_blank">What is Litmaps?</a>)</em>
+          </div>
+        </div>
+        <div class="columns is-mobile lab-row">
+          <div class="column lab-switch">
+            <label class="switch">
+              <input id="scite-toggle" type="checkbox" class="lab-toggle" data-script-url="/static/browse/0.3.4/js/scite.js?20210617" aria-labelledby="label-for-scite">
+              <span class="slider"></span>
+              <span class="is-sr-only">scite.ai Toggle</span>
+            </label>
+          </div>
+          <div class="column lab-name">
+            <span id="label-for-scite">scite Smart Citations</span> <em>(<a href="https://www.scite.ai/" target="_blank">What are Smart Citations?</a>)</em>
+          </div>
+        </div>
+      </div>
+        <div class="labs-content-placeholder labs-display" style="display: none;"></div>
+        <div style="min-height: 15px" id="connectedpapers-output"></div>
+        <div style="min-height: 15px" id="litmaps-open-in"></div>
+        <div style="min-height: 15px" id="scite-open-in"></div>
+    </div>
+
+
+    <input type="radio" name="tabs" id="tabtwo" class="labs-tab-input">
+    <label for="tabtwo" role="tab" aria-selected="false" aria-controls="tabpanel-two" id="tab-label-two">Code, Data, Media</label>
+    <div class="tab" role="tabpanel" id="tabpanel-two" aria-labelledby="tab-label-two">
+      <h1>Code, Data and Media Associated with this Article</h1>
+      <div class="toggle">
+        <div class="columns is-mobile lab-row">
+          <div class="column lab-switch">
+            <label class="switch">
+              <input id="alphaxiv-toggle" data-script-url="/static/browse/0.3.4/js/alphaxiv.js" type="checkbox" class="lab-toggle" aria-labelledby="label-for-alphaxiv">
+              <span class="slider"></span>
+              <span class="is-sr-only">alphaXiv Toggle</span>
+            </label>
+          </div>
+          <div class="column lab-name">
+            <span id="label-for-alphaxiv">alphaXiv</span> <em>(<a href="https://alphaxiv.org/" target="_blank">What is alphaXiv?</a>)</em>
+          </div>
+        </div>
+
+        <div class="columns is-mobile lab-row">
+          <div class="column lab-switch">
+            <label class="switch">
+              <input id="catalyzex-toggle" data-script-url="/static/browse/0.3.4/js/catalyzex.js" type="checkbox" class="lab-toggle" aria-labelledby="label-for-cx">
+              <span class="slider"></span>
+              <span class="is-sr-only">Links to Code Toggle</span>
+            </label>
+          </div>
+          <div class="column lab-name">
+            <span id="label-for-cx">CatalyzeX Code Finder for Papers</span> <em>(<a href="https://www.catalyzex.com" target="_blank">What is CatalyzeX?</a>)</em>
+          </div>
+        </div>
+
+        <div class="columns is-mobile lab-row">
+          <div class="column lab-switch">
+            <label class="switch">
+              <input id="dagshub-toggle" data-script-url="/static/browse/0.3.4/js/dagshub.js" type="checkbox" class="lab-toggle" aria-labelledby="label-for-dagshub">
+              <span class="slider"></span>
+              <span class="is-sr-only">DagsHub Toggle</span>
+            </label>
+          </div>
+          <div class="column lab-name">
+            <span id="label-for-dagshub">DagsHub</span> <em>(<a href="https://dagshub.com/" target="_blank">What is DagsHub?</a>)</em>
+          </div>
+        </div>
+  
+        <div class="columns is-mobile lab-row">
+          <div class="column lab-switch">
+            <label class="switch">
+              <input id="gotitpub-toggle" data-script-url="/static/browse/0.3.4/js/gotitpub.js" type="checkbox" class="lab-toggle" aria-labelledby="label-for-gotitpub">
+              <span class="slider"></span>
+              <span class="is-sr-only">GotitPub Toggle</span>
+            </label>
+          </div>
+          <div class="column lab-name">
+            <span id="label-for-gotitpub">Gotit.pub</span> <em>(<a href="http://gotit.pub/faq" target="_blank">What is GotitPub?</a>)</em>
+          </div>
+        </div>
+
+        <div class="columns is-mobile lab-row">
+          <div class="column lab-switch">
+            <label class="switch">
+              <input id="huggingface-toggle" data-script-url="/static/browse/0.3.4/js/huggingface.js" type="checkbox" class="lab-toggle" aria-labelledby="label-for-huggingface">
+              <span class="slider"></span>
+              <span class="is-sr-only">Huggingface Toggle</span>
+            </label>
+          </div>
+          <div class="column lab-name">
+            <span id="label-for-huggingface">Hugging Face</span> <em>(<a href="https://huggingface.co/huggingface" target="_blank">What is Huggingface?</a>)</em>
+          </div>
+        </div>
+
+        <div class="columns is-mobile lab-row">
+          <div class="column lab-switch">
+            <label class="switch">
+              <input id="sciencecast-toggle" data-script-url="/static/browse/0.3.4/js/sciencecast.js" type="checkbox" class="lab-toggle" aria-labelledby="label-for-sciencecast">
+              <span class="slider"></span>
+              <span class="is-sr-only">ScienceCast Toggle</span>
+            </label>
+          </div>
+          <div class="column lab-name">
+            <span id="label-for-sciencecast">ScienceCast</span> <em>(<a href="https://sciencecast.org/welcome" target="_blank">What is ScienceCast?</a>)</em>
+          </div>
+        </div>
+      </div>
+
+      <div id="alphaxiv-output" style="display:none"></div>
+      <div id="catalyzex-output" style="display:none"></div>
+      <div id="dagshub-output" style="display:none"></div>
+      <div id="gotitpub-output" style="display:none"></div>
+      <div id="sciencecast-output" style="display:none"></div>
+      <div id="huggingface-output" style="display:none"></div>
+    </div>
+
+
+      <input type="radio" name="tabs" id="labstabs-demos-input" class="labs-tab-input">
+      <label for="labstabs-demos-input" id="labstabs-demos-label" role="tab" aria-selected="false" aria-controls="tabpanel-demos">Demos</label>
+      <div class="tab" role="tabpanel" id="tabpanel-demos" aria-labelledby="labstabs-demos-label">
+        <h1>Demos</h1>
+        <div class="toggle">
+          <div class="columns is-mobile lab-row">
+            <div class="column lab-switch">
+              <label class="switch">
+                <input id="replicate-toggle" data-script-url="/static/browse/0.3.4/js/replicate.js" type="checkbox" class="lab-toggle" aria-labelledby="label-for-replicate">
+                <span class="slider"></span>
+                <span class="is-sr-only">Replicate Toggle</span>
+              </label>
+            </div>
+            <div class="column lab-name">
+              <span id="label-for-replicate">Replicate</span> <em>(<a href="https://replicate.com/docs/arxiv/about" target="_blank">What is Replicate?</a>)</em>
+            </div>
+          </div>
+          <div class="columns is-mobile lab-row">
+            <div class="column lab-switch">
+              <label class="switch">
+                <input id="spaces-toggle" data-script-url="/static/browse/0.3.4/js/spaces.js" type="checkbox" class="lab-toggle" aria-labelledby="label-for-spaces">
+                <span class="slider"></span>
+                <span class="is-sr-only">Spaces Toggle</span>
+              </label>
+            </div>
+            <div class="column lab-name">
+              <span id="label-for-spaces">Hugging Face Spaces</span> <em>(<a href="https://huggingface.co/docs/hub/spaces" target="_blank">What is Spaces?</a>)</em>
+            </div>
+          </div>
+          <div class="columns is-mobile lab-row">
+            <div class="column lab-switch">
+              <label class="switch">
+                <input id="txyz-toggle" data-script-url="/static/browse/0.3.4/js/txyz.js" type="checkbox" class="lab-toggle" aria-labelledby="label-for-txyz">
+                <span class="slider"></span>
+                <span class="is-sr-only">Spaces Toggle</span>
+              </label>
+            </div>
+            <div class="column lab-name">
+              <span id="label-for-txyz">TXYZ.AI</span> <em>(<a href="https://txyz.ai" target="_blank">What is TXYZ.AI?</a>)</em>
+            </div>
+          </div>
+        </div>
+        <div id="replicate-output"></div>
+        <div id="spaces-output"></div>
+        <div id="txyz-output"></div>
+      </div>
+      <input type="radio" name="tabs" id="tabfour" class="labs-tab-input">
+      <label for="tabfour" role="tab" aria-selected="false" aria-controls="tabpanel-four" id="tab-label-four">Related Papers</label>
+      <div class="tab" role="tabpanel" id="tabpanel-four" aria-labelledby="tab-label-four">
+        <h1>Recommenders and Search Tools</h1>
+        <div class="toggle">
+          <div class="columns is-mobile lab-row">
+            <div class="column lab-switch">
+              <label class="switch">
+                <input id="influenceflower-toggle" data-script-url="/static/browse/0.3.4/js/influenceflower.js" type="checkbox" class="lab-toggle" aria-labelledby="label-for-influenceflower">
+                <span class="slider"></span>
+                <span class="is-sr-only">Link to Influence Flower</span>
+              </label>
+            </div>
+            <div class="column lab-name">
+              <span id="label-for-influenceflower">Influence Flower</span> <em>(<a href="https://influencemap.cmlab.dev/" target="_blank">What are Influence Flowers?</a>)</em>
+            </div>
+          </div>
+          <div class="columns is-mobile lab-row">
+            <div class="column lab-switch">
+              <label class="switch">
+                <input id="core-recommender-toggle" type="checkbox" class="lab-toggle" aria-labelledby="label-for-core">
+                <span class="slider"></span>
+                <span class="is-sr-only">Core recommender toggle</span>
+              </label>
+            </div>
+            <div class="column lab-name">
+              <span id="label-for-core">CORE Recommender</span> <em>(<a href="https://core.ac.uk/services/recommender">What is CORE?</a>)</em>
+            </div>
+          </div></div>
+        <div id="influenceflower-output"></div>
+        <div id="influenceflower-output-graph" style="display:none">
+          <ul class="flower-tabs">
+            <li class="active"><a class="btn tab-btn" onclick="openTab(event, 'tab-author')">Author</a></li>
+            <li><a class="btn tab-btn" onclick="openTab(event, 'tab-venue')">Venue</a></li>
+            <li><a class="btn tab-btn" onclick="openTab(event, 'tab-inst')">Institution</a></li>
+            <li><a class="btn tab-btn" onclick="openTab(event, 'tab-topic')">Topic</a></li>
+          </ul>
+          <div class="flower-tab-content">
+            <div class="tab-flower active" id="tab-author"><svg id="flower-graph-author"></svg></div>
+            <div class="tab-flower" id="tab-venue"><svg id="flower-graph-venue"></svg></div>
+            <div class="tab-flower" id="tab-inst"><svg id="flower-graph-inst"></svg></div>
+            <div class="tab-flower" id="tab-topic"><svg id="flower-graph-topic"></svg></div>
+          </div>
+        </div>
+        <div id="coreRecommenderOutput"></div>
+        <div id="iarxivOutput"></div>
+      </div>
+
+      <input type="radio" name="tabs" id="tabfive" class="labs-tab-input">
+      <label for="tabfive" role="tab" aria-selected="false" aria-controls="tabpanel-five" id="tab-label-five">
+        About arXivLabs
+      </label>
+      <div class="tab" role="tabpanel" id="tabpanel-five" aria-labelledby="tab-label-five">
+        <div class="columns">
+          <div class="column">
+            <h1>arXivLabs: experimental projects with community collaborators</h1>
+            <p>arXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.</p>
+            <p>Both individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.</p>
+            <p>Have an idea for a project that will add value for arXiv's community? <a href="https://info.arxiv.org/labs/index.html"><strong>Learn more about arXivLabs</strong></a>.</p>
+          </div>
+          <div class="column is-narrow is-full-mobile">
+            <p class="icon-labs"><svg xmlns="http://www.w3.org/2000/svg" role="presentation" viewBox="0 0 635.572 811"><path d="M175.6 676v27h-27v-27zm-54 27v27h27v-27zm-27 27v27h27v-27zm396-54v27h-27v-27zm0 27v27h27v-27zm27 27v27h27v-27zm-27-414h27v27h-27zm27 0h27v-27h-27zm27-27h27v-27h-27zm-396 45h-27v-27h27zm-27-54h-27v27h27zm-27-27h-27v27h27z"></path><path d="M94.6 730v27h-27v-27zm477 0v27h-27v-27zm-27-495h27v27h-27zm-450 18h-27v-27h27zm477 9h27v27h-27zm-54 495h27v27h-27zm-423 0h27v27h-27zm-54-504h27v27h-27z" fill="#666"></path><path d="M67.6 730v27h-27v-27zm54 54v27h-27v-27zm0-108v27h27v-27zm-27 27v27h27v-27zm-81 0v27h27v-27zm585 27v27h-27v-27zm-108-54v27h27v-27zm27 27v27h27v-27zm81 0v27h27v-27zm-54-495h27v27h-27zm-54 108h27v-27h-27zm27-27h27v-27h-27zm0-81h27v-27h-27zm-423 18h-27v-27h27zm54 54h-27v27h27zm-27-27h-27v27h27zm0-81h-27v27h27zm423 612v27h-27v-27zm81-522v27h-27v-27zm-585-9v27h-27v-27z" fill="#999"></path><path d="M94.6 784v27h-27v-27zm-27-27v27h27v-27zm-27-54v27h27v-27zm27 0v27h27v-27zm0-27v27h27v-27zm27 0v27h27v-27zm0-27v27h27v-27zm27 0v27h27v-27zm-108 81v27h27v-27zm558 54v27h-27v-27zm-27-27v27h27v-27zm27-54v27h27v-27zm-27 0v27h27v-27zm0-27v27h27v-27zm-27 0v27h27v-27zm0-27v27h27v-27zm-27 0v27h27v-27zm108 81v27h27v-27zm0-495h27v27h-27zm-27 27h27v-27h-27zm-54-27h27v-27h-27zm0 27h27v-27h-27zm-27 0h27v-27h-27zm0 27h27v-27h-27zm-27 0h27v-27h-27zm0 27h27v-27h-27zm81-108h27v-27h-27zm-504 45h-27v-27h27zm27-27h-27v27h27zm54-27h-27v27h27zm0 27h-27v27h27zm27 0h-27v27h27zm0 27h-27v27h27zm27 0h-27v27h27zm0 27h-27v27h27zm-81-108h-27v27h27z" fill="#ccc"></path><path d="M598.6 665.1H41.5C-76.5 667 176 280.2 176 280.2h53a46.5 46.5 0 0162.8-56.3 29.2 29.2 0 1128.5 35.9h-1a46.5 46.5 0 01-1.5 20.3l142.5-.1s255.3 387 138.3 385.1zM291 181a29.3 29.3 0 10-29.2-29.3A29.3 29.3 0 00291 181zm65.4-66.8a22.4 22.4 0 10-22.5-22.4 22.4 22.4 0 0022.5 22.4z" fill="#fc0"></path><path d="M245.5 172V10h153v162s324 495 198 495h-558c-126 0 207-495 207-495zm126 54h56m-13 72h56m-9 72h56m-20 72h56m-22 72h56m-29 72h56m-457-45c20.8 41.7 87.3 81 160.7 81 72.1 0 142.1-38.2 163.4-81" fill="none" stroke="#000" stroke-miterlimit="10" stroke-width="20"></path><path d="M273.3 421.7c0 31-9.8 56.3-21.9 56.3s-21.8-25.2-21.8-56.3 9.8-56.3 21.8-56.3 21.9 25.2 21.9 56.3zm114.4-56.3c-12 0-21.8 25.2-21.8 56.3s9.7 56.3 21.8 56.3 21.9-25.2 21.9-56.3-9.8-56.3-21.9-56.3zM150.1 526.6c-18.2 6.7-27.5 22.9-23.2 30.2s14.8-5.5 33-12.2 37.4-4.9 33-12.2-24.5-12.6-42.8-5.8zm296 5.8c-4.2 7.3 14.9 5.5 33.1 12.2s28.7 19.5 33 12.2-5-23.5-23.2-30.2-38.5-1.5-42.8 5.8z"></path></svg></p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+</div>
+
+  <div class="endorsers">
+    <a href="/auth/show-endorsers/2106.01933" class="endorser-who" rel="nofollow">Which authors of this paper are endorsers?</a> |
+    <a id="mathjax_toggle" href="javascript:setMathjaxCookie()">Disable MathJax</a> (<a href="https://info.arxiv.org/help/mathjax.html">What is MathJax?</a>)
+    <span class="help" style="font-style: normal; float: right; margin-top: 0; margin-right: 1em;"></span>
+  </div>
+  
+</div>
+      </div>
+    </main>
+
+<footer class="ds-site-footer">
+  <div class="ds-site-footer-grid">
+    <div class="ds-site-footer-main">
+      <div class="ds-site-footer-ack">
+        We gratefully acknowledge support from
+        our <strong>major funders</strong>,
+        <a href="https://info.arxiv.org/about/ourmembers.html"><strong>member institutions</strong></a><span class="ack-member-inline" hidden="">, <strong></strong></span>,
+        and all contributors.
+      </div>
+      <nav class="ds-site-footer-links" aria-label="Site navigation">
+        <a href="https://info.arxiv.org/about">About</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help">Help</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help/contact.html">Contact</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help/subscribe">Subscribe</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help/license/index.html">Copyright</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help/policies/privacy_policy.html">Privacy</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help/web_accessibility.html">Accessibility</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://status.arxiv.org" target="_blank" rel="noopener noreferrer">Operational Status<span class="is-sr-only"> (opens in new tab)</span></a>
+      </nav>
+    </div>
+
+    <div class="ds-site-footer-funders" aria-label="Major funders">
+      <div class="ds-site-footer-funders-label">Major funding support from</div>
+      <div class="ds-site-footer-funders-logos">
+        <a class="ds-funder-link" href="https://www.simonsfoundation.org/" target="_blank" rel="noopener noreferrer">
+          <img class="ds-funder-logo" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="Simons Foundation" style="width: 168px !important; height: 48px !important;">
+        </a>
+        <a class="ds-funder-link" href="https://www.sfi.org.bm/" target="_blank" rel="noopener noreferrer">
+          <img class="ds-funder-logo" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="Simons Foundation International" style="width: 192px !important; height: 48px !important;">
+        </a>
+        <a class="ds-funder-link" href="https://www.schmidtsciences.org/" target="_blank" rel="noopener noreferrer">
+          <img class="ds-funder-logo" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="Schmidt Sciences" style="width: 158px !important; height: 48px !important;">
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>  </div>
+
+  
+
+
+
+</body></html>
