@@ -25,9 +25,9 @@ Files: `site/assets/afono-symbol.svg`, `afono-symbol-light.svg` (dark background
 
 ## Type
 - Wordmark only: **Manrope** ExtraBold (800).
-- Display: **Bricolage Grotesque** 600–700, tight tracking (−3% to −4% on large sizes).
-- Body and interface: **Figtree** 400–600, 16–17 px.
-- Data and labels: **IBM Plex Mono**.
+- Display and text: the system face. **SF Pro** on Apple devices, **Inter** everywhere else (the closest open equivalent; SF Pro cannot be hosted on the web). Headlines 600–700 with tight tracking.
+- Data and labels: **SF Mono** on Apple devices, **IBM Plex Mono** elsewhere.
+- Look: white and #F5F5F7 surfaces, near-black #1D1D1F text, teal and orange used sparingly.
 All four are free on Google Fonts. Tokens live in `site/assets/afono.css`.
 
 ## Motion: the intro (about 4 s)

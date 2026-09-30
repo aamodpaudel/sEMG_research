@@ -8,7 +8,7 @@
 <link rel="icon" href="assets/afono-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@600;800&display=swap">
 <link rel="stylesheet" href="assets/afono.css">
 <style>
   .wrap { max-width: 980px; }
@@ -63,7 +63,7 @@
 <header class="top">
   <div class="wrap">
     <a class="lockup" href="index.html" style="font-size: 28px" aria-label="Afono home">
-      <svg viewBox="0 0 64 96" aria-hidden="true"><circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="9"></circle><line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="9" stroke-linecap="round"></line></svg>
+      <svg viewBox="0 0 64 96" aria-hidden="true"><circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="6.5"></circle><line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="6.5" stroke-linecap="round"></line></svg>
       <span>afono</span>
     </a>
     <nav aria-label="Pages"><a href="index.html">Home</a><a href="brand.html">Brand</a></nav>
@@ -197,7 +197,7 @@ python -m semg.compare --profile demo-open --a runs/base/best.pt --b runs/&lt;ca
     <h2 id="r10"><span class="num">10</span>Cite</h2>
 <pre>@misc{afono2026silent,
   title  = {Afono: silent speech to text with interface-constrained decoding},
-  author = {[Founder name] and Afono contributors},
+  author = {Aamod Paudel and Afono contributors},
   year   = {2026},
   note   = {Research card, protocol v2},
   url    = {https://afono.org/research.html}
@@ -287,12 +287,12 @@ python -m semg.compare --profile demo-open --a runs/base/best.pt --b runs/&lt;ca
   el("text", { x: x(90) - 6, y: top - 20, "text-anchor": "end", fill: "var(--ink-2)", "font-size": 13, "font-family": "IBM Plex Mono, monospace" }, "goal 90%");
   R.tasks.forEach(function (t, i) {
     var y = top + i * rowH + rowH / 2;
-    el("text", { x: 0, y: y - 3, fill: "var(--ink)", "font-size": 16, "font-family": "Figtree, sans-serif" }, t.label);
+    el("text", { x: 0, y: y - 3, fill: "var(--ink)", "font-size": 16, "font-family": "Inter, sans-serif" }, t.label);
     el("text", { x: 0, y: y + 15, fill: "var(--ink-2)", "font-size": 12, "font-family": "IBM Plex Mono, monospace" }, t.vocab.toLocaleString() + " words · n = " + t.n);
     el("line", { x1: x(t.acc_ci[0]), x2: x(t.acc_ci[1]), y1: y, y2: y, stroke: "var(--chart)", "stroke-width": 2, "stroke-linecap": "round" });
     [t.acc_ci[0], t.acc_ci[1]].forEach(function (v) { el("line", { x1: x(v), x2: x(v), y1: y - 6, y2: y + 6, stroke: "var(--chart)", "stroke-width": 2, "stroke-linecap": "round" }); });
     el("circle", { cx: x(t.acc), cy: y, r: 6, fill: "var(--chart)", stroke: "var(--card)", "stroke-width": 2 });
-    el("text", { x: x(t.acc_ci[1]) + 10, y: y + 5, fill: "var(--ink)", "font-size": 14, "font-weight": 600, "font-family": "Bricolage Grotesque, sans-serif" }, f1(t.acc) + "%");
+    el("text", { x: x(t.acc_ci[1]) + 10, y: y + 5, fill: "var(--ink)", "font-size": 14, "font-weight": 600, "font-family": "Inter, sans-serif" }, f1(t.acc) + "%");
     var hit = el("rect", { x: left - 10, y: y - rowH / 2, width: W - left - right + 20, height: rowH, fill: "transparent" });
     hit.addEventListener("pointermove", function (e) {
       var b = svg.getBoundingClientRect(), fb = svg.parentNode.getBoundingClientRect();

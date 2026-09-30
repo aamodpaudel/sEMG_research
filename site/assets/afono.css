@@ -1,11 +1,11 @@
-/* Afono brand tokens + shared components (website, brand guide, local app). */
+/* Afono brand tokens + shared components (website, brand guide, local app). One light look: white, soft gray, near-black. */
 :root {
-  --paper: #F3F5F2;      /* cool paper: page ground */
-  --paper-2: #E4EBE8;    /* mist: quiet surfaces */
+  --paper: #FFFFFF;      /* cool paper: page ground */
+  --paper-2: #F5F5F7;    /* mist: quiet surfaces */
   --card: #FFFFFF;
-  --ink: #12262A;        /* primary text, dark surfaces */
-  --ink-2: #3E5156;      /* secondary text (8:1 on paper) */
-  --line: #C9D5D2;
+  --ink: #1D1D1F;        /* primary text, dark surfaces */
+  --ink-2: #6E6E73;      /* secondary text (8:1 on paper) */
+  --line: #E4E4E9;
   --teal: #0F5E63;       /* Afono teal: ring, headings, links */
   --teal-2: #0B4A4E;
   --signal: #D9552B;     /* signal orange: the bar, one accent per view */
@@ -13,25 +13,13 @@
   --good: #1F7A4D;
   --bad: #B3261E;
   --on-dark: #F3F5F2;
-  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
   --wordmark: "Manrope", "Geist", system-ui, sans-serif;   /* logo only */
   --ease: cubic-bezier(.2, .8, .2, 1);
   --r: 14px;
   color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0D1B1E; --paper-2: #15282C; --card: #112226; --ink: #EAF0EE; --ink-2: #A9BAB8;
-    --line: #2A3F43; --teal: #5DB5AE; --teal-2: #7FCBC4; --signal: #F0794A; --chart: #12A094; --good: #5CC08C; --bad: #FF8A80;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper: #0D1B1E; --paper-2: #15282C; --card: #112226; --ink: #EAF0EE; --ink-2: #A9BAB8;
-  --line: #2A3F43; --teal: #5DB5AE; --teal-2: #7FCBC4; --signal: #F0794A; --chart: #12A094; --good: #5CC08C; --bad: #FF8A80;
-  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -48,8 +36,8 @@ p { margin: 0; }
 .wrap { width: 100%; max-width: 1160px; margin: 0 auto; padding-inline: 24px; }
 
 /* wordmark lockup */
-.lockup { display: inline-flex; align-items: center; gap: 0.22em; font-family: var(--wordmark); font-weight: 800;
-  letter-spacing: -0.045em; line-height: 1; color: var(--teal); text-decoration: none; }
+.lockup { display: inline-flex; align-items: center; gap: 0.2em; font-family: var(--wordmark); font-weight: 600;
+  letter-spacing: -0.04em; line-height: 1; color: var(--teal); text-decoration: none; }
 .lockup svg { height: 1.15em; width: auto; overflow: visible; }
 .sym-ring { stroke: var(--teal); }
 .sym-bar { stroke: var(--signal); }

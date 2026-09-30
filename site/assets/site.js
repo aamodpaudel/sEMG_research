@@ -44,10 +44,18 @@
   }
 
   /* ---------- headline: words blur in ---------- */
+  /* hero window grows toward full size as it scrolls into view */
   var heroFrame = document.getElementById("hero-frame");
   if (heroFrame && !reduce) {
-    var flatten = function () { heroFrame.classList.toggle("flat", window.scrollY > 40); };
-    window.addEventListener("scroll", flatten, { passive: true }); flatten();
+    var ticking = false;
+    var grow = function () {
+      ticking = false;
+      var r = heroFrame.getBoundingClientRect(), vh = window.innerHeight;
+      var p = Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.9)));
+      heroFrame.style.transform = "scale(" + (0.9 + 0.1 * p).toFixed(4) + ")";
+    };
+    window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(grow); } }, { passive: true });
+    window.addEventListener("resize", grow); setTimeout(grow, 950);
   }
   var hl = document.getElementById("headline");
   if (hl && !reduce) {
