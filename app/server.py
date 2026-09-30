@@ -448,6 +448,83 @@ def get_gaze_candidates():
     return {**GAZE, "age_s": round(time.time() - GAZE["received"], 3)}
 
 
+# ------------------------------------------------------------------ Whisper mode (quiet speech, ordinary microphone)
+VOICE = {"loading": False, "error": None}
+
+
+def _voice():
+    try:
+        from semg import voice
+        return voice
+    except ImportError as e:  # transformers missing
+        raise HTTPException(503, f"Whisper mode needs the transformers package ({e}).")
+
+
+def _load_voice():
+    try:
+        _voice().get_decoder()
+    except Exception as e:  # noqa: BLE001 - shown in the UI
+        VOICE["error"] = str(e)[:300]
+    finally:
+        VOICE["loading"] = False
+
+
+@app.get("/api/voice/status")
+def voice_status(load: int = 0):
+    v = _voice()
+    ready = v._DECODER is not None
+    if load and not ready and not VOICE["loading"]:
+        VOICE.update(loading=True, error=None)
+        threading.Thread(target=_load_voice, daemon=True).start()
+    cands = v.candidates(CONTEXT.get("targets"))
+    return {"ready": ready, "loading": VOICE["loading"], "error": VOICE["error"], "model": v.MODEL_ID,
+            "device": v._DECODER.device.type if ready else None, "n_candidates": len(cands),
+            "page": CONTEXT.get("title") or None, "candidates": [c["say"] for c in cands[:200]]}
+
+
+@app.post("/api/voice/decode")
+async def voice_decode(request: Request, send: int = 0, gaze: int = 1, keep: int = 0, label: str = "",
+                       profile: str = "default"):
+    """Body: 16 kHz mono int16 PCM. Returns the most likely on-screen phrase; queues it for the extension
+    when accepted and send=1. With keep=1 and a label (self-test prompts only), the clip is saved to the
+    profile folder on this computer for later training."""
+    v = _voice()
+    raw = await request.body()
+    if len(raw) < 3200:
+        raise HTTPException(400, "Clip too short.")
+    audio = np.frombuffer(raw[: 2 * int(v.MAX_SECONDS * v.SR)], dtype=np.int16).astype(np.float32) / 32768.0
+    cands = v.candidates(CONTEXT.get("targets"))
+    if label and normalize_text(label) not in {c["say"] for c in cands}:
+        cands.append({"say": normalize_text(label), "send": normalize_text(label), "target": None})
+    g = None
+    if gaze and GAZE and time.time() - GAZE.get("received", 0) < 1.5:
+        g = {int(c["id"][1:]): c["p"] for c in GAZE.get("candidates", []) if c["id"][:1] == "n" and c["id"][1:].isdigit()}
+    import asyncio
+    r = await asyncio.to_thread(v.get_decoder().decode, audio, cands, g or None)
+    if send and r["accepted"]:
+        COMMAND_QUEUE.append(r["send"])
+        r["queued"] = True
+    if keep and label and _SAFE.match(profile):
+        d = os.path.join(os.environ.get("AFONO_USER_ROOT", "data/user"), profile, "voice")
+        os.makedirs(d, exist_ok=True)
+        import wave
+        name = time.strftime("%Y%m%d-%H%M%S") + "_" + "-".join(normalize_text(label).split())[:40] + ".wav"
+        with wave.open(os.path.join(d, name), "wb") as w:
+            w.setnchannels(1); w.setsampwidth(2); w.setframerate(v.SR); w.writeframes(raw)
+        r["saved"] = name
+    return r
+
+
+@app.post("/api/voice/result")
+def voice_result(body: dict = Body(...)):
+    keep = {k: body[k] for k in ("accuracy", "accepted_accuracy", "reject_rate", "trials", "median_candidates",
+                                 "median_ms", "style", "mic", "gaze") if k in body}
+    rec = log_run("evaluate", "voice-1", model="voice", benchmark="Whisper mode self-test", metrics=keep,
+                  whisper_model=_voice().MODEL_ID, profile=str(body.get("profile", "default"))[:40],
+                  notes=str(body.get("notes", ""))[:200])
+    return {"logged": rec["time"]}
+
+
 # ------------------------------------------------------------------ calibration (in-process, works when packaged)
 JOBS = {}
 

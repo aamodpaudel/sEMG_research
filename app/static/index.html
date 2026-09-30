@@ -82,6 +82,7 @@
       <button role="tab" aria-selected="true" data-tab="semg" id="tab-semg">sEMG Model</button>
       <button role="tab" aria-selected="false" data-tab="track" id="tab-track">Track Model</button>
       <button role="tab" aria-selected="false" data-tab="dom" id="tab-dom">DOM Model</button>
+      <button role="tab" aria-selected="false" data-tab="voice" id="tab-voice">Whisper</button>
       <button role="tab" aria-selected="false" data-tab="settings" id="tab-settings">Settings</button>
     </div>
     <span class="grow"></span>
@@ -226,6 +227,47 @@
     </div>
     <h2>Recent actions</h2>
     <div class="runs" id="ran"></div>
+  </div>
+</section>
+
+<section class="layout" id="view-voice" role="tabpanel" aria-labelledby="tab-voice" hidden>
+  <div class="col">
+    <h2>Whisper mode</h2>
+    <div class="panel">
+      <p>Whisper or speak quietly into any microphone, including your earbuds. Nullpoint only listens for the phrases on the connected page (its labels, <b>click</b> plus a label or badge number, and the Tier 1 commands), so a whisper only has to pick one of them.</p>
+      <p class="msg" id="v-state">Speech model not loaded.</p>
+      <div class="row">
+        <button class="btn primary" type="button" id="v-mic">Start microphone</button>
+        <button class="btn" type="button" id="v-ptt" disabled>Hold to talk</button>
+      </div>
+      <label class="f"><span><input type="checkbox" id="v-auto"> Listen hands-free (detects when you start and stop)</span></label>
+      <label class="f"><span><input type="checkbox" id="v-send" checked> Send accepted phrases to the page</span></label>
+      <label class="f"><span><input type="checkbox" id="v-gaze" checked> Use gaze from the Track Model when live snap is on</span></label>
+      <p>Level <meter id="v-level" min="0" max="1" value="0" style="width: 60%"></meter></p>
+      <p>Audio is decoded on this computer and not stored, except self-test clips when you tick the box below.</p>
+    </div>
+  </div>
+  <div class="col">
+    <h2>Last phrase</h2>
+    <div class="panel">
+      <p class="big" id="v-out" style="font-size: 26px; margin: 0">–</p>
+      <p class="msg" id="v-meta"></p>
+      <pre id="v-top" style="max-height: 220px; overflow: auto"></pre>
+    </div>
+    <h2>Phrases on this page</h2>
+    <p class="msg" id="v-page">No page connected: only the Tier 1 commands are listened for.</p>
+  </div>
+  <div class="col">
+    <h2>Self-test</h2>
+    <div class="panel">
+      <p>Measures Whisper mode on you: 20 prompts drawn from the phrases on the current page. Say each one the way you chose below, then the next prompt appears.</p>
+      <label class="f" for="v-style">How you speak<select id="v-style"><option value="whisper">Whisper</option><option value="quiet">Quiet voice</option><option value="normal">Normal voice</option></select></label>
+      <label class="f" for="v-micname">Microphone<input type="text" id="v-micname" placeholder="e.g. AirPods Pro, laptop mic"></label>
+      <label class="f"><span><input type="checkbox" id="v-keep"> Keep the self-test clips on this computer (for training later)</span></label>
+      <div class="row"><button class="btn" type="button" id="v-test" disabled>Start self-test</button></div>
+      <p class="big" id="v-prompt" style="font-size: 24px; margin: 8px 0">&nbsp;</p>
+      <p class="msg" id="v-score"></p>
+    </div>
   </div>
 </section>
 
@@ -487,5 +529,6 @@
 })();
 </script>
 <script type="module" src="/static/track-ui.js"></script>
+<script src="/static/voice-ui.js"></script>
 </body>
 </html>

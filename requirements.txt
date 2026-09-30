@@ -8,3 +8,4 @@ pytest
 fastapi
 uvicorn
 python-multipart
+transformers>=4.44,<5   # Whisper mode

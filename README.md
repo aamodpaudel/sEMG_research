@@ -109,6 +109,13 @@ book sentences. They are not a measurement on our 4-channel rig, on isolated com
 the Tier 1 recording session (`python -m semg.commands`, below). The 90% target on page30-hard is not reached.
 The published state of the art on open vocabulary is 12.2% WER; we are at 52.0%.
 
+## Whisper mode (no extra hardware)
+Whisper or speak quietly into any microphone, earbuds included. Nullpoint's **Whisper** tab listens only for the
+phrases on the connected page, sends accepted ones to the browser extension, and has a 20-prompt self-test that
+logs your accuracy. It uses Whisper base.en on this computer (`pip install transformers`; the model, about 290 MB,
+downloads on first use). Command line: `python -m semg.voice decode clip.wav --labels "sign in" "reply two"`.
+Synthetic pipeline check: `python -m semg.voice selftest`. See METRICS.md, "Whisper mode".
+
 ## Tier 1 command words (hardware weekend)
 `python -m semg.commands` records, trains and evaluates a 20–30 word silent-command classifier from the 4-channel ESP32 rig:
 ```bash

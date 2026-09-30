@@ -277,6 +277,23 @@ landmarks trained on MPIIFaceGaze, corrected per person from the 9-point calibra
 (3) later, a small CNN on normalised eye patches (MobileNet-sized, ONNX in the browser), trained leave-one-subject-out
 on MPIIFaceGaze with the paper's 4.8° as the bar, then fine-tuned per person.
 
+## Whisper mode: quiet speech from an ordinary microphone
+`semg/voice.py`. Whisper base.en (Radford et al., 2022) scores every phrase the page allows (labels, `click` plus a
+label or badge number, Tier 1 commands) by teacher-forced log-likelihood. The encoder runs once per clip; the free
+transcription acts as a garbage model. A phrase is **accepted** when its posterior (uniform prior, optionally
+re-weighted by Track Model gaze with a uniform floor) is at least 0.7 and the free transcription either agrees with
+it (character similarity >= 0.75, so homophones like "reply to" / "reply two" agree) or scores at most 4 nats higher.
+Thresholds were set on synthetic clips, not on test data from people.
+
+**Pipeline check (SYNTHETIC, not a measurement):** Windows SAPI text-to-speech in a normal voice, 36 prompts on
+three page-like phrase sets (median 62 phrases): 36/36 top choice correct, 1 rejected (British "colour" heard as
+"Color"). Off-page speech (4 sentences), silence and two noise levels: all rejected. About 0.3-0.6 s per clip on
+the RTX 4060. This shows the pipeline works; it says nothing about whispers or real voices.
+
+**Self-test (the measurement):** Nullpoint's Whisper tab draws 20 prompts from the connected page's phrases.
+It logs, per session, top-choice accuracy, accuracy when accepted, rejection rate, speaking style (whisper,
+quiet, normal) and microphone, as `voice-1` in the run registry.
+
 ## Planned protocols for the other two models
 - **Afono Track Model** (gaze): first human sessions with the v1 protocol above (accuracy, sigma, snap vs pixel hit rate on the same trials); then a CNN on MPIIFaceGaze, leave-one-subject-out.
 - **Afono DOM Model** (page elements): DOM-1 above; next, precision and recall of clickable elements on the WebUI test split and on a hand-labelled DOM-2 set of div-soup pages (the case the learned detector targets).
