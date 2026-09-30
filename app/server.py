@@ -147,7 +147,9 @@ def lexicon_for(vocab, profile, words):
     if vocab in ("custom", "page"):
         ws = [normalize_text(w) for w in (words or "").replace(",", " ").split()]
         if vocab == "page":
-            ws += COMMAND_WORDS + CONTEXT.get("vocabulary", [])
+            # The extension's list already holds the command and number words that apply to this page;
+            # the full command set (spelling alphabet included) is only a fallback when no page is connected.
+            ws += CONTEXT.get("vocabulary") or COMMAND_WORDS
         ws = [w for w in ws if w and " " not in w]
         if not ws:
             raise HTTPException(400, "Type the words that are on screen, separated by spaces.")
@@ -351,7 +353,14 @@ CONTEXT, COMMAND_QUEUE, RAN = {}, deque(maxlen=20), deque(maxlen=50)
 
 @app.post("/api/context")
 def set_context(body: dict = Body(...)):
-    targets = [{"n": int(t.get("n", 0)), "label": str(t.get("label", ""))[:60], "kind": str(t.get("kind", ""))[:20]}
+    def rect(r):
+        try:
+            return {k: float(r[k]) for k in ("left", "top", "width", "height")}
+        except (KeyError, TypeError, ValueError):
+            return None
+
+    targets = [{"n": int(t.get("n", 0)), "label": str(t.get("label", ""))[:60], "kind": str(t.get("kind", ""))[:20],
+                "rect": rect(t.get("rect"))}
                for t in body.get("targets", [])[:150]]
     CONTEXT.update({"url": str(body.get("url", ""))[:300], "title": str(body.get("title", ""))[:200], "targets": targets,
                     "vocabulary": [normalize_text(w) for w in body.get("vocabulary", [])[:400] if normalize_text(w)],
@@ -407,11 +416,36 @@ def track_result(body: dict = Body(...)):
     if kind not in ("validation", "target_test"):
         raise HTTPException(400, "kind must be validation or target_test")
     keep = {k: body[k] for k in ("accuracy_px", "precision_px", "accuracy_deg", "precision_deg", "points", "hit_rate",
-                                 "trials", "mean_time_ms", "screen_px", "screen_cm", "distance_cm", "calibration_samples")
+                                 "trials", "mean_time_ms", "screen_px", "screen_cm", "distance_cm", "calibration_samples",
+                                 "sigma_px", "sigma_deg", "mapping", "lopo_deg", "dropped_points", "pixel_hit_rate",
+                                 "centre_hit_rate", "accuracy_deg_poly2", "accuracy_deg_v0", "accuracy_px_poly2",
+                                 "accuracy_px_v0")
             if k in body}
-    rec = log_run("evaluate", "track-0", model="track", benchmark=f"Track {kind}", metrics=keep,
+    rec = log_run("evaluate", "track-1", model="track", benchmark=f"Track {kind}", metrics=keep,
                   profile=body.get("profile", "default"), notes=str(body.get("notes", ""))[:200])
     return {"logged": rec["time"]}
+
+
+# Latest gaze candidates from the Track tab (top-k elements with probabilities), for fusion with the voice decoder.
+GAZE = {}
+
+
+@app.post("/api/track/candidates")
+def set_gaze_candidates(body: dict = Body(...)):
+    cands = [{"id": str(c.get("id", ""))[:40], "label": str(c.get("label", ""))[:60], "p": float(c.get("p", 0))}
+             for c in body.get("candidates", [])[:10]]
+    GAZE.clear()
+    GAZE.update({"candidates": cands, "p_none": float(body.get("p_none", 1)), "highlight": body.get("highlight"),
+                 "fixating": bool(body.get("fixating", False)), "sigma_px": float(body.get("sigma_px", 0)),
+                 "gaze": body.get("gaze"), "received": time.time()})
+    return {"ok": True}
+
+
+@app.get("/api/track/candidates")
+def get_gaze_candidates():
+    if not GAZE:
+        return {"candidates": [], "p_none": 1.0, "age_s": None}
+    return {**GAZE, "age_s": round(time.time() - GAZE["received"], 3)}
 
 
 # ------------------------------------------------------------------ calibration (in-process, works when packaged)

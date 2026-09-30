@@ -65,6 +65,10 @@
   #stage .grid div { border: 2px solid var(--line); border-radius: 18px; display: grid; place-items: center; font: 600 26px var(--display); color: var(--ink-2); transition: all .12s; }
   #stage .grid div.goal { border-color: var(--signal); color: var(--signal); }
   #stage .grid div.hot { background: var(--teal); color: var(--on-dark); border-color: var(--teal); }
+  .gz-hot { outline: 3px solid var(--teal) !important; outline-offset: 2px; }
+  .gz-dwell { box-shadow: 0 0 0 6px rgba(20,130,120,.28) !important; }
+  .gz-dot { position: fixed; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 2px solid var(--signal); opacity: .55; pointer-events: none; z-index: 60; }
+  pre#t-cands { max-height: 200px; }
   #stage .help { position: absolute; left: 50%; bottom: 3vh; transform: translateX(-50%); font: 500 15px var(--display); color: var(--ink-2); background: var(--card); padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); }
   @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } .col + .col { border-left: 0; border-top: 1px solid var(--line); } }
 </style>
@@ -164,15 +168,16 @@
     <div class="panel">
       <ol class="steps">
         <li>Sit about an arm's length from the screen, face lit from the front.</li>
-        <li><b>Calibrate:</b> look at each orange dot until it shrinks. 9 dots, about 15 seconds.</li>
-        <li><b>Accuracy test:</b> 5 new dots measure the error in pixels and degrees.</li>
+        <li><b>Calibrate:</b> look at each orange dot until it disappears. 9 dots in a 3 × 3 grid, about 15 seconds.</li>
+        <li><b>Accuracy test:</b> 5 new dots measure the error in pixels and degrees, and set how far snapping reaches.</li>
         <li><b>Target test:</b> look at the orange square and press Space when it turns teal. 12 trials.</li>
+        <li><b>Live snap:</b> the button you look at on this page gets a teal outline.</li>
       </ol>
       <div class="row">
         <button class="btn primary" type="button" id="t-cal" disabled>Calibrate</button>
         <button class="btn" type="button" id="t-val" disabled>Accuracy test</button>
         <button class="btn" type="button" id="t-grid" disabled>Target test</button>
-        <button class="btn" type="button" id="t-live" disabled>Live gaze dot</button>
+        <button class="btn" type="button" id="t-live" disabled>Live snap</button>
       </div>
       <div class="row">
         <label class="f" for="scr-cm">Screen width, cm<input type="number" id="scr-cm" value="34.5" step="0.1" style="width: 110px"></label>
@@ -180,12 +185,15 @@
       </div>
     </div>
     <div class="out"><span class="k">Last result</span><span class="v" id="t-result" style="font-size: 18px">No test yet.</span></div>
+    <div class="out"><span class="k">Gaze candidates for the voice decoder</span><pre class="log" id="t-cands">Start Live snap to see the most likely elements and their probabilities.</pre></div>
   </div>
   <div class="col">
     <h2>What gets measured</h2>
     <div class="panel">
       <p><b>Accuracy</b> is the distance between where you looked and the Track Model's median estimate. <b>Precision</b> is the jitter between consecutive estimates. Both are reported in pixels and degrees of visual angle, the standard eye-tracking units.</p>
-      <p><b>Target test</b> measures what matters for Nullpoint: whether gaze snapped to the nearest of 12 buttons picks the right one, and how long it takes.</p>
+      <p><b>Snapping.</b> Webcam gaze is off by a few degrees, about the size of a button, so Nullpoint never steers a cursor pixel by pixel. It highlights the page element that most likely has your attention, given your own measured error, and only switches when another element clearly wins.</p>
+      <p><b>Target test</b> measures what matters for Nullpoint: whether the snapped highlight picks the right one of 12 buttons, compared on the same trials with a plain gaze cursor, and how long it takes.</p>
+      <p><b>Gaze narrows, voice picks.</b> The top 3 candidates and their probabilities go to the voice decoder, which chooses among them by the word you say.</p>
       <p>Results go to the run log with your screen size and distance.</p>
     </div>
   </div>
