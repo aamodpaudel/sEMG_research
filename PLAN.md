@@ -114,7 +114,7 @@ Suggested bill of materials (prices approximate):
 1. **Put the project in git and on GitHub.** `git init`, commit, push. Commit `runs/registry.jsonl` and the reports, not `data/`
    or checkpoints (upload good checkpoints to Hugging Face instead). Accelerators look for a public repo.
 2. **Deploy the site to afono.org.** Point the domain at Cloudflare Pages or GitHub Pages with `site/` as the root.
-   Fill in `[hello@afono.org]` and `[Founder name]` in `site/index.html` first.
+   Contact on the site: Aamod Paudel, contact@aamodpaudel.com.np (done).
 3. **Close the gap on book sentences** (Phase 1 exit test). One change per run, each with `--notes`:
    word-bigram prior in the decoder → phoneme targets → silent/voiced alignment → more regularisation.
 4. **Build the Chrome extension** that sends the page's visible link and button labels to the decoder as "Words on screen".
@@ -147,3 +147,10 @@ Evaluate → the site data rebuilds itself → republish the site. The training 
 - **DOM Model v0:** Chrome extension, Tier 1 commands, Nullpoint bridge; passes the DOM-0 fixture.
 - **Track Model v0:** webcam gaze with calibration and scored tests; no human session logged yet.
 - **Next:** first Track session on yourself; WebUI benchmark for the DOM Model; phoneme-target sEMG run; hardware and Tier 1 recordings.
+
+## Status (2026-09-30, sEMG Model)
+- **Protocol v3** (METRICS.md): page-vocabulary tasks (page10/20/30, easy and look-alike "hard" distractors) and an isolated-word proxy, defined before results.
+- **Best run `r1-phone`:** phoneme CTC auxiliary head + decoding through the CMUdict pronunciation lexicon. Against `base` (paired, test): 500-word 45.3% → 54.9% (p = 0.001), open WER 58.2% → 52.0% (p < 0.001), page30-hard 60.0% → **68.2% [61.4, 73.7]** (p = 0.02). The 90% page30-hard target is not reached.
+- Tried and not kept: trigram Kneser-Ney prior (open −1.5 points, p = 0.04, not better on closed sets); DTW voiced-EMG distillation (page30-hard worse, p < 0.01); stronger augmentation (training stalled, stopped at epoch 26).
+- **Tier 1 ready:** `python -m semg.commands plan | record | train | eval` for the 27-word starter set (vocab/commands.json, `tier1_starter`), tested end to end on synthetic 4-channel and Gaddy-derived data.
+- **Next:** record Tier 1 sessions 1–3 this weekend and run `semg.commands eval`; that number, not the Gaddy simulation, decides the product claim.

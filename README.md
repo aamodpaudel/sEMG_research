@@ -90,16 +90,38 @@ python -m semg.export --ckpt runs/base/best.pt --out runs/base/model.onnx
 The dataset has one speaker and lab hardware. These numbers validate the method, not the
 accuracy a new user on a $50 rig will get; that needs per-user calibration (Phase 4).
 
-## Baseline results (run `base`, protocol v2)
-Silent speech only, 95% bootstrap CIs. Full protocol and definitions: [METRICS.md](METRICS.md).
+## Results (protocol v3, best run `r1-phone`)
+Silent speech only, 95% bootstrap CIs, decoder settings tuned on dev only. Full protocol, every run and paired tests:
+[METRICS.md](METRICS.md). Best model: `runs/r1-phone/best.pt` (phoneme CTC auxiliary head), decoded through the CMUdict
+pronunciation lexicon (`python -m semg.evaluate --ckpt runs/r1-phone/best.pt --lm bigram --units phone`).
 
-| Task | Vocabulary | Word accuracy [95% CI] | Without the vocabulary |
+| Task | Vocabulary | `base` (v3 re-score) | `r1-phone` [95% CI] |
 |---|---|---|---|
-| Dates and times | 51 words | **94.8%** [90.9, 98.2] | 57.6% |
-| Book sentences | 500 words | 39.7% [33.9, 45.2] | 24.7% |
-| Any sentence | 9,139 words | 40.5% [36.8, 44.1] | 25.6% |
+| Dates and times | 51 words | 95.9% | **96.5%** [93.3, 98.9] |
+| Book sentences | 500 words | 45.3% | **54.9%** [49.4, 60.2] |
+| Any sentence | 9,139 words (WER) | 58.2% | **52.0%** [48.1, 56.2] |
+| Page vocabulary, ~30 look-alike words (page30-hard) | 30–56 words per sentence | 60.0% | **68.2%** [61.4, 73.7] |
+| Page vocabulary, ~30 random words (page30-easy) | 30–56 words per sentence | 66.5% | **71.1%** [63.9, 77.3] |
+| One word out of 30 look-alikes, known boundaries (iso30-hard) | 30 | 59.4% | **71.6%** [68.7, 74.4] |
 
-The published state of the art on open vocabulary is 12.2% WER (87.8% accuracy); this baseline is at 59.5% WER.
+The page tasks simulate "the page tells the decoder which ~30 words are possible" on one speaker's lab recordings of
+book sentences. They are not a measurement on our 4-channel rig, on isolated command words, or on a new user: that is
+the Tier 1 recording session (`python -m semg.commands`, below). The 90% target on page30-hard is not reached.
+The published state of the art on open vocabulary is 12.2% WER; we are at 52.0%.
+
+## Tier 1 command words (hardware weekend)
+`python -m semg.commands` records, trains and evaluates a 20–30 word silent-command classifier from the 4-channel ESP32 rig:
+```bash
+pip install pyserial                                           # once
+python -m semg.commands plan                                   # the 27-word starter set and why
+python -m semg.commands record --user me --session 1 --port COM5   # 270 prompts (~18 min); re-seat electrodes, repeat for 2 and 3
+python -m semg.commands train --user me                        # sessions 1-2 train, session 3 test
+python -m semg.commands eval --user me                         # + leave-one-session-out, logged to runs/registry.jsonl
+```
+Recordings made in Nullpoint instead can be given a session with `python -m semg.commands tag --user me --session 1 --since <ISO time>`.
+The model is the pretrained silent-speech encoder with its input layer re-initialised for 4 channels, an attention-pooled
+word classifier and the CTC head scoring each item's spelling; a shrinkage-LDA baseline is reported next to it.
+`synth` and `import-gaddy` make test profiles so the whole flow can be checked without hardware.
 
 Export (`semg.export`), 5 s window on CPU:
 

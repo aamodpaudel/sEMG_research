@@ -55,6 +55,7 @@ def _replace_time(m: re.Match) -> str:
 
 def normalize_text(text: str) -> str:
     """Lowercase, ASCII-fold, spell out numbers, keep only a-z, apostrophe and single spaces."""
+    text = re.sub("[\\u2012-\\u2015\\u2026]", " ", text)  # dashes and ellipses separate words (protocol v3)
     text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
     text = text.lower().replace("\u2019", "'")
     text = re.sub(r"\b(\d{1,2}):(\d{2})\b", _replace_time, text)

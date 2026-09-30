@@ -44,10 +44,12 @@ class Block(nn.Module):
 
 class EMGCTC(nn.Module):
     def __init__(self, n_channels=8, d_model=256, n_layers=6, n_heads=4, ff=1024,
-                 dropout=0.2, n_vocab=len(CHARS), n_modes=2):
+                 dropout=0.2, n_vocab=len(CHARS), n_modes=2, n_phones=0):
         super().__init__()
         self.config = dict(n_channels=n_channels, d_model=d_model, n_layers=n_layers,
                            n_heads=n_heads, ff=ff, dropout=dropout, n_vocab=n_vocab, n_modes=n_modes)
+        if n_phones:
+            self.config["n_phones"] = n_phones
         self.frontend = nn.Sequential(ResBlock(n_channels, 128, 2), ResBlock(128, 192, 2),
                                       ResBlock(192, d_model, 2))
         self.mode_emb = nn.Embedding(n_modes, d_model)  # 0 = silent, 1 = voiced
@@ -55,6 +57,7 @@ class EMGCTC(nn.Module):
         self.blocks = nn.ModuleList(Block(d_model, n_heads, ff, dropout) for _ in range(n_layers))
         self.norm = nn.LayerNorm(d_model)
         self.head = nn.Linear(d_model, n_vocab)
+        self.phone_head = nn.Linear(d_model, n_phones) if n_phones else None   # phoneme CTC (Gaddy 2021)
 
     @staticmethod
     def output_lengths(lengths):
@@ -63,7 +66,17 @@ class EMGCTC(nn.Module):
         return lengths
 
     def forward(self, emg, lengths=None, mode=None):
-        """emg: (B, T, C) at 1000 Hz. Returns log-probs (B, T/8, V) and output lengths."""
+        """emg: (B, T, C) at 1000 Hz. Returns character log-probs (B, T/8, V) and output lengths."""
+        x, out_lens = self.encode(emg, lengths, mode)
+        return self.head(x).log_softmax(-1), out_lens
+
+    def forward_all(self, emg, lengths=None, mode=None):
+        """Character log-probs, phoneme log-probs (None without a phoneme head) and output lengths."""
+        x, out_lens = self.encode(emg, lengths, mode)
+        ph = self.phone_head(x).log_softmax(-1) if self.phone_head is not None else None
+        return self.head(x).log_softmax(-1), ph, out_lens
+
+    def encode(self, emg, lengths=None, mode=None):
         x = self.frontend(emg.transpose(1, 2))           # (B, D, T')
         x = x + self.pos_conv(x)
         x = x.transpose(1, 2)                            # (B, T', D)
@@ -77,7 +90,7 @@ class EMGCTC(nn.Module):
             mask = torch.arange(x.shape[1], device=x.device)[None] >= out_lens[:, None]
         for blk in self.blocks:
             x = blk(x, mask)
-        return self.head(self.norm(x)).log_softmax(-1), out_lens
+        return self.norm(x), out_lens
 
 
 def load_model(path, device="cpu"):

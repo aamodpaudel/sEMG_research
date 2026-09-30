@@ -28,8 +28,9 @@ def _worker_init(worker_id):
 
 
 @torch.no_grad()
-def run_model(model, ds, device, max_samples=400_000):
-    """Returns list of (T', V) numpy log-prob arrays, in dataset order."""
+def run_model(model, ds, device, max_samples=400_000, head="char"):
+    """Returns list of (T', V) numpy log-prob arrays, in dataset order.
+    head: "char", "phone" (needs a phoneme head) or "both" (list of (char, phone) pairs)."""
     model.eval()
     lengths = ds.compute_lengths()
     sampler = BucketSampler(lengths, max_samples, shuffle=False)
@@ -39,10 +40,18 @@ def run_model(model, ds, device, max_samples=400_000):
     k = 0
     for batch in loader:
         with torch.autocast(device.type, dtype=torch.bfloat16, enabled=device.type == "cuda"):
-            lp, ol = model(batch["emg"].to(device), batch["lengths"].to(device), batch["mode"].to(device))
+            if head == "char":
+                lp, ol = model(batch["emg"].to(device), batch["lengths"].to(device), batch["mode"].to(device))
+                ph = None
+            else:
+                lp, ph, ol = model.forward_all(batch["emg"].to(device), batch["lengths"].to(device),
+                                               batch["mode"].to(device))
         lp = lp.float().cpu().numpy()
+        ph = ph.float().cpu().numpy() if ph is not None else None
         for j in range(lp.shape[0]):
-            out[order[k]] = lp[j, : int(ol[j])]
+            n = int(ol[j])
+            out[order[k]] = (lp[j, :n] if head == "char" else ph[j, :n] if head == "phone"
+                             else (lp[j, :n], ph[j, :n]))
             k += 1
     return out
 
@@ -55,7 +64,8 @@ def evaluate_greedy(model, ds, device):
 
 
 def train(model, train_ds, dev_ds, out_dir, epochs=80, lr=5e-4, max_samples=200_000,
-          device="cuda", eval_every=5, workers=4, log=print):
+          device="cuda", eval_every=5, workers=4, log=print, phone_weight=0.0, patience=0,
+          weight_decay=0.01, align_weight=0.0):
     os.makedirs(out_dir, exist_ok=True)
     device = torch.device(device)
     model.to(device)
@@ -66,18 +76,30 @@ def train(model, train_ds, dev_ds, out_dir, epochs=80, lr=5e-4, max_samples=200_
     steps_per_epoch = len(sampler)
     total = epochs * steps_per_epoch
     warmup = max(1, min(1000, total // 10))
-    opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
+    opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     sched = torch.optim.lr_scheduler.LambdaLR(
         opt, lambda s: min(1.0, (s + 1) / warmup) * 0.5 * (1 + math.cos(math.pi * min(1.0, s / total))))
-    best, step, history = float("inf"), 0, []
+    best, step, history, since_best = float("inf"), 0, [], 0
     for epoch in range(1, epochs + 1):
         model.train()
         t0, losses = time.time(), []
         for batch in loader:
             with torch.autocast(device.type, dtype=torch.bfloat16, enabled=device.type == "cuda"):
-                lp, ol = model(batch["emg"].to(device), batch["lengths"].to(device), batch["mode"].to(device))
+                lp, ph, ol = model.forward_all(batch["emg"].to(device), batch["lengths"].to(device),
+                                               batch["mode"].to(device))
             loss = F.ctc_loss(lp.float().transpose(0, 1), batch["labels"].to(device), ol,
                               batch["label_lengths"].to(device), blank=0, zero_infinity=True)
+            if phone_weight and ph is not None and "phones" in batch:
+                loss = loss + phone_weight * F.ctc_loss(
+                    ph.float().transpose(0, 1), batch["phones"].to(device), ol,
+                    batch["phone_lengths"].to(device), blank=0, zero_infinity=True)
+            if align_weight and "align" in batch and int(batch["align_lengths"].sum()) > 0:
+                tg = batch["align"].to(device)
+                n = torch.minimum(batch["align_lengths"].to(device), ol)
+                T = min(tg.shape[1], lp.shape[1])
+                m = (torch.arange(T, device=device)[None] < n[:, None]).float()
+                kl = (tg[:, :T] * (torch.log(tg[:, :T] + 1e-6) - lp[:, :T].float())).sum(-1)
+                loss = loss + align_weight * (kl * m).sum() / m.sum().clamp(min=1)
             opt.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -90,9 +112,11 @@ def train(model, train_ds, dev_ds, out_dir, epochs=80, lr=5e-4, max_samples=200_
             ev = evaluate_greedy(model, dev_ds, device)
             rec.update(dev_wer=ev["wer"], dev_cer=ev["cer"])
             if ev["wer"] < best:
-                best = ev["wer"]
+                best, since_best = ev["wer"], 0
                 torch.save({"model": model.state_dict(), "config": model.config, "epoch": epoch,
                             "dev": ev}, os.path.join(out_dir, "best.pt"))
+            else:
+                since_best += 1
             rec["example"] = ev["examples"][0]
         torch.save({"model": model.state_dict(), "config": model.config, "epoch": epoch},
                    os.path.join(out_dir, "last.pt"))
@@ -100,6 +124,9 @@ def train(model, train_ds, dev_ds, out_dir, epochs=80, lr=5e-4, max_samples=200_
         with open(os.path.join(out_dir, "log.jsonl"), "a") as f:
             f.write(json.dumps(rec) + "\n")
         log(rec)
+        if patience and since_best >= patience:
+            log({"early_stop": epoch, "best_dev_wer": best})
+            break
     return history
 
 
@@ -127,6 +154,14 @@ def main():
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--eval-every", type=int, default=5)
     ap.add_argument("--rebuild-index", action="store_true")
+    ap.add_argument("--phone-weight", type=float, default=0.0, help="weight of the auxiliary phoneme CTC loss (0 = off)")
+    ap.add_argument("--aug", choices=["v1", "v2"], default="v1")
+    ap.add_argument("--dropout", type=float, default=0.2)
+    ap.add_argument("--weight-decay", type=float, default=0.01)
+    ap.add_argument("--align-dir", default=None, help="DTW-aligned voiced targets from semg.align")
+    ap.add_argument("--align-weight", type=float, default=0.0)
+    ap.add_argument("--init", default=None, help="start from this checkpoint's weights")
+    ap.add_argument("--patience", type=int, default=0, help="stop after this many evaluations without dev gain")
     ap.add_argument("--notes", default="", help="what this run is testing (goes in the registry)")
     args = ap.parse_args()
 
@@ -136,12 +171,22 @@ def main():
     print("utterances:", dict(sorted(counts.items())))
     train_utts = [u for u in utts if u.split == "train"]
     dev_utts = [u for u in utts if u.split == "dev" and not u.closed_vocab]
-    model = EMGCTC(d_model=args.d_model, n_layers=args.layers, ff=4 * args.d_model)
+    from .phonemes import N_TOKENS
+    model = EMGCTC(d_model=args.d_model, n_layers=args.layers, ff=4 * args.d_model, dropout=args.dropout,
+                   n_phones=N_TOKENS if args.phone_weight > 0 else 0)
     print("params: %.2fM" % (sum(p.numel() for p in model.parameters()) / 1e6))
     t0 = time.time()
-    hist = train(model, EMGDataset(train_utts, args.cache, train=True), EMGDataset(dev_utts, args.cache),
+    ph = args.phone_weight > 0
+    if args.init:
+        own = model.state_dict()
+        src = torch.load(args.init, map_location="cpu", weights_only=False)["model"]
+        model.load_state_dict({k: v for k, v in src.items() if k in own and own[k].shape == v.shape}, strict=False)
+    hist = train(model, EMGDataset(train_utts, args.cache, train=True, phones=ph, aug=args.aug,
+                                   align_dir=args.align_dir if args.align_weight > 0 else None),
+                 EMGDataset(dev_utts, args.cache),
                  args.out, epochs=args.epochs, lr=args.lr, max_samples=args.max_samples,
-                 eval_every=args.eval_every, workers=args.workers,
+                 eval_every=args.eval_every, workers=args.workers, phone_weight=args.phone_weight,
+                 patience=args.patience, weight_decay=args.weight_decay, align_weight=args.align_weight,
                  device="cuda" if torch.cuda.is_available() else "cpu")
     best = torch.load(os.path.join(args.out, "best.pt"), weights_only=False)
     log_run("train", os.path.basename(os.path.normpath(args.out)), out=args.out, config=vars(args),

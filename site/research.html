@@ -76,7 +76,7 @@
     <p class="eyebrow">Research card · Afono sEMG Model</p>
     <h1>Silent speech to text with a vocabulary the interface already knows</h1>
     <div class="meta"><span>Run <b data-r="run">base</b></span><span>Protocol <b data-r="protocol">v2</b></span><span>Measured <b data-r="date">2026-09-29</b></span><span><b data-r="params">5.8</b>M parameters</span></div>
-    <p class="abstract">The Afono sEMG Model decodes silent speech from 8-channel facial surface EMG with a 5.8M-parameter convolutional Transformer trained with CTC on characters. Restricting the decoder to the words an interface can accept, and scoring them with a bigram word prior, raises word accuracy on a 51-word dates-and-times task from 57.6% to <span data-r="dates_acc">95.9</span>% (95% CI <span data-r="dates_ci">92.5–98.8</span>%). On free-form sentences the same model reaches <span data-r="open_acc">43.2</span>% open-vocabulary word accuracy, well behind the published state of the art (87.8%). All results are from one speaker on lab hardware.</p>
+    <p class="abstract">The Afono sEMG Model decodes silent speech from 8-channel facial surface EMG with a 5.8M-parameter convolutional Transformer trained with CTC on characters and an auxiliary phoneme head; words are decoded through a pronunciation lexicon. Restricting the decoder to the words an interface can accept, and scoring them with a bigram word prior, gives <span data-r="dates_acc">95.9</span>% word accuracy on a 51-word dates-and-times task (95% CI <span data-r="dates_ci">92.5–98.8</span>%). On free-form sentences the same model reaches <span data-r="open_acc">43.2</span>% open-vocabulary word accuracy, well behind the published state of the art (87.8%). When each sentence may only use about 30 words, as an interface would allow, including look-alike distractors, word accuracy is <span data-r="page30_acc">68.2</span>%. All results are from one speaker on lab hardware.</p>
   </div>
 
   <section aria-labelledby="r1">
@@ -238,6 +238,7 @@ python -m semg.compare --profile demo-open --a runs/base/best.pt --b runs/&lt;ca
   var T0 = {}; R.tasks.forEach(function (t) { T0[t.task] = t; });
   if (T0.dates) { set("dates_acc", f1(T0.dates.acc)); set("dates_ci", f1(T0.dates.acc_ci[0]) + "–" + f1(T0.dates.acc_ci[1])); }
   if (T0.open) set("open_acc", f1(T0.open.acc));
+  if (T0["page30-hard"]) set("page30_acc", f1(T0["page30-hard"].acc));
   var ab = document.getElementById("ablation-body");
   if (ab && R.decoder_compare) {
     ab.textContent = "";

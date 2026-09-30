@@ -1,6 +1,6 @@
 # Afono evaluation protocol and metrics
 
-Protocol **v2** (2026-09-29). Implemented in `semg/evaluate.py`, `semg/metrics.py` and `semg/compare.py`.
+Protocol **v3** (2026-09-29; v2 below plus the v3 section). Implemented in `semg/evaluate.py`, `semg/metrics.py` and `semg/compare.py`.
 The website's research card (`site/research.html`) is generated from the same outputs.
 
 ## What each run produces
@@ -26,6 +26,44 @@ The website's research card (`site/research.html`) is generated from the same ou
 Decoder hyperparameters (prior weight, word bonus) are tuned on the first 100 dev utterances only.
 Protocol v1 pooled dev and test sentences for closed-N; v2 fixed that, and the 500-word result moved from 45.2% to 39.7%.
 
+## Protocol v3 (2026-09-29): page-vocabulary tasks and an isolated-word proxy
+Written down before any v3 result was looked at. Everything in v2 still applies. Changes:
+
+1. **Transcript fix.** Em/en dashes and ellipses now separate words (v2 glued them: "cellar—something" became
+   "cellarsomething"). 266 transcripts change, 2 of them in the silent test set. Splits are unchanged (the index
+   rebuild asserts identical utterance ids and splits). v2 numbers are therefore re-measured under v3.
+2. **Tuning grid** for the sentence tasks: prior weight {0, 0.5, 1, 1.5, 2} × word bonus {0, 1, 2, 3, 4}, first 100 dev utterances.
+3. **Word prior options**: unigram, bigram (as v2), and trigram = interpolated modified Kneser-Ney (`semg/lm.py`),
+   trained on training transcripts only, no external text. Closed lexicons renormalise the prior over their words.
+
+### Page-vocabulary tasks (`pageN-easy`, `pageN-hard`, N = 10, 20, 30)
+Simulates "the page tells the decoder which ~N words are possible" (the product's 20–30 command words).
+- Test data: all 98 silent book test sentences. None is dropped.
+- Lexicon, per utterance: the utterance's k distinct words plus d = max(N − k, ⌈N/3⌉) distractors from the training
+  vocabulary. So the lexicon has exactly N words when k ≤ N − ⌈N/3⌉, and more than N for long sentences (every lexicon
+  keeps at least ⌈N/3⌉ wrong choices). The report gives the mean, minimum and maximum lexicon size.
+- **easy** distractors: training words ranked by SHA-256 of ("afono-page-v3", utterance id, word).
+- **hard** distractors: for each utterance word in order of first appearance, round robin, its next-nearest training
+  word by character edit distance (ties by the same hash). These are the look-alike words ("them"/"then"/"thee").
+  **page30-hard is the headline** page number.
+- Prior: uniform over the page words (a page gives a set of words, not a sentence model). Only the word bonus is tuned,
+  grid {−2, −1, 0, 1, 2, 3, 4}, on the first 100 dev utterances with the same construction.
+- Secondary (not a headline): `page30-hard+lm`, the same lexicons with the trigram prior renormalised over the page
+  words, prior weight {0.5, 1, 1.5} × bonus {−1, 0, 1, 2, 3} tuned on dev.
+- Score: word accuracy = 1 − WER of the whole decoded sentence (insertions and deletions count), bootstrap CI over utterances.
+
+### Isolated-word proxy (`isoN-easy`, `isoN-hard`, N = 10, 20, 30; books and dates)
+CTC forced alignment of the reference to the model's own output gives each test word a frame span; the span ± 16 ms
+is scored against N candidates (the true word + N − 1 distractors chosen as above for that single word) by CTC
+log-likelihood; correct if the true word wins. Failed alignments count as errors. It measures word discrimination with
+known word boundaries. It is optimistic: the boundaries come from the true word and the encoder hears the whole
+sentence. It is not a measurement of isolated words spoken on their own.
+
+### What these numbers are and are not
+A **single-speaker, lab-hardware simulation** on Gaddy & Klein book sentences. It is not a measurement on the Afono
+4-channel rig, on isolated command words, or on the target user. The Tier 1 command recordings (`python -m semg.commands`)
+are the measurement that counts; until they exist, page-task numbers are evidence about the method only.
+
 ## Metrics
 - **WER**: corpus-level edit distance over words divided by reference words. **Word accuracy** = 1 − WER. **CER** likewise over characters. Text is lowercased, numbers spelled out, punctuation removed.
 - **Sentence accuracy**: share of utterances decoded exactly.
@@ -36,6 +74,33 @@ Protocol v1 pooled dev and test sentences for closed-N; v2 fixed that, and the 5
   It assumes equiprobable words and uniform errors, which sentences violate, and it favours large N at low accuracy. Reported for comparison with BCI literature only.
 - **Correct words per minute** = reference words ÷ recording minutes × word accuracy (natural reading pace, no interface overhead).
 - **Real-time factor** = (median encoder time + decoder time) ÷ recording duration.
+
+## Results, protocol v3 (2026-09-30)
+Silent test word accuracy [95% bootstrap CI]. Sentence tasks use the bigram prior (tuned on dev). Page tasks use a
+uniform prior over the page words. "phone" = decoding through the CMUdict pronunciation lexicon with the phoneme head.
+
+| Run | Change | dates | closed500 | open WER | page10 easy / hard | page20 easy / hard | page30 easy / **hard** | iso30 hard |
+|---|---|---|---|---|---|---|---|---|
+| base (char) | v2 model, re-scored under v3 | 95.9 [92.5, 98.8] | 45.3 [39.4, 51.0] | 58.2 [54.2, 62.1] | 65.6 / 65.2 | 66.0 / 65.6 | 66.5 / **60.0** [54.5, 64.8] | 59.4 |
+| r0 (char) | trigram MKN prior instead of bigram | 97.1 | 45.7 | 56.7 | same (uniform prior) | same | same | same |
+| r1 (char) | + phoneme CTC auxiliary head | 96.5 | 48.6 | 55.8 | 71.2 / 71.7 | 70.3 / 64.9 | 70.4 / **64.5** [58.5, 69.3] | 63.4 |
+| **r1 (phone)** | decode r1 through the pronunciation lexicon | 96.5 [93.3, 98.9] | **54.9** [49.4, 60.2] | **52.0** [48.1, 56.2] | 72.2 / 71.9 | 71.3 / 70.1 | 71.1 / **68.2** [61.4, 73.7] | 71.6 |
+| r2 (phone) | r1 + DTW voiced-EMG distillation | 95.3 | 55.0 | 51.7 | 72.2 / 66.3 | 72.1 / 68.2 | 70.8 / **62.0** [54.2, 68.4] | 69.4 |
+| r3 (phone) | r1 + stronger augmentation (aug v2); stopped at epoch 26 of 80, stuck on the CTC plateau (dev CER 68.7%) | 7.6 | 8.3 | 92.5 | 13.2 / 13.2 | 13.1 / 12.8 | 13.0 / **12.1** | 11.2 |
+
+Page lexicon sizes (test): page10 mean 19.4 words (10–50), page20 24.9 (20–53), page30 32.2 (30–56).
+Secondary page30-hard+lm (trigram/bigram prior over the page words): base 68.3, r1 phone 70.2, r2 phone 69.4.
+Isolated-word proxy, r1 phone: iso10/20/30 easy 98.3 / 97.3 / 96.7, hard 78.6 / 73.4 / 71.6; dates hard 95.9 at every N.
+
+Paired tests (WER, B − A, 95% CI, one-sided p):
+- r0 trigram vs bigram (base): open −1.5 [−3.2, +0.1] p = 0.04; closed500 −0.5 [−2.0, +1.1] p = 0.30; closed100 +10.8 (n = 10). Kept bigram as the default.
+- r1 vs base (both char): open −2.4 p = 0.04; page30-hard −4.6 [−10.6, +2.9] p = 0.10; page10-hard −6.5 p = 0.002.
+- r1 phone vs r1 char (same checkpoint): closed500 −6.3 [−9.1, −3.4] p < 0.001; open −3.8 p = 0.006; page30-hard −3.7 [−7.0, −0.3] p = 0.02.
+- **r1 phone vs base char: closed500 −9.6 [−15.0, −4.3] p = 0.001; open −6.2 [−9.2, −3.0] p < 0.001; page30-hard −8.3 [−14.5, −0.1] p = 0.02.**
+- r2 vs r1 (both phone): page30-hard +6.2 [+2.8, +10.4] (worse), open −0.3 (n.s.). Voiced distillation not kept.
+
+Best: **r1 with phone-lexicon decoding**. Headline page30-hard = **68.2% [61.4, 73.7]**, far from the 90% target.
+Everything here is one speaker on lab hardware (see "What these numbers are and are not").
 
 ## Results, run `base`, protocol v2
 | Task | Vocab | Utterances / words | Word accuracy [95% CI] | No lexicon | Correct wpm |
@@ -64,22 +129,157 @@ same model and test utterances, paired bootstrap:
 
 The bigram decoder is now the default in Nullpoint. The browser demo still uses the unigram prior.
 
-## Afono DOM Model: DOM-0 fixture
-`python -m semg.dom_eval` runs the detector in headless Chrome on `extension/test/fixture.html`: 17 true targets
-(links, buttons, an icon button with aria-label, ARIA roles, two script-only click handlers, form fields, a checkbox,
-an image link, a summary) and 6 decoys (disabled, display:none, visibility:hidden, aria-hidden, covered, off-screen).
-v0 result: precision 100%, recall 100%, label accuracy 100%, 5 of 5 commands parsed. We wrote this page ourselves,
+## Afono DOM Model: DOM-0 fixture and DOM-1 real pages
+`python -m semg.dom_eval` runs both in headless Chrome (CDP, 1280x800, network blocked) and logs them to the registry.
+
+**Model.** DOM Model v1.1 (`extension/dom-model.js`), rules only: candidates from native controls, ARIA widget roles,
+click handlers and pointer-cursor elements (open shadow roots included; closed ones via `chrome.dom` in the extension;
+iframes out of scope); filters for rendering, disabled, aria-hidden/inert and occlusion; W3C accname 1.2 names
+(aria-labelledby, aria-label, label/for and wrapping labels with embedded controls, alt, svg title, title, placeholder,
+name from content); a 1-2 word spoken label (stop words, counts and punctuation dropped, visible text preferred over a
+differing aria-label, bare numbers become "link two"); duplicates numbered in reading order ("reply one", "reply two");
+every target also has a badge number. The page lexicon = label words + the Tier 1 command words that apply
+(scroll words only if the page scrolls, editing words only with a field, answers only with a dialog) + the number words
+needed for the badges. It goes to Nullpoint as the flat `vocabulary` list (unchanged format) plus a split `lexicon`.
+
+**DOM-0 fixture v3** (`extension/test/fixture.html`): 48 true targets and 12 decoys. Adds to v1: aria-labelledby (incl. a
+hidden referenced node and a missing id), label/for, a wrapping label with an embedded text field, aria-labelledby that
+includes an input value, icon-only buttons (title, svg title, none), duplicates (3x Reply, 3x Share, 2 unnamed icon
+buttons), nesting (card with onclick holding a button, pointer card wrapping a link, button inside a link, span inside a
+button), a display:contents link, a custom checkbox with a transparent input, open shadow DOM; decoys: sr-only skip link,
+focusable scroll region, named anchor, aria-disabled, opacity 0, inert. Closed shadow DOM and iframes are present but
+not scored (out of scope in the harness). v1.1: precision 100%, recall 100%, label accuracy 100%, accname checks 18/18,
+labels unique, 8/8 commands. The old v0 scored precision 97.7%, recall 91.5% and labels unique = no on fixture v2 (same page without the display:contents case) (its
+label accuracy, 58%, is not a fair comparison: the expected labels follow the v1 scheme). We wrote this page ourselves,
 so it is a regression test, not evidence of real-world performance.
 
-## Afono Track Model: session protocol
-Accuracy = distance between each validation target and the median estimate over 1 s (after 0.6 s settling), averaged
-over 5 targets not used in calibration. Precision = RMS distance between consecutive estimates. Both in pixels and
-degrees of visual angle from the entered screen width and viewing distance. Target test: 12 cells in a 4 × 3 grid,
-random order, selection by Space when the gaze-snapped highlight is on the goal; reports hit rate and time per selection.
+**DOM-1 real pages v1** (`extension/test/pages/`): 18 public pages saved 2026-09-29 by `python -m semg.dom_eval snapshot`
+(scripts removed, CSS inlined and pruned, images blanked to the same size, web fonts dropped; sources and notes in
+`SOURCES.json`): Wikipedia article and main page, GitHub repo and login, Hacker News and its login, BBC News, Bing and
+DuckDuckGo results, Python docs, MDN, npm, USA.gov, Craigslist, weather.gov, an Allbirds product page, a books demo
+shop, an arXiv abstract. Stack Overflow (bot check) and Reddit (login wall that does not render without scripts) were
+excluded. BBC and Allbirds open a full-screen cross-origin consent/marketing iframe on first visit; as captured the
+model finds 0 targets there (it cannot reach iframes), so the overlay was removed at capture. Ground truth: every
+visible, enabled control in the first viewport of 7 pages (BBC, Bing, GitHub login, npm, Allbirds, USA.gov,
+weather.gov; 173 targets), labelled by the Claude agent from screenshots, a broad DOM candidate list and point probes,
+not by an independent human (`<page>.gt.json`).
+
+| DOM-1, v1.1 (18 pages) | first viewport | whole page |
+|---|---|---|
+| actionable targets per page, median (range) | 33 (4-219) | 70 (4-546) |
+| targets with a speakable accessible name | 95.1% [89.9, 98.2] | 92.3% [88.7, 96.4] |
+| labels unique after numbering | 100% | 100% |
+| label words per page ("words on screen"), median (range) | 40 (4-248) | 82.5 (4-383) |
+| pages with <= 30 label words | 6 / 18 | 3 / 18 |
+| same with one-word labels, median; pages <= 30 | 28.5; 9 / 18 | 56.5; 4 / 18 |
+| full lexicon incl. commands and badge numbers, median | 84.5 | 126.5 |
+
+Ground truth (7 pages, 173 targets, first viewport): v1.1 precision 99.4% (page-bootstrap CI [98.2, 100]), recall 100%;
+v1 (frozen before labelling) and v0 both 99.4% / 99.4%. The one v1 miss was a display:contents link (BBC); the v1.1 fix
+was made after seeing the test labels, so the v1.1 recall is tuned on test. The one false positive is a hover-only
+permalink icon on npm. CIs are percentile bootstraps over pages (2,000 resamples; element-level CIs in the registry).
+These pages are well-built and semantic, so detection is close to saturated here; they say nothing about div-soup sites,
+which is what the learned detector is for (plan in `extension/test/webui/webui_loader.py`). Labels vs. v0 on the same
+18 pages: unique 92.5% -> 100%, named 93.4% -> 95.1%, median label words 46.5 -> 40.
+
+Reading: the "10 to 30 words" target holds for simple pages (logins, search results, product and gov pages) but not for
+link-heavy pages (Hacker News 123, Craigslist 248, Wikipedia 79-103 in the first viewport). Next levers: restrict the
+lexicon to the gaze region, one-word labels, and badge numbers for long lists.
+
+## Afono Track Model v1: session protocol
+Pipeline (`app/static/track.js`): MediaPipe Face Landmarker iris landmarks 468-477 -> eye-in-head features (iris
+centre relative to the eye corners, both eyes, aspect-corrected) + head pose from the facial transformation matrix ->
+ridge-regularised 2nd-order polynomial -> One Euro filter -> dispersion fixation detector -> Bayesian snap to the
+page element with hysteresis.
+- **Calibration**: 9 dots in a 3 × 3 grid at 10/50/90% of the screen, random order, 0.6 s settling then 1 s of frames
+  per dot; frames more than 3.5 robust SDs from the dot's median are dropped; a dot with < 10 clean frames is repeated
+  once; one dot is dropped if its leave-one-point-out (LOPO) error is > 2.5 × the median. The mapping (poly2 vs the v0
+  linear map) and the ridge lambda are chosen by LOPO on calibration data only.
+- **Accuracy** = distance between each validation target and the median estimate over 1 s (after 0.6 s settling),
+  averaged over 5 targets not used in calibration. **Precision** = RMS distance between consecutive estimates. Both in
+  pixels and degrees from the entered screen width and viewing distance. Both mappings are scored on the same frames.
+- **Snap sigma** = sqrt(mean |error|² / 2) over all smoothed validation estimates (isotropic Gaussian fit); before the
+  accuracy test, the LOPO error is used.
+- **Snap rule**: p(element | gaze) ∝ prior × (Gaussian(sigma) convolved with a uniform box over the element), plus a
+  "none" hypothesis (5% prior, uniform over the screen). The highlight switches only when a challenger has ≥ 1.5 × the
+  current probability for ≥ 120 ms (≥ 300 ms to drop to none). Dwell = same highlight for 800 ms inside a fixation.
+- **Target test**: 12 cells in a 4 × 3 grid, random order, selection by Space when the highlight is on the goal.
+  Reports snap hit rate and, on the same trials, the hit rate of a plain gaze cursor (smoothed point inside the goal)
+  and of nearest-centre snapping, plus time per selection.
+- **Output for the voice decoder**: `GET /api/track/candidates` (or `AfonoTrack.candidates(k)` in the page):
+  `{gaze, sigma_px, highlight, p_none, fixating, candidates: [{id, label, p}]}`, top 10 elements. Page rects come in
+  through `AfonoTrack.setTargets([{id, label, rect: {left, top, width, height}}])` in screen CSS pixels.
+
+No human session has been logged yet.
+
+## Afono Track Model: snapping simulation (SIMULATION, not a measurement)
+`python -m semg.gaze_eval sim --variants`. Layouts are real: the DOM-0 fixture and 18 DOM-1 page snapshots
+(`extension/test/pages/`, first 1920 × 1080 viewport, elements found by the DOM Model), plus 5 synthetic layouts
+(32 px toolbar, 44 px grid, search results and mail list with repeated labels, the 12-cell target test). The gaze
+error is simulated: isotropic Gaussian scaled so the mean error is 1-5° on a 1920 px / 34 cm screen at 60 cm
+(1° = 59 px); the user looks inside the central 50% of the target; sigma is estimated from a simulated 5-point
+validation. 200 trials per element. CIs: bootstrap over layouts (pages), 2,000 resamples, seed 1234.
+Voice: an assumed 90%-accurate word decoder, errors uniform over the page vocabulary (not a measured confusion matrix).
+
+Real pages (19 layouts, equal weight), hit rate [95% CI]:
+
+| Mean gaze error | Pixel cursor | Snap (Bayes) | Snap top-3 contains target | Gaze × voice (all elements) | Voice alone |
+|---|---|---|---|---|---|
+| 1° | 15.7% [12.7, 18.9] | 52.7% [45.3, 59.8] | 84.5% [76.7, 90.6] | 94.4% [93.8, 95.1] | 90.1% |
+| 2° | 5.9% [4.5, 7.4] | 32.5% [26.5, 38.5] | 64.3% [54.5, 73.2] | 92.1% [91.6, 92.6] | 90.0% |
+| 3° | 3.1% [2.3, 4.1] | 23.5% [18.5, 28.5] | 51.9% [42.0, 61.0] | 91.1% [90.8, 91.5] | 89.9% |
+| 4° | 2.0% [1.4, 2.6] | 18.6% [14.2, 22.6] | 43.3% [34.1, 52.2] | 90.7% [90.5, 91.0] | 90.0% |
+| 5° | 1.4% [1.0, 1.8] | 15.4% [11.6, 19.0] | 37.5% [28.6, 46.1] | 90.5% [90.4, 90.7] | 90.1% |
+
+Snap minus pixel (same trials): +37.1 points [30.9, 42.7] at 1°, +26.6 [21.4, 31.9] at 2°, +14.0 [10.5, 17.6] at 5°.
+
+Reading:
+- Snapping beats pixel steering at every error level (3× the hit rate at 1°, 5× at 2°, 11× at 5°). On its own it is
+  not enough: at a realistic 2-3° webcam error the snapped element is right only a quarter to a third of the time,
+  because real pages are dense (Hacker News: 215 targets, median 56 × 11 px).
+- The Bayesian rule and nearest-centre snapping pick the same element almost always (within 1.3 points in every
+  variant); the value of the posterior is calibrated probabilities for fusion, not a better argmax.
+- Hard "top-3, then voice" is worse than voice alone on real pages (60.7% vs 90.0% at 2°), because the top 3 often
+  misses the target. Soft fusion (gaze posterior × voice likelihood over all elements) beats voice alone (92.1% vs
+  90.0% at 2°), and by more where labels repeat (synthetic search results 59.9% vs 39.6%, mail list 44.4% vs 32.7%).
+  So the decoder should fuse softly over the top 10 candidates, not truncate to 3.
+- Sensitivity: 50% of the error as a per-session constant bias, or fixations uniform over the whole element, move
+  the pooled numbers by at most 4 points.
+
+## Afono Track Model: MPIIFaceGaze
+Dataset: Zhang, Sugano, Fritz & Bulling, "It's written all over your face" (CVPRW 2017). 15 participants, 37,667
+annotated laptop-webcam images (1,498-2,929 per person) from everyday use over many days, with 3D gaze targets and
+camera calibration. Licence CC BY-NC-SA 4.0 (non-commercial). Original images: 942 MB, no registration,
+`https://datasets.d2.mpi-inf.mpg.de/MPIIGaze/MPIIFaceGaze.zip`; the normalised 448 × 448 version is 22.3 GB. Protocol:
+leave-one-subject-out (15 folds), mean angular error between predicted and true 3D gaze directions (from the face
+centre). The paper's full-face CNN reports 4.8°.
+
+Our landmark baselines (`python -m semg.gaze_eval mpii-extract` then `mpii`; MediaPipe Face Landmarker on CPU, face
+found with open eyes in 37,555 images; ridge regression, lambda from an inner split of training subjects):
+
+| Model | Mean angular error (per-subject range) |
+|---|---|
+| Predict the mean gaze direction (no model) | 12.0° (9.7-16.6) |
+| Nullpoint features (poly2 eye + head pose), person-independent, LOSO | 6.3° (5.2-8.2) |
+| Eye landmarks in the head frame + head pose, person-independent, LOSO | 6.2° (5.1-9.6) |
+| Nullpoint poly2, personal calibration on 9 images nearest a 3 × 3 grid | 9.1° (5.9-13.1) |
+| Nullpoint poly2, personal calibration on 9 × 5 images | 5.0° (3.4-6.3) |
+| Population model (LOSO) + per-person offset from 9 images | 5.7° (3.8-11.6) |
+| Population model (LOSO) + per-person offset from 9 × 5 images | 4.9° (3.7-6.7) |
+
+The personal rows test on the same person's other images, often from other days and head poses, which is harder than
+a live session right after calibration. Found while building this: the v0 features averaged the horizontal iris
+position of the two eyes measured from each eye's inner corner, which cancels for sideways gaze; measuring both eyes
+image-left to image-right took the poly2 LOSO error from 9.5° to 6.3°.
+
+Model plan: (1) now, personal poly2 calibration in the browser; (2) next, a population regression head on MediaPipe
+landmarks trained on MPIIFaceGaze, corrected per person from the 9-point calibration (the 5.7° and 4.9° rows);
+(3) later, a small CNN on normalised eye patches (MobileNet-sized, ONNX in the browser), trained leave-one-subject-out
+on MPIIFaceGaze with the paper's 4.8° as the bar, then fine-tuned per person.
 
 ## Planned protocols for the other two models
-- **Afono Track Model** (gaze): angular error (degrees) on MPIIFaceGaze, leave-one-subject-out; on-screen pointing hit rate and error in pixels at a fixed viewing distance.
-- **Afono DOM Model** (page elements): precision and recall of actionable elements on the WebUI dataset; median size of the per-page vocabulary handed to the decoder.
+- **Afono Track Model** (gaze): first human sessions with the v1 protocol above (accuracy, sigma, snap vs pixel hit rate on the same trials); then a CNN on MPIIFaceGaze, leave-one-subject-out.
+- **Afono DOM Model** (page elements): DOM-1 above; next, precision and recall of clickable elements on the WebUI test split and on a hand-labelled DOM-2 set of div-soup pages (the case the learned detector targets).
 - **Combined system**: success rate and time per task on scripted web tasks, selections per minute and ITR, against keyboard, mouse and eye-gaze baselines. Participants with and without motor impairments, with ethics review before any human study.
 
 ## Rules

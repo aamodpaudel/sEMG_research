@@ -24,23 +24,32 @@ def greedy(logprobs: np.ndarray) -> str:
 
 
 class _Node:
-    __slots__ = ("children", "word")
+    __slots__ = ("children", "word", "words")
 
     def __init__(self):
         self.children = {}
-        self.word = None
+        self.word = None          # first word ending here
+        self.words = None         # all words ending here (homophones share a node in a phone lexicon)
 
 
 class Lexicon:
     """Allowed words (a trie over characters) plus a word prior.
 
     With `bigrams` (Counter of (prev, word) pairs, "<s>" = sentence start) the prior is an
-    interpolated absolute-discount bigram model; otherwise it is an add-one unigram.
+    interpolated absolute-discount bigram model; with `lm` (a semg.lm.NGramLM) it is that
+    model renormalised over these words; otherwise it is an add-one unigram (uniform when
+    no counts are given).
+    `spell` maps a word to CTC token ids (default: characters); `space` is the word-boundary id.
     """
 
-    def __init__(self, words, counts=None, bigrams=None, discount=0.75):
-        words = sorted({w for w in words if w and all(c in CHAR_TO_ID and c != " " for c in w)})
-        self.words = words
+    def __init__(self, words, counts=None, bigrams=None, discount=0.75, lm=None, spell=None, space=SPACE):
+        if spell is None:
+            words = sorted({w for w in words if w and all(c in CHAR_TO_ID and c != " " for c in w)})
+            spell = lambda w: [CHAR_TO_ID[c] for c in w]  # noqa: E731
+        else:
+            words = sorted({w for w in words if w})
+        self.words, self.space = words, space
+        self.lm, self.vocab = lm, frozenset(words)
         self.root = _Node()
         counts = counts or Counter()
         total = sum(counts[w] + 1 for w in words)
@@ -56,15 +65,26 @@ class Lexicon:
         self._cache = {}
         for w in words:
             node = self.root
-            for c in w:
-                node = node.children.setdefault(CHAR_TO_ID[c], _Node())
-            node.word = w
+            for c in spell(w):
+                node = node.children.setdefault(c, _Node())
+            if node.word is None:
+                node.word, node.words = w, [w]
+            else:
+                node.words.append(w)
 
     def __len__(self):
         return len(self.words)
 
     def score(self, prev, w):
-        """log P(w | prev)."""
+        """log P(w | prev); `prev` is the previous word or a tuple of previous words."""
+        if self.lm is not None:
+            hist = prev if isinstance(prev, tuple) else ((prev,) if prev != "<s>" else ())
+            key = (hist[-(self.lm.order - 1):] if self.lm.order > 1 else (), w)
+            if key not in self._cache:
+                self._cache[key] = self.lm.logprob(key[0], w, self.vocab)
+            return self._cache[key]
+        if isinstance(prev, tuple):
+            prev = prev[-1] if prev else "<s>"
         if self.bi is None:
             return self.logp[w]
         key = (prev, w)
@@ -96,8 +116,11 @@ def _lse(a, b):
     return m + math.log(math.exp(a - m) + math.exp(b - m))
 
 
-def lexicon_beam_search(logprobs, lex, beam=32, lm_weight=1.0, word_bonus=2.0, prune=12.0):
-    """logprobs: (T, V) CTC log-probabilities. Returns best word sequence from the lexicon."""
+def lexicon_beam_search(logprobs, lex, beam=32, lm_weight=1.0, word_bonus=2.0, prune=12.0, space_optional=False):
+    """logprobs: (T, V) CTC log-probabilities. Returns best word sequence from the lexicon.
+    space_optional: a word may also end without an emitted word-boundary token (the next word starts
+    directly), for models that rarely emit the boundary in silent speech."""
+    SPACE = lex.space
     # state key: (completed words, partial word chars) -> [p_blank, p_nonblank, trie node, lm score]
     beams = {((), ()): [0.0, NEG_INF, lex.root, 0.0]}
     for t in range(logprobs.shape[0]):
@@ -125,13 +148,20 @@ def lexicon_beam_search(logprobs, lex, beam=32, lm_weight=1.0, word_bonus=2.0, p
                 if c == SPACE:
                     if node.word is None:                                  # only end a complete word
                         continue
-                    w = node.word
-                    add((words + (w,), ()), NEG_INF, base, lex.root,
-                        lm + lm_weight * lex.score(words[-1] if words else "<s>", w) + word_bonus)
+                    for w in node.words:
+                        add((words + (w,), ()), NEG_INF, base, lex.root,
+                            lm + lm_weight * lex.score(words, w) + word_bonus)
                 else:
                     child = node.children.get(c)
                     if child is not None:
                         add((words, part + (c,)), NEG_INF, base, child, lm)
+                    if space_optional and node.word is not None:
+                        nchild = lex.root.children.get(c)
+                        if nchild is not None:
+                            for w in node.words:
+                                nw = words + (w,)
+                                add((nw, (c,)), NEG_INF, base, nchild,
+                                    lm + lm_weight * lex.score(words, w) + word_bonus)
         beams = dict(sorted(nxt.items(), key=lambda kv: _lse(kv[1][0], kv[1][1]) + kv[1][3],
                             reverse=True)[:beam])
     best, best_score = "", NEG_INF
@@ -140,8 +170,10 @@ def lexicon_beam_search(logprobs, lex, beam=32, lm_weight=1.0, word_bonus=2.0, p
         if part:
             if node.word is None:
                 continue                                                   # unfinished word
-            score += lm_weight * lex.score(words[-1] if words else "<s>", node.word) + word_bonus
-            words = words + (node.word,)
-        if score > best_score:
-            best, best_score = " ".join(words), score
+            ends = [(score + lm_weight * lex.score(words, w) + word_bonus, words + (w,)) for w in node.words]
+        else:
+            ends = [(score, words)]
+        for sc, ws in ends:
+            if sc > best_score:
+                best, best_score = " ".join(ws), sc
     return best

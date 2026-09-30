@@ -14,7 +14,8 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, Sampler
 
-from .signal import preprocess, augment
+from .phonemes import encode_phones
+from .signal import preprocess, augment, augment_v2
 from .text import normalize_text, encode
 
 
@@ -114,8 +115,12 @@ def load_index(path) -> list[Utterance]:
 
 class EMGDataset(Dataset):
     def __init__(self, utts: list[Utterance], cache_dir: str, train: bool = False,
-                 max_len: int = 30000, seed: int = 0):
+                 max_len: int = 30000, seed: int = 0, phones: bool = False, aug: str = "v1",
+                 align_dir: str | None = None):
         self.cache_dir, self.train, self.max_len = cache_dir, train, max_len
+        self.phones, self.aug, self.align_dir = phones, aug, align_dir
+        if align_dir and aug != "v1":
+            raise ValueError("aligned voiced targets are only supported with aug v1 (no time stretch)")
         if train:  # never crop training audio: the transcript would no longer match
             utts = [u for u in utts if self._raw_len(u) <= max_len]
         self.utts = list(utts)
@@ -134,10 +139,22 @@ class EMGDataset(Dataset):
     def __getitem__(self, i):
         u = self.utts[i]
         x = self.load(i)[: self.max_len]
+        tgt_path = os.path.join(self.align_dir, u.uid + ".npy") if self.align_dir and u.silent else None
+        tgt = np.load(tgt_path).astype(np.float32) if tgt_path and os.path.exists(tgt_path) else None
         if self.train:
-            x = augment(x, self.rng)
-        return {"emg": torch.from_numpy(x), "label": torch.tensor(encode(u.text)),
+            if self.aug == "v1":
+                x, shift = augment(x, self.rng, return_shift=True)
+                if tgt is not None:
+                    tgt = tgt[shift // 8:]
+            else:
+                x = augment_v2(x, self.rng)
+        item = {"emg": torch.from_numpy(x), "label": torch.tensor(encode(u.text)),
                 "mode": 0 if u.silent else 1, "text": u.text}
+        if self.phones:
+            item["phones"] = torch.tensor(encode_phones(u.text))
+        if self.align_dir:
+            item["align"] = torch.from_numpy(tgt) if tgt is not None else None
+        return item
 
     def compute_lengths(self):
         if self.lengths is None:
@@ -153,8 +170,22 @@ def collate(batch):
         emg[i, : lens[i]] = b["emg"]
     labels = torch.cat([b["label"] for b in batch])
     label_lens = torch.tensor([len(b["label"]) for b in batch])
-    return {"emg": emg, "lengths": lens, "labels": labels, "label_lengths": label_lens,
-            "mode": torch.tensor([b["mode"] for b in batch]), "texts": [b["text"] for b in batch]}
+    out = {"emg": emg, "lengths": lens, "labels": labels, "label_lengths": label_lens,
+           "mode": torch.tensor([b["mode"] for b in batch]), "texts": [b["text"] for b in batch]}
+    if "align" in batch[0]:
+        V = next((b["align"].shape[1] for b in batch if b["align"] is not None), 1)
+        T = max([b["align"].shape[0] for b in batch if b["align"] is not None] or [1])
+        al = torch.zeros(len(batch), T, V)
+        al_len = torch.zeros(len(batch), dtype=torch.long)
+        for i, b in enumerate(batch):
+            if b["align"] is not None:
+                al[i, : len(b["align"])] = b["align"]
+                al_len[i] = len(b["align"])
+        out["align"], out["align_lengths"] = al, al_len
+    if "phones" in batch[0]:
+        out["phones"] = torch.cat([b["phones"] for b in batch])
+        out["phone_lengths"] = torch.tensor([len(b["phones"]) for b in batch])
+    return out
 
 
 class BucketSampler(Sampler):

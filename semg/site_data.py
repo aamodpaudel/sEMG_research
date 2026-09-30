@@ -22,7 +22,8 @@ def _pct(x):
 def _summary(r):
     k = r["kind"]
     if k == "train":
-        return (f"Trained {r.get('params_m', '?')}M-parameter model on {r.get('train_utterances', '?'):,} recordings "
+        n = r.get('train_utterances')
+        return (f"Trained {r.get('params_m', '?')}M-parameter model on {f'{n:,}' if isinstance(n, int) else '?'} recordings "
                 f"for {r.get('hours', '?')} h. Dev character error {_pct(r.get('dev_cer'))}%.")
     if k == "evaluate":
         m = r.get("metrics", {})
@@ -49,10 +50,35 @@ def _summary(r):
     return k
 
 
+def _report(r):
+    p = (r.get("report") or "").replace("\\", "/")
+    if p and os.path.exists(p):
+        with open(p) as f:
+            return json.load(f)
+    return {}
+
+
+def _best(evals):
+    """The run the site reports: best page30-hard word accuracy under the newest protocol, not simply the latest
+    run (a failed run must not replace a good one). Protocol v2 runs, which lack page tasks, rank by closed500."""
+    for proto, task in (("v3", "page30-hard"), ("v2", "closed500")):
+        cand = []
+        for r in evals:
+            if r.get("protocol") != proto:
+                continue
+            t = _report(r).get("tasks", {}).get(task)
+            if t:
+                cand.append((t["lexicon"]["word_accuracy"], r["time"], r))
+        if cand:
+            return max(cand, key=lambda c: (c[0], c[1]))[2]
+    return None
+
+
 def build(site=SITE, registry=None):
     runs = read_runs(registry)
     evals = [r for r in runs if r["kind"] == "evaluate" and r.get("model") is None]
-    latest = evals[-1] if evals else None
+    best = _best(evals)
+    latest = best or (evals[-1] if evals else None)
     demo = {}
     sj = os.path.join(site, "demo", "samples.json")
     if os.path.exists(sj):
@@ -69,15 +95,11 @@ def build(site=SITE, registry=None):
             roadmap = json.load(f)
     m = (latest or {}).get("metrics", {})
     research = {}
-    v2 = [r for r in evals if r.get("protocol") == "v2" and r.get("model") is None]
-    if v2:
-        r = v2[-1]
-        rep = {}
-        if r.get("report") and os.path.exists(r["report"]):
-            with open(r["report"]) as f:
-                rep = json.load(f)
+    if best:
+        r = best
+        rep = _report(r)
         order = [("dates", "Dates and times"), ("closed100", "Book sentences"), ("closed250", "Book sentences"),
-                 ("closed500", "Book sentences"), ("open", "Any sentence")]
+                 ("closed500", "Book sentences"), ("open", "Any sentence"), ("page30-hard", "Page words, look-alike distractors")]
         rows = []
         for key, label in order:
             t = rep.get("tasks", {}).get(key)
@@ -98,7 +120,8 @@ def build(site=SITE, registry=None):
         c = calib[-1]
         research["paired"] = {k: c.get(k) for k in ("wer_a", "wer_b", "delta_wer", "delta_ci95", "p_b_not_better",
                                                     "n_utterances", "profile", "a", "b")}
-    dec = [r for r in runs if r["kind"] == "compare" and r.get("task")]
+    # the site's decoder ablation table is the unigram-vs-bigram study; other paired tests stay in the run log
+    dec = [r for r in runs if r["kind"] == "compare" and r.get("task") and "unigram vs bigram" in r.get("notes", "").lower()]
     if dec:
         last = {}
         for r in dec:

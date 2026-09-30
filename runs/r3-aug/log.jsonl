@@ -1,0 +1,25 @@
+{"epoch": 1, "step": 380, "loss": 19.362923170390882, "sec": 116.3}
+{"epoch": 2, "step": 762, "loss": 9.452791879314402, "sec": 108.1}
+{"epoch": 3, "step": 1145, "loss": 7.006666049011071, "sec": 119.1}
+{"epoch": 4, "step": 1526, "loss": 5.802287113009475, "sec": 127.6}
+{"epoch": 5, "step": 1908, "loss": 4.205551842744438, "sec": 136.3, "dev_wer": 1.2157226045526734, "dev_cer": 0.7242745369911855, "example": ["are we far from sunbury", "e e e e e e e"]}
+{"epoch": 6, "step": 2289, "loss": 4.072725441825046, "sec": 143.4}
+{"epoch": 7, "step": 2670, "loss": 4.048467167406257, "sec": 147.9}
+{"epoch": 8, "step": 3050, "loss": 4.033479465308942, "sec": 149.9}
+{"epoch": 9, "step": 3430, "loss": 4.0029238073449385, "sec": 149.9}
+{"epoch": 10, "step": 3814, "loss": 3.9906074851751328, "sec": 150.9, "dev_wer": 1.146638433033351, "dev_cer": 0.7261067643854611, "example": ["are we far from sunbury", "ee e e ee e"]}
+{"epoch": 11, "step": 4194, "loss": 3.9766891134412665, "sec": 149.5}
+{"epoch": 12, "step": 4579, "loss": 3.9735712212401553, "sec": 146.7}
+{"epoch": 13, "step": 4964, "loss": 3.954344262085952, "sec": 146.9}
+{"epoch": 14, "step": 5344, "loss": 3.9551042111296404, "sec": 147.4}
+{"epoch": 15, "step": 5723, "loss": 3.936119411740265, "sec": 149.0, "dev_wer": 1.1537850714663844, "dev_cer": 0.7095671981776766, "example": ["are we far from sunbury", "e ee ee e ee e"]}
+{"epoch": 16, "step": 6106, "loss": 3.929076779915832, "sec": 149.0}
+{"epoch": 17, "step": 6485, "loss": 3.922034672508139, "sec": 149.7}
+{"epoch": 18, "step": 6867, "loss": 3.9127827346012856, "sec": 153.1}
+{"epoch": 19, "step": 7247, "loss": 3.898520070628116, "sec": 152.8}
+{"epoch": 20, "step": 7629, "loss": 3.891387412061242, "sec": 149.9, "dev_wer": 1.0955532027527792, "dev_cer": 0.7038229176983263, "example": ["are we far from sunbury", "eae e aee ee a o"]}
+{"epoch": 21, "step": 8009, "loss": 3.877387947785227, "sec": 149.7}
+{"epoch": 22, "step": 8389, "loss": 3.867579674093347, "sec": 149.7}
+{"epoch": 23, "step": 8772, "loss": 3.848437652264189, "sec": 151.5}
+{"epoch": 24, "step": 9154, "loss": 3.8265570077596536, "sec": 153.5}
+{"epoch": 25, "step": 9535, "loss": 3.800379569762022, "sec": 154.1, "dev_wer": 1.0389094759131816, "dev_cer": 0.6872833514905418, "example": ["are we far from sunbury", "a e e i the ae"]}
