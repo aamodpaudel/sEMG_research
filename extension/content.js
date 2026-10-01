@@ -111,6 +111,7 @@
     if (m.type === "toggle-hints") setHints(!hintsOn);
     if (m.type === "command-bar") { bar.classList.add("on"); setHints(true); setTimeout(function () { cmd.focus(); }, 30); }
     if (m.type === "run") run(m.text, "nullpoint");
+    if (m.type === "refresh") refresh();                 // this tab became the one the user is on
   });
   var mo = new MutationObserver(function () { dirty = true; });
   mo.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style", "hidden", "disabled"] });

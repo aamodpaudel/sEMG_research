@@ -39,19 +39,33 @@
   }
 
   function startClip() { recording = true; chunks = preRoll.slice(); }
+  // Speech that ends while the previous clip is still decoding is kept (the latest one) and decoded next,
+  // instead of being dropped: a noise blip decoded first used to swallow the words that followed it.
+  var pending = null;
   function endClip() {
     recording = false;
     var pcm = toPcm16(chunks); chunks = [];
-    if (pcm.length < SR * 0.25 || busy) return;
+    if (pcm.length < SR * 0.25) return;
+    if (busy) { pending = pcm; return; }
+    decode(pcm);
+  }
+  function decode(pcm) {
     busy = true;
     var q = ["send=" + (test ? 0 : ($("v-send").checked ? 1 : 0)), "gaze=" + ($("v-gaze").checked ? 1 : 0), "profile=" + encodeURIComponent(NP.prof())];
     if (test) { q.push("label=" + encodeURIComponent(test.prompts[test.i])); if ($("v-keep").checked) q.push("keep=1"); }
     NP.api("/api/voice/decode?" + q.join("&"), { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: pcm.buffer })
       .then(show).catch(function (e) { NP.msg("v-meta", e.message, true); })
-      .finally(function () { busy = false; });
+      .finally(function () { busy = false; if (pending) { var p = pending; pending = null; decode(p); } });
   }
 
+  /** Whisper transcribes silence and noise as nothing or a bracketed tag ("[BLANK_AUDIO]", "(water splashing)"). */
+  function noSpeech(r) { var f = (r.free || "").trim(); return !f || /^[\[(].*[\])]$/.test(f); }
+
   function show(r) {
+    if (noSpeech(r)) {                                   // not an attempt: never sent, never scored
+      NP.msg("v-meta", "Only noise or silence in that clip (heard “" + (r.free || "") + "”), ignored." + (test ? " Say the prompt again." : ""));
+      return;
+    }
     $("v-out").textContent = (r.accepted ? "" : "? ") + r.say;
     NP.msg("v-meta", (r.accepted ? (r.queued ? "Sent to the page. " : "Accepted. ") : "Not sure, nothing sent. ") +
       "p = " + r.p.toFixed(2) + " of " + r.n_candidates + " phrases" + (r.gaze_used ? ", gaze used" : "") + ". Heard as “" + r.free + "”. " + r.ms + " ms.");
@@ -74,8 +88,9 @@
       if (chunks.length * dt > MAX_S) endClip();
       return;
     }
-    if (!auto || busy) return;
-    if (rms > Math.max(floor * 3, 0.004)) { loud += dt; if (loud > 0.15) { loud = 0; quiet = 0; startClip(); } }
+    if (!auto) return;
+    // A clip starts after 0.2 s clearly above the room's noise floor (short clicks and bumps do not count).
+    if (rms > Math.max(floor * 3.5, 0.004)) { loud += dt; if (loud > 0.2) { loud = 0; quiet = 0; startClip(); } }
     else { loud = 0; floor = 0.98 * floor + 0.02 * Math.max(rms, 0.0005); }   // slow noise-floor tracking
   }
 
