@@ -523,8 +523,21 @@
       .catch(function (e) { msg("set-msg", e.message, true); });
   });
 
-  function beat() { post("/api/heartbeat", {}).catch(function () {}); }
+  // If the local server has stopped, say so plainly instead of letting each tab fail with its own error.
+  var missed = 0, gone = null;
+  function beat() {
+    post("/api/heartbeat", {}).then(function () { missed = 0; if (gone) { gone.remove(); gone = null; } }).catch(function () {
+      if (++missed < 2 || gone) return;
+      gone = document.createElement("div");
+      gone.setAttribute("role", "alert");
+      gone.style.cssText = "position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:100;background:#12262A;color:#F3F5F2;" +
+        "padding:14px 22px;border-radius:14px;font:16px system-ui,sans-serif;box-shadow:0 16px 40px rgba(0,0,0,.3)";
+      gone.textContent = "Afono Nullpoint has stopped. Close this window and open Afono Nullpoint again.";
+      document.body.appendChild(gone);
+    });
+  }
   beat(); setInterval(beat, 5000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) beat(); });
   refreshStatus(); loadList();
 })();
 </script>

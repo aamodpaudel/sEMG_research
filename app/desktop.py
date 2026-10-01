@@ -15,6 +15,7 @@ import urllib.request
 import webbrowser
 
 PORT = int(os.environ.get("AFONO_PORT", "8765"))
+HEARTBEAT_TIMEOUT_S = 180
 BROWSERS = [
     r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
     r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
@@ -44,12 +45,26 @@ def _port_free(port):
 
 
 def open_window(url, profile_dir):
+    """True if Nullpoint got its own app window (Edge or Chrome with a separate profile)."""
     for b in BROWSERS:
         if os.path.exists(b):
             subprocess.Popen([b, f"--app={url}", f"--user-data-dir={profile_dir}", "--window-size=1440,920",
                               "--no-first-run", "--no-default-browser-check"])
             return True
     webbrowser.open(url)
+    return False
+
+
+def window_open(profile_dir):
+    """Whether a browser is using Nullpoint's window profile. Chromium holds <profile>/lockfile open exclusively
+    while it runs. (The launched process itself is no guide: Edge hands the window to another process and exits.)"""
+    try:
+        fd = os.open(os.path.join(profile_dir, "lockfile"), os.O_RDWR)
+    except FileNotFoundError:
+        return False
+    except PermissionError:
+        return True
+    os.close(fd)
     return False
 
 
@@ -66,7 +81,7 @@ def main():
     url = f"http://127.0.0.1:{PORT}/"
     profile_dir = os.path.join(paths.DATA, "window")
     if _running(PORT):                       # already open: just show another window
-        open_window(url, profile_dir)
+        open_window(url, profile_dir)        # the running instance keeps serving it
         return
     if not _port_free(PORT):
         print(f"Port {PORT} is used by another program; Nullpoint needs it for the browser extension.")
@@ -83,15 +98,22 @@ def main():
             break
         time.sleep(0.1)
     print(time.strftime("%Y-%m-%d %H:%M:%S"), "Afono Nullpoint started", url, "data:", paths.DATA)
-    open_window(url, profile_dir)
-    # stay alive while the window sends heartbeats; give it a minute to open the first time
-    start = time.time()
+    own_window = open_window(url, profile_dir)
+    # Stay alive while Nullpoint's window profile is in use. Heartbeats are only the fallback (e.g. when the
+    # default browser had to be used): a background or minimised window has its timers throttled to about one a
+    # minute, which is what used to shut the server down behind an open window, so the timeout must be longer.
+    start, seen = time.time(), False
     while True:
         time.sleep(2)
+        if own_window and window_open(profile_dir):
+            seen = True
+            continue
         beat = server.LAST_BEAT[0]
-        if beat == 0 and time.time() - start > 90:
+        if seen and (beat == 0 or time.time() - beat > 10):      # the window was there and has been closed
             break
-        if beat and time.time() - beat > 25:
+        if beat == 0 and time.time() - start > 120:
+            break
+        if beat and time.time() - beat > HEARTBEAT_TIMEOUT_S:
             break
     srv.should_exit = True
     t.join(timeout=5)
