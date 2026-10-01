@@ -65,7 +65,7 @@ export function featuresV0(lm, matrix) {
     1 = image-right corner) and perpendicular to it (v), both in eye widths, averaged over the two eyes; open = lid gap.
     aspect = video width / height, so distances are in square pixels. Being relative to the corners, e is invariant to head translation, scale and in-plane roll.
     h = [yaw, pitch, roll, tx, ty, tz] from the facial transformation matrix (head-pose compensation). */
-export function features(lm, matrix, aspect = 1) {
+export function features(lm, matrix, aspect = 1, blink = 0.12) {
   if (!lm || lm.length < 478) return null;
   const raw = lm;
   if (aspect !== 1) lm = lm.map((p) => ({ x: p.x * aspect, y: p.y }));        // normalised coords -> square pixels
@@ -83,7 +83,7 @@ export function features(lm, matrix, aspect = 1) {
     v += (d.x * -ev.y + d.y * ev.x) / (w * w) / 2;                          // perpendicular, + = down
     open += len(sub(lm[e.top], lm[e.bottom])) / w / 2;
   }
-  if (open < 0.12) return null;                                             // blink
+  if (open < blink) return null;                                            // blink
   return { e: [u, v, open], h: headPose(matrix), v0: featuresV0(raw, matrix) };
 }
 
@@ -203,6 +203,7 @@ export function calibrate(points, opts = {}) {
   }
   result.kind = kinds.reduce((a, b) => (result.lopo_px[b] < result.lopo_px[a] ? b : a));
   result.model = result.models[result.kind];
+  result.open_median = centre[2];
   result.points = pts.length;
   result.frames = pts.reduce((s, p) => s + p.frames.length, 0);
   result.n = result.frames;
@@ -370,8 +371,10 @@ function loop() {
     const r = landmarker.detectForVideo(video, t);
     const lm = r.faceLandmarks && r.faceLandmarks[0];
     const aspect = video.videoWidth && video.videoHeight ? video.videoWidth / video.videoHeight : 1;
-    last = lm ? { f: features(lm, r.facialTransformationMatrixes && r.facialTransformationMatrixes[0], aspect), t, face: true }
-              : { f: null, t, face: false };
+    const raw = lm ? features(lm, r.facialTransformationMatrixes && r.facialTransformationMatrixes[0], aspect, 0) : null;
+    const f = raw && raw.e[2] >= blinkThr ? raw : null;
+    last = { f, t, face: !!lm, open_ratio: raw ? raw.e[2] : null };
+    stat.frames++; if (lm) stat.face++; if (f) stat.eyes++;
     frames++;
     if (t - fpsT > 1000) { fps = frames; frames = 0; fpsT = t; }
     if (onFrame) onFrame(last);
@@ -380,6 +383,15 @@ function loop() {
 }
 export function info() { return { fps, face: !!(last && last.face), open: !!(last && last.f), calibrated: !!model }; }
 export function setModel(m) { model = m; }
+/* Blink cut-off on the lid gap (eye widths). Fixed values drop open eyes for some people and when looking down,
+   so it starts low and is set from each person's calibration (60% of their median open-eye gap). */
+let blinkThr = 0.08;
+export function setBlinkThreshold(x) { blinkThr = Math.max(0.05, Math.min(0.12, x)); }
+export function getBlinkThreshold() { return blinkThr; }
+/* Share of frames with a face and with usable (open) eyes since resetStats(), logged with every test. */
+let stat = { frames: 0, face: 0, eyes: 0 };
+export function resetStats() { stat = { frames: 0, face: 0, eyes: 0 }; }
+export function stats() { const n = Math.max(1, stat.frames); return { frames: stat.frames, face_rate: stat.face / n, eyes_rate: stat.eyes / n }; }
 export function getModel() { return model; }
 export function subscribe(fn) { onFrame = fn; }
 

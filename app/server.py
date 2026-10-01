@@ -419,7 +419,7 @@ def track_result(body: dict = Body(...)):
                                  "trials", "mean_time_ms", "screen_px", "screen_cm", "distance_cm", "calibration_samples",
                                  "sigma_px", "sigma_deg", "mapping", "lopo_deg", "dropped_points", "pixel_hit_rate",
                                  "centre_hit_rate", "accuracy_deg_poly2", "accuracy_deg_v0", "accuracy_px_poly2",
-                                 "accuracy_px_v0")
+                                 "accuracy_px_v0", "frames", "face_rate", "eyes_rate", "skipped", "blink_threshold")
             if k in body}
     rec = log_run("evaluate", "track-1", model="track", benchmark=f"Track {kind}", metrics=keep,
                   profile=body.get("profile", "default"), notes=str(body.get("notes", ""))[:200])

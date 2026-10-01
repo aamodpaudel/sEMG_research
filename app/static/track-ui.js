@@ -40,6 +40,16 @@ $("cam-start").addEventListener("click", async () => {
 });
 $("cam-stop").addEventListener("click", () => { T.stop(); stopLive(); enable(false); say("Camera off."); });
 
+/* While a test runs full screen, show whether the camera sees a face and open eyes (otherwise a test can fail
+   silently: no frames means no gaze estimate, and nothing snaps). */
+const chip = document.createElement("div"); chip.className = "track-chip"; stage.appendChild(chip);
+setInterval(() => {
+  if (stage.hidden) return;
+  const i = T.info();
+  chip.textContent = !i.face ? "Face not found: sit in front of the camera" : !i.open ? "Eyes not seen: more light on your face, look at the screen" : "Face and eyes tracked";
+  chip.dataset.ok = i.face && i.open ? "1" : "0";
+}, 200);
+
 async function openStage() {
   stage.hidden = false; stage.querySelectorAll(".dot,.grid,.gaze").forEach((n) => n.remove());
   try { await document.documentElement.requestFullscreen(); } catch (e) { /* windowed is fine */ }
@@ -77,6 +87,7 @@ $("t-cal").addEventListener("click", async () => {
   try { calib = T.calibrate(points); }
   catch (e) { say(e.message + " Make sure your face is lit and visible, then try again.", true); return; }
   T.setModel(calib);
+  T.setBlinkThreshold(0.6 * calib.open_median);
   const lopo = calib.lopo_px[calib.kind];
   snapper.setSigma(Math.max(pxOf(0.5), lopo / Math.sqrt(Math.PI / 2))); sigmaSource = "calibration (leave-one-point-out)";
   enable(true);
@@ -90,6 +101,7 @@ $("t-val").addEventListener("click", async () => {
   stopLive();
   await openStage();
   help.textContent = "Look at each dot until it disappears.";
+  T.resetStats();
   const spots = [[0.3, 0.3], [0.7, 0.3], [0.5, 0.5], [0.3, 0.7], [0.7, 0.7]];
   const pts = [];
   for (const [fx, fy] of spots) {
@@ -108,15 +120,17 @@ $("t-val").addEventListener("click", async () => {
     by[kind] = T.score(scored, g.pxPerCm, g.dist);
   }
   const s = by[calib.kind];
-  if (!s.points) { say("No usable frames in the accuracy test. Check the lighting and try again.", true); return; }
+  const st = T.stats();
+  if (!s.points) { say(`No usable frames in the accuracy test (face seen ${Math.round(100 * st.face_rate)}% of the time, open eyes ${Math.round(100 * st.eyes_rate)}%). Add front light, sit at arm's length, then calibrate again.`, true); return; }
   snapper.setSigma(Math.max(pxOf(0.5), s.sigma_px)); sigmaSource = "accuracy test";
   const other = Object.entries(by).filter(([k]) => k !== calib.kind).map(([k, v]) => `${k} ${v.accuracy_deg.toFixed(2)}°`).join(", ");
   $("t-result").textContent = `Accuracy ${s.accuracy_deg.toFixed(2)}° (${Math.round(s.accuracy_px)} px), precision ${s.precision_deg.toFixed(2)}°, ` +
-    `snap σ ${s.sigma_deg.toFixed(2)}°, ${s.points} points, mapping ${calib.kind}. Other mapping on the same frames: ${other}.` +
+    `snap σ ${s.sigma_deg.toFixed(2)}°, ${s.points} of 5 points, mapping ${calib.kind}. Other mapping on the same frames: ${other}. ` +
+    `Eyes tracked ${Math.round(100 * st.eyes_rate)}% of the time.` + (s.points < 4 ? " Some dots had no usable frames: check the light and calibrate again." : "") +
     (s.accuracy_deg > 5 ? " The error is large: check lighting and distance, then calibrate again." : "");
   const extra = {};
   for (const [k, v] of Object.entries(by)) { extra[`accuracy_deg_${k}`] = v.accuracy_deg; extra[`accuracy_px_${k}`] = v.accuracy_px; }
-  NP.post("/api/track/result", { kind: "validation", profile: NP.prof(), ...s, ...extra, mapping: calib.kind,
+  NP.post("/api/track/result", { kind: "validation", profile: NP.prof(), ...s, ...extra, ...T.stats(), blink_threshold: T.getBlinkThreshold(), mapping: calib.kind,
     lopo_deg: degOf(calib.lopo_px[calib.kind]), dropped_points: calib.dropped.length,
     screen_px: [screen.width, screen.height], screen_cm: +$("scr-cm").value, distance_cm: g.dist,
     calibration_samples: calib.frames }).then(() => NP.refreshStatus()).catch(() => {});
@@ -134,25 +148,32 @@ $("t-grid").addEventListener("click", async () => {
   const rects = cells.map((c) => toScreenRect(c.getBoundingClientRect()));
   snapper.reset(); snapper.setTargets(rects.map((r, i) => ({ id: i, label: String(i + 1), rect: r })));
   snapper.screen = { width: screen.width, height: screen.height };
-  const f = new T.OneEuro(); fixation.reset();
+  const f = new T.OneEuro(); fixation.reset(); T.resetStats();
+  const dot = document.createElement("div"); dot.className = "gaze"; dot.hidden = true; stage.appendChild(dot);
   let hot = null, gaze = null;
   T.subscribe((fr) => {
     if (!fr.f) return;
     const [x, y] = f.filter(T.predict(T.getModel(), fr.f), fr.t);
     gaze = [x, y];
+    const [vx, vy] = toViewport(x, y);                       // faint ring: where the model thinks you look
+    dot.hidden = false; dot.style.left = Math.max(0, Math.min(innerWidth, vx)) + "px"; dot.style.top = Math.max(0, Math.min(innerHeight, vy)) + "px";
     const st = snapper.update(x, y, fr.t, fixation.push(x, y, fr.t).fixating);
     if (st.highlight !== hot) { cells.forEach((c, i) => c.classList.toggle("hot", i === st.highlight)); hot = st.highlight; }
   });
   const order = shuffle([...Array(12).keys()]);
-  let snapHits = 0, pixelHits = 0, centreHits = 0; const times = [];
+  let snapHits = 0, pixelHits = 0, centreHits = 0, skipped = 0; const times = [];
   for (const goal of order) {
     cells.forEach((c, i) => c.classList.toggle("goal", i === goal));
-    help.textContent = `Look at the orange square (${goal + 1}) and press Space when it turns teal. ${times.length + 1} of 12.`;
+    help.textContent = `Look at the orange square (${goal + 1}) and press Space when it turns teal. ${times.length + 1} of 12. ` +
+      "If it never turns teal, it moves on after 8 s.";
     const t0 = performance.now();
-    await new Promise((res) => {
-      const k = (e) => { if (e.code === "Space") { e.preventDefault(); removeEventListener("keydown", k); res(); } };
+    const timedOut = await new Promise((res) => {
+      const done = (v) => { removeEventListener("keydown", k); clearTimeout(to); res(v); };
+      const k = (e) => { if (e.code === "Space") { e.preventDefault(); done(false); } };
+      const to = setTimeout(() => done(hot !== goal), 8000);        // skip, counted as a miss unless it is teal now
       addEventListener("keydown", k);
     });
+    if (timedOut) skipped++;
     times.push(performance.now() - t0);
     if (hot === goal) snapHits++;
     if (gaze) {
@@ -165,8 +186,10 @@ $("t-grid").addEventListener("click", async () => {
   T.subscribe(null); closeStage();
   const mean = times.reduce((a, b) => a + b, 0) / times.length, pct = (n) => Math.round((100 * n) / 12);
   $("t-result").textContent = `Target test: snap ${snapHits}/12 (${pct(snapHits)}%), pixel cursor ${pixelHits}/12 (${pct(pixelHits)}%) ` +
-    `on the same trials, ${Math.round(mean)} ms per selection.`;
-  NP.post("/api/track/result", { kind: "target_test", profile: NP.prof(), hit_rate: snapHits / 12, pixel_hit_rate: pixelHits / 12,
+    `on the same trials, ${Math.round(mean)} ms per selection` + (skipped ? `, ${skipped} skipped after 8 s` : "") +
+    `. Eyes tracked ${Math.round(100 * T.stats().eyes_rate)}% of the time.`;
+  NP.post("/api/track/result", { kind: "target_test", profile: NP.prof(), ...T.stats(), skipped, blink_threshold: T.getBlinkThreshold(),
+    hit_rate: snapHits / 12, pixel_hit_rate: pixelHits / 12,
     centre_hit_rate: centreHits / 12, trials: 12, mean_time_ms: mean, sigma_px: snapper.sigma, mapping: calib && calib.kind,
     screen_px: [screen.width, screen.height] }).then(() => NP.refreshStatus()).catch(() => {});
 });
