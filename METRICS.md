@@ -272,6 +272,21 @@ a live session right after calibration. Found while building this: the v0 featur
 position of the two eyes measured from each eye's inner corner, which cancels for sideways gaze; measuring both eyes
 image-left to image-right took the poly2 LOSO error from 9.5° to 6.3°.
 
+**Input cap (2026-09-30).** The mapping standardises each input by its spread during calibration. Head pose barely
+moves while calibrating, so a small head movement afterwards became a huge z-score and threw the estimate off-screen
+(seen in the first human session: 2.9° right after calibrating, 55° in another run, and no snapping minutes later).
+Standardised inputs are now capped at ±3. Same protocol as above, with and without the cap:
+
+| Personal poly2 calibration | Mean error | 95th percentile | Worst image |
+|---|---|---|---|
+| 9 images, no cap → cap 3 | 9.10° → 8.52° | 18.7° → 17.0° | 142.7° → 57.9° |
+| 9 × 5 images, no cap → cap 3 | 4.95° → 4.91° | 10.6° → 10.4° | 139.9° → 60.5° |
+
+**First human session (founder, 2026-09-30, desktop app, 1536 × 864 CSS px, 34.5 cm wide screen at 60 cm):**
+accuracy test 2.94° (137 px), precision 0.69°, 5 of 5 points, eyes tracked 99% of frames, right after calibrating.
+One person, one session: not a benchmark. The target test in the same session got no snaps because of the
+extrapolation bug above.
+
 Model plan: (1) now, personal poly2 calibration in the browser; (2) next, a population regression head on MediaPipe
 landmarks trained on MPIIFaceGaze, corrected per person from the 9-point calibration (the 5.7° and 4.9° rows);
 (3) later, a small CNN on normalised eye patches (MobileNet-sized, ONNX in the browser), trained leave-one-subject-out

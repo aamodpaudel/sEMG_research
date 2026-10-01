@@ -137,8 +137,12 @@ export function fit(X, Y, lambda = 1.0, w = null) {
   }
   return { mu, sd, W: coef, n };
 }
+/* Inputs are standardised by their spread during calibration. Head pose barely varies while calibrating, so its
+   spread is tiny and a small head movement afterwards becomes a huge z-score that throws the estimate off-screen.
+   Each standardised input is therefore capped at Z_CLIP: outside the calibrated range the estimate saturates. */
+export const Z_CLIP = 3;
 export function predictRaw(m, x) {
-  const z = [1, ...x.map((v, j) => (v - m.mu[j]) / m.sd[j])];
+  const z = [1, ...x.map((v, j) => Math.max(-Z_CLIP, Math.min(Z_CLIP, (v - m.mu[j]) / m.sd[j])))];
   return m.W.map((w) => w.reduce((s, wi, i) => s + wi * z[i], 0));
 }
 
@@ -215,6 +219,18 @@ export function predict(m, f) {
   if (m && m.model) m = m.model;
   return predictRaw(m.reg, MAPPINGS[m.kind](f, m.centre));
 }
+
+/** How far the head is from where it was during calibration: the largest |z| of the head-pose inputs (poly2), so
+    values above Z_CLIP mean the mapping is extrapolating and calibrating again will help. */
+export function headDrift(m, f) {
+  if (m && m.model) m = m.model;
+  if (!m || m.kind !== "poly2" || !f) return 0;
+  const x = MAPPINGS.poly2(f, m.centre);
+  let worst = 0;
+  for (let j = 6; j < x.length; j++) worst = Math.max(worst, Math.abs((x[j] - m.reg.mu[j]) / m.reg.sd[j]));
+  return worst;
+}
+export function lastFrame() { return last; }
 
 /* ---------- units ---------- */
 export function deg2px(deg, pxPerCm, distCm) { return Math.tan((deg * Math.PI) / 180) * distCm * pxPerCm; }

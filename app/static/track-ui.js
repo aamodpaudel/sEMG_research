@@ -28,6 +28,9 @@ function offset() {
 }
 function toScreenRect(r) { const o = offset(); return { left: r.left + o.x, top: r.top + o.y, width: r.width, height: r.height }; }
 function toViewport(x, y) { const o = offset(); return [x - o.x, y - o.y]; }
+/** Keep a gaze estimate within 5% of the screen edges, so a bad estimate snaps to the nearest edge element
+    instead of to nothing. */
+function onScreen([x, y]) { return [Math.max(-0.05 * screen.width, Math.min(1.05 * screen.width, x)), Math.max(-0.05 * screen.height, Math.min(1.05 * screen.height, y))]; }
 
 setInterval(() => {
   const i = T.info();
@@ -46,8 +49,10 @@ const chip = document.createElement("div"); chip.className = "track-chip"; stage
 setInterval(() => {
   if (stage.hidden) return;
   const i = T.info();
-  chip.textContent = !i.face ? "Face not found: sit in front of the camera" : !i.open ? "Eyes not seen: more light on your face, look at the screen" : "Face and eyes tracked";
-  chip.dataset.ok = i.face && i.open ? "1" : "0";
+  const fr = T.lastFrame(), drift = i.open && T.getModel() && fr ? T.headDrift(T.getModel(), fr.f) : 0;
+  chip.textContent = !i.face ? "Face not found: sit in front of the camera" : !i.open ? "Eyes not seen: more light on your face, look at the screen"
+    : drift > 2 * T.Z_CLIP ? "Head moved since calibration: sit as you did, or calibrate again" : "Face and eyes tracked";
+  chip.dataset.ok = i.face && i.open && drift <= 2 * T.Z_CLIP ? "1" : "0";
 }, 200);
 
 async function openStage() {
@@ -153,7 +158,7 @@ $("t-grid").addEventListener("click", async () => {
   let hot = null, gaze = null;
   T.subscribe((fr) => {
     if (!fr.f) return;
-    const [x, y] = f.filter(T.predict(T.getModel(), fr.f), fr.t);
+    const [x, y] = f.filter(onScreen(T.predict(T.getModel(), fr.f)), fr.t);
     gaze = [x, y];
     const [vx, vy] = toViewport(x, y);                       // faint ring: where the model thinks you look
     dot.hidden = false; dot.style.left = Math.max(0, Math.min(innerWidth, vx)) + "px"; dot.style.top = Math.max(0, Math.min(innerHeight, vy)) + "px";
@@ -237,7 +242,7 @@ $("t-live").addEventListener("click", () => {
   }, 500);
   T.subscribe((fr) => {
     if (!fr.f || !T.getModel()) return;
-    const [x, y] = f.filter(T.predict(T.getModel(), fr.f), fr.t);
+    const [x, y] = f.filter(onScreen(T.predict(T.getModel(), fr.f)), fr.t);
     const fx = fixation.push(x, y, fr.t);
     const st = snapper.update(x, y, fr.t, fx.fixating);
     const [vx, vy] = toViewport(x, y);
