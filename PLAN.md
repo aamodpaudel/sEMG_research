@@ -193,6 +193,12 @@ badges on). Task list read from paper: open Hacker News, open the third story, s
 for "afono", open the repo, star it. Measure time per task, errors and undos against the same tasks with a mouse.
 Log it (`voice-1` / `track-1` runs). Then the same tasks silent, on the rig, once Tier 1 passes.
 
+**Smallest version, gaze + 10 words (`gaze_v1`, 2026-10-12):** gaze picks the element, one word acts on it:
+click, double, right, down, up, zoom, out, back, afono, sleep. A bare "click" / "double" / "right" goes to whatever the
+Track Model highlights (Nullpoint adds the badge number). No numbers to say, so it is the first set to record
+silently (`python -m semg.commands record --set gaze_v1`). Right click reaches page menus only; a script cannot open
+the browser's own context menu.
+
 **Midas touch:** nothing fires unless (1) a phrase from the grammar is accepted (action posterior ≥ 0.7 and the free
 transcription agrees), (2) the target exists on screen, (3) Afono is awake ("afono" / "sleep"). Gaze only re-weights.
 

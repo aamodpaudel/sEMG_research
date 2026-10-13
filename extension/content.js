@@ -91,15 +91,30 @@
         if (box) { box.el.focus(); box.el.value = a.query; box.el.dispatchEvent(new Event("input", { bubbles: true })); if (box.el.form && box.el.form.requestSubmit) box.el.form.requestSubmit(); }
         else toast("No search box on this page"); break;
       case "click":
-        flash(a.target); toast("click " + a.target.n + " · " + (a.target.display || a.target.label));
+        flash(a.target); toast((a.mode ? a.mode + " click " : "click ") + a.target.n + " · " + (a.target.display || a.target.label));
         setTimeout(function () {
-          var k = a.target.kind;
-          if (k === "field" || k === "searchbox" || k === "combobox") a.target.el.focus(); else (a.target.click || a.target.el).click();
+          var k = a.target.kind, el = a.target.click || a.target.el;
+          if (a.mode) mouse(el, a.mode);
+          else if (k === "field" || k === "searchbox" || k === "combobox") a.target.el.focus(); else el.click();
           dirty = true;
         }, 180); break;
       default: toast("Did not understand “" + text + "”");
     }
     chrome.runtime.sendMessage({ type: "ran", text: text, action: a.type, from: from }).catch(function () {});
+  }
+
+  /* Double and right click as real mouse event sequences at the element's centre. Pages see them like a mouse;
+     the browser's own context menu cannot be opened from a script, so "right" reaches page menus only. */
+  function mouse(el, mode) {
+    var r = el.getBoundingClientRect(), o = { bubbles: true, cancelable: true, view: window, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 };
+    if (mode === "right") {
+      o.button = 2; o.buttons = 2;
+      ["pointerdown", "mousedown", "pointerup", "mouseup"].forEach(function (t) { el.dispatchEvent(new (t[0] === "p" ? PointerEvent : MouseEvent)(t, o)); });
+      el.dispatchEvent(new MouseEvent("contextmenu", o));
+      return;
+    }
+    el.click(); el.click();
+    el.dispatchEvent(new MouseEvent("dblclick", Object.assign({ detail: 2 }, o)));
   }
 
   cmd.addEventListener("keydown", function (e) {

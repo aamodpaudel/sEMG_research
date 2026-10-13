@@ -53,7 +53,7 @@ def load_commands(path=COMMANDS_FILE):
         return json.load(f)
 
 
-ITEM_SETS = ("tier1_starter", "intent_v1")
+ITEM_SETS = ("tier1_starter", "intent_v1", "gaze_v1")
 
 
 def starter_items(path=COMMANDS_FILE, set_name="tier1_starter"):
@@ -566,7 +566,7 @@ def main():
             p.add_argument("--user", required=True)
         p.add_argument("--items", nargs="*", default=None, help="restrict to these items (default: all / starter set)")
         p.add_argument("--set", default="tier1_starter", choices=ITEM_SETS,
-                       help="item set from vocab/commands.json: tier1_starter, or intent_v1 (verbs + digits)")
+                       help="item set from vocab/commands.json: tier1_starter, intent_v1 (verbs + digits) or gaze_v1 (gaze + 10 words)")
         p.add_argument("--notes", default="")
 
     p = sub.add_parser("plan")

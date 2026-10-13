@@ -34,7 +34,8 @@ FORMS = os.environ.get("AFONO_WHISPER_FORMS", "fast")      # "full" also tries T
 # Tier 1 command phrases that need no page target (see vocab/commands.json and extension/commands.js).
 COMMAND_PHRASES = ["scroll up", "scroll down", "page up", "page down", "top", "bottom", "zoom in", "zoom out",
                    "back", "next", "stop", "enter", "undo", "copy", "paste", "delete", "send", "tab", "cancel",
-                   "yes", "no", "done", "show", "hide", "sleep", "afono"]
+                   "yes", "no", "done", "show", "hide", "sleep", "afono",
+                   "click", "double", "right", "zoom", "out", "up", "down"]   # gaze set: acts on the gazed element
 
 _DIGITS = {w: str(i) for i, w in enumerate(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
                                              "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",

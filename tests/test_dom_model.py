@@ -206,3 +206,11 @@ def test_webui_loader(tmp_path):
     assert len(boxes) == 2 and sorted(y) == [0, 1]
     div = [e for e in els if e["id"] == "2"][0]
     assert div["cursor"] == "pointer" and not div["clickable"]   # the div-with-handler blind spot of AX labels
+
+
+@need_node
+def test_gaze_commands_double_right_out():
+    r = js("(function(){ var t=[{n:25,label:'reply'},{n:3,label:'share'}];"
+           "var d=C.parse('double 25',t), rc=C.parse('right click share',t), o=C.parse('out',t), z=C.parse('zoom',t), b=C.parse('right',t);"
+           "return [d.type,d.mode,d.target.n, rc.mode,rc.target.n, o.type,o.dir, z.dir, b.type]; })()")
+    assert r == ["click", "double", 25, "right", 3, "zoom", -1, 1, "unknown"]

@@ -54,6 +54,11 @@
     if (a === "show") return { type: "hints", on: true };
     if (a === "hide") return { type: "hints", on: false };
     if (a === "zoom") return { type: "zoom", dir: rest[0] === "out" ? -1 : 1 };
+    if (a === "out" && !rest.length) return { type: "zoom", dir: -1 };
+    if (a === "double" || a === "right") {                       // "double 25", "right click sign in"
+      var r = rest[0] === "click" ? rest.slice(1) : rest, tt = bestTarget(r, targets);
+      return tt ? { type: "click", target: tt, mode: a } : { type: "unknown", text: text, reason: "no target (look at one, or add its number)" };
+    }
     if (a === "scroll" || a === "page") return { type: "scroll", dir: rest[0] === "up" ? -1 : 1, big: a === "page" };
     if (a === "up" || a === "down") return { type: "scroll", dir: a === "up" ? -1 : 1, big: false };
     if (a === "top" || a === "bottom") return { type: "jump", to: a };

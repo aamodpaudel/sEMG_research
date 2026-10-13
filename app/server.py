@@ -354,6 +354,7 @@ def decode(body: dict = Body(...)):
     if ref:
         out["word_accuracy"] = max(0.0, 1 - wer([ref], [hyp]))
     if body.get("send") and hyp:
+        hyp = aim(hyp)
         COMMAND_QUEUE.append(hyp)
         out["sent"] = True
     return out
@@ -392,11 +393,24 @@ def pop_commands():
     return {"commands": out}
 
 
+AIMED = {"click", "double", "right", "double click", "right click"}
+
+
+def aim(text, max_age=1.5):
+    """A bare 'click' / 'double' / 'right' acts on what the Track Model highlights: 'click' -> 'click 25'.
+    Without a fresh highlight the command is sent as it is and the extension reports that it has no target."""
+    h = GAZE.get("highlight") if GAZE and time.time() - GAZE.get("received", 0) <= max_age else None
+    if text in AIMED and isinstance(h, str) and h[:1] == "n" and h[1:].isdigit():
+        return f"{text} {h[1:]}"
+    return text
+
+
 @app.post("/api/commands")
 def push_command(body: dict = Body(...)):
     text = normalize_text(str(body.get("text", "")))
     if not text:
         raise HTTPException(400, "Empty command")
+    text = aim(text)
     COMMAND_QUEUE.append(text)
     return {"queued": text}
 
@@ -515,6 +529,7 @@ async def voice_decode(request: Request, send: int = 0, gaze: int = 1, keep: int
     import asyncio
     r = await asyncio.to_thread(v.get_decoder().decode, audio, cands, g or None)
     if send and r["accepted"]:
+        r["send"] = aim(r["send"])
         COMMAND_QUEUE.append(r["send"])
         r["queued"] = True
     if keep and label and _SAFE.match(profile):

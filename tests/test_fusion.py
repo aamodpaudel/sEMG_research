@@ -27,3 +27,16 @@ def test_gaze_boosts_softly_and_never_removes():
     # a word shared by several targets averages them: looking at "reply two" lifts "reply" less than "two"
     w = gaze_word_weights(TARGETS, {5: 1.0})
     assert w["two"] > w["reply"] > w["one"]
+
+
+def test_bare_commands_aim_at_the_gaze_highlight():
+    import time
+    import app.server as S
+    S.GAZE.clear()
+    assert S.aim("click") == "click"                            # no gaze: sent as it is
+    S.GAZE.update({"highlight": "n25", "received": time.time()})
+    assert [S.aim(c) for c in ("click", "double", "right", "scroll down", "click 3")] == [
+        "click 25", "double 25", "right 25", "scroll down", "click 3"]
+    S.GAZE.update({"received": time.time() - 5})                # stale gaze is ignored
+    assert S.aim("click") == "click"
+    S.GAZE.clear()

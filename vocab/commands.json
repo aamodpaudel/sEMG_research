@@ -128,7 +128,8 @@
     "back | next | stop | enter | undo | copy | paste | select | delete | send | tab",
     "search <words>",
     "show | hide            (number badges on the page)",
-    "afono (wake) | sleep   (ignore speech until woken)"
+    "afono (wake) | sleep   (ignore speech until woken)",
+    "click | double | right   (alone: the element gaze highlights; or with a target / number)"
   ],
   "recording_protocol": {
     "repetitions_per_item": 10,
@@ -165,5 +166,20 @@
       "nine"
     ],
     "why": "The intent grammar: a verb, optionally followed by a badge number said digit by digit ('click two five' = 25). 14 verbs + 10 digits = 24 items, so 'click' plus any target on the page is three or four items from a fixed set instead of the page's own words. Digits replace number words because 'fourteen'/'forty' and 'fifteen'/'fifty' differ mainly in stress, which surface EMG barely sees. 'no' is replaced by 'cancel' (it shares the n onset and vowel family with 'nine' and 'one'); 'zero' is used, not 'oh' (close to 'open'). Not yet measured on the rig: record it with python -m semg.commands record --set intent_v1."
+  },
+  "gaze_v1": {
+    "items": [
+      "click",
+      "double",
+      "right",
+      "down",
+      "up",
+      "zoom",
+      "out",
+      "back",
+      "afono",
+      "sleep"
+    ],
+    "why": "Gaze picks the element, one word says what to do: click, double (double click), right (right click), down / up (scroll), zoom / out (zoom in / out), back, afono (wake) and sleep (stop listening). No numbers. Pairs to watch on the muscles, to be measured before swapping: down / double (same d onset), right / out (both end in t after a glide), up / out. Not yet recorded: python -m semg.commands record --set gaze_v1."
   }
 }
