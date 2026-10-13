@@ -103,3 +103,29 @@ def word_candidates(key, word, n, pool, variant, index=None):
     if variant == "easy":
         return [word] + easy_distractors(key, [word], pool, n - 1)
     return [word] + hard_distractors(key, [word], index, n - 1)
+
+
+def gaze_word_weights(targets, gaze, floor=0.5):
+    """Soft gaze prior for the sEMG page lexicon (the rule voice.py uses for phrases, applied to words).
+
+    targets: the page's targets [{"n": badge, "label": "..."}]; gaze: {badge: p} from the Track Model.
+    Each target gets p' = (1 - floor) * gaze_p + floor / n_targets, so a wrong gaze estimate can lower a target but
+    never remove it. A label word's weight is n_targets * the sum of p' over the targets whose label contains it,
+    divided by the number of such targets: 1 when gaze is uniform, up to (1 - floor) * n + floor when one target has
+    all the gaze. Words in no label (commands, numbers) keep weight 1. Returns {word: weight}.
+    The gaze-fusion simulation (METRICS.md) is why this is soft over all targets and not a top-k filter.
+    """
+    from .text import normalize_text
+    tg = [t for t in targets or [] if t.get("label")]
+    if not tg or not gaze:
+        return {}
+    n = len(tg)
+    total = sum(max(0.0, float(gaze.get(int(t["n"]), 0.0))) for t in tg)
+    if total <= 0:
+        return {}
+    words = {}
+    for t in tg:
+        p = (1 - floor) * max(0.0, float(gaze.get(int(t["n"]), 0.0))) / total + floor / n
+        for w in set(normalize_text(t["label"]).split()):
+            words.setdefault(w, []).append(p)
+    return {w: n * sum(ps) / len(ps) for w, ps in words.items()}

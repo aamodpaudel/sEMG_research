@@ -27,6 +27,7 @@ from fastapi.staticfiles import StaticFiles  # noqa: E402
 
 from semg.data import Utterance, load_index  # noqa: E402
 from semg.decode import Lexicon, greedy, lexicon_beam_search  # noqa: E402
+from semg.page import gaze_word_weights  # noqa: E402
 from semg.model import load_model  # noqa: E402
 from semg.registry import log_run, read_runs  # noqa: E402
 from semg.signal import preprocess  # noqa: E402
@@ -135,7 +136,15 @@ def get_model(ckpt=None):
         return STATE["model"]
 
 
-def lexicon_for(vocab, profile, words):
+def gaze_weights(max_age=1.5):
+    """{word: weight} from the Track Model's latest candidates (empty when gaze is off or stale)."""
+    if not GAZE or time.time() - GAZE.get("received", 0) > max_age:
+        return {}
+    g = {int(c["id"][1:]): c["p"] for c in GAZE.get("candidates", []) if c["id"][:1] == "n" and c["id"][1:].isdigit()}
+    return gaze_word_weights(CONTEXT.get("targets"), g)
+
+
+def lexicon_for(vocab, profile, words, gaze=False):
     personal = profile.word_counts()
     if vocab in ("dates", "open"):
         return LEX[vocab]
@@ -153,7 +162,9 @@ def lexicon_for(vocab, profile, words):
         ws = [w for w in ws if w and " " not in w]
         if not ws:
             raise HTTPException(400, "Type the words that are on screen, separated by spaces.")
-        counts = Counter({w: 1 + PERSONAL_WEIGHT * personal.get(w, 0) for w in ws})
+        # Lexicon's prior is add-one over counts, so a gaze weight m scales (count + 1).
+        weights = gaze_weights() if gaze and vocab == "page" else {}
+        counts = Counter({w: (2 + PERSONAL_WEIGHT * personal.get(w, 0)) * weights.get(w, 1.0) - 1 for w in ws})
         return Lexicon(counts.keys(), counts)
     raise HTTPException(400, "Unknown vocabulary")
 
@@ -329,7 +340,8 @@ def decode(body: dict = Body(...)):
         raise HTTPException(400, f"This model expects {model.config['n_channels']} channels and the recording has "
                                  f"{x.shape[1]}. Label a few recordings and run Calibrate to adapt it.")
     vocab = body.get("vocab", "open")
-    lex = lexicon_for(vocab, profile, body.get("words"))
+    use_gaze = bool(body.get("gaze", True)) and vocab == "page" and bool(gaze_weights())
+    lex = lexicon_for(vocab, profile, body.get("words"), gaze=use_gaze)
     t0 = time.perf_counter()
     with torch.no_grad():
         lp = model(torch.from_numpy(x)[None].to(DEVICE))[0][0].float().cpu().numpy()
@@ -338,7 +350,7 @@ def decode(body: dict = Body(...)):
     t2 = time.perf_counter()
     out = {"greedy": greedy(lp), "text": hyp, "reference": ref, "lexicon_size": len(lex), "vocab": vocab,
            "model_ms": round((t1 - t0) * 1000), "decode_ms": round((t2 - t1) * 1000),
-           "seconds": round(x.shape[0] / 1000, 2), "preview": preview(x)}
+           "seconds": round(x.shape[0] / 1000, 2), "preview": preview(x), "gaze_used": use_gaze}
     if ref:
         out["word_accuracy"] = max(0.0, 1 - wer([ref], [hyp]))
     if body.get("send") and hyp:

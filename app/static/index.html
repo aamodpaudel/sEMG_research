@@ -411,7 +411,7 @@
         drawScope(r.preview); $("ref").textContent = r.reference || "(no label yet)";
         words(r.reference, r.text); lastHyp = r.text; $("raw").textContent = r.greedy || "(empty)";
         $("fix").value = r.reference || r.text;
-        msg("msg", r.seconds + " s · model " + r.model_ms + " ms · decoder " + r.decode_ms + " ms · " + r.lexicon_size + " words" +
+        msg("msg", r.seconds + " s · model " + r.model_ms + " ms · decoder " + r.decode_ms + " ms · " + r.lexicon_size + " words" + (r.gaze_used ? " · weighted by gaze" : "") +
           (r.word_accuracy != null ? " · word accuracy " + Math.round(r.word_accuracy * 100) + "%" : "") + (r.sent ? " · sent to the page" : ""));
       }).catch(function (e) { msg("msg", e.message, true); });
   }
