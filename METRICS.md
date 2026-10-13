@@ -321,6 +321,9 @@ transcription acts as a garbage model. A phrase is **accepted** when its posteri
 re-weighted by Track Model gaze with a uniform floor) is at least 0.7 and the free transcription either agrees with
 it (character similarity >= 0.75, so homophones like "reply to" / "reply two" agree) or scores at most 4 nats higher.
 Thresholds were set on synthetic clips, not on test data from people.
+**Change (2026-10-12):** the posterior is summed over phrases that send the same command before the 0.7 test
+("click twenty five" and "click two five", or "reply" and "click reply", are one action). Badge numbers can now be
+said digit by digit. The synthetic check above was run before this change; self-tests logged from today use it.
 
 **Pipeline check (SYNTHETIC, not a measurement):** Windows SAPI text-to-speech in a normal voice, 36 prompts on
 three page-like phrase sets (median 62 phrases): 36/36 top choice correct, none rejected. Off-page speech

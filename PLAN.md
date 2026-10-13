@@ -161,3 +161,57 @@ Evaluate → the site data rebuilds itself → republish the site. The training 
 - **sEMG Model:** gaze × sEMG soft fusion on the page vocabulary in Nullpoint (mechanism; not yet measured).
 - **Film:** `video/` (Remotion), 61 s product film.
 - **Still blocked on a person or hardware:** Tier 1 sessions 1–3 (`semg.commands eval`), a Whisper self-test in a real voice, a Track target test after the input-cap fix, a hand-labelled DOM-2 div-soup set.
+
+---
+
+## Pivot (2026-10-12): Afono is the intent layer
+**Decision.** Stop growing the vocabulary. Every input decodes into one small grammar of actions on the page:
+`<verb> [<badge number>]`, numbers said digit by digit ("click two five" = badge 25). The DOM Model puts a number
+on every target, so 14 verbs + 10 digits (`intent_v1` in `vocab/commands.json`, 24 items) can reach anything on any
+page. Voice, silent speech and gaze are interchangeable sensors: any one, or any combination, gives probabilities
+over the same actions, and the combination multiplies them (soft fusion, as in Whisper mode and the sEMG page
+decoder). Afono owns the action layer; the sensors can be anyone's.
+
+**Why this is the right cut (our own registry, one speaker, lab hardware):**
+- Small fixed sets already work: dates and times (51 words, numbers included) 96.5% silent; one word out of 10
+  random words 98.3% (iso10-easy proxy). Open words are what fail: page30-hard is 68.2%, open WER 52%.
+- Real pages need numbers: the first screen has a median of 40 label words (DOM-1), only 6 of 18 pages have 30 or
+  fewer. Badge numbers make every page the same 24 items.
+- Expected: "click two five" is 3 items, so about 0.965³ ≈ 90% before using the fact that only existing badges are
+  allowed. An estimate, not a measurement: Tier 1 `intent_v1` sessions decide it.
+
+**What earbuds can and cannot do (physics, not software):**
+- Whisper or quiet speech into any earbud mic: works now (Whisper mode, closed set, on the laptop).
+- Fully silent (no sound): needs skin contact. Earbud mics need sound; consumer earbuds give apps head motion at
+  most, no raw in-ear signals. Silent = the electrode rig (under chin, throat) now, in-ear electrodes as custom
+  hardware later. Never claim "silent with AirPods".
+- So: demo v1 = whisper through earbuds + DOM badges + gaze; demo v2 = the same with the silent rig.
+
+**The YC demo (one uncut take, numbers logged):**
+A friend who has never used it sits at the laptop, hands in lap, earbuds in. 2 min setup (camera calibration, page
+badges on). Task list read from paper: open Hacker News, open the third story, scroll down, go back, search GitHub
+for "afono", open the repo, star it. Measure time per task, errors and undos against the same tasks with a mouse.
+Log it (`voice-1` / `track-1` runs). Then the same tasks silent, on the rig, once Tier 1 passes.
+
+**Midas touch:** nothing fires unless (1) a phrase from the grammar is accepted (action posterior ≥ 0.7 and the free
+transcription agrees), (2) the target exists on screen, (3) Afono is awake ("afono" / "sleep"). Gaze only re-weights.
+
+**Next 6 weeks:**
+1. Week 1: demo v1 rehearsed with 3 friends (Whisper tab self-test in their voices, logged); fix what breaks.
+2. Week 1–2: record `intent_v1` on yourself: `python -m semg.commands record --set intent_v1 --session 1..3`, then
+   `train` and `eval --set intent_v1`. Target 90% per item on session 3. If a pair confuses, swap the word, re-run.
+3. Week 3: phrase-level silent decoding (verb + digits as one constrained search) and the same task list silent.
+4. Week 4: 5 people with hand pain or limited hand use (r/RSI contacts, accessibility groups): the task list,
+   then a week of daily use. Retention, not accuracy, is the number YC will ask about.
+5. Week 5–6: application: the uncut video, the logged numbers, user quotes.
+
+**Positioning against the teams you met:** Subvocal (YC F26) builds RF glasses for full silent speech; Tacit
+(stealth) builds RF headphones. Both bet on a sensor and open vocabulary. Afono bets on the action layer and a
+fixed grammar that any sensor can feed, and ships on hardware people already own.
+
+**What changes with a company instead of a nonprofit (check before launch):**
+- `app/static/track_pop.json` comes from MPIIFaceGaze (CC BY-NC-SA): non-commercial. Retrain on data that allows
+  commercial use, or our own, before charging. Same question for WebUI (CMU research terms).
+- Fine: Gaddy & Klein EMG data (CC BY 4.0), CMUdict (BSD), Whisper (MIT), MediaPipe (Apache 2.0).
+- Funding comparisons, accuracy figures for other products and valuations from chat assistants are unverified:
+  check each against a primary source before it goes in an application.
