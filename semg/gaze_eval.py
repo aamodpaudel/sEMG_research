@@ -4,6 +4,9 @@
     python -m semg.gaze_eval mpii-extract   # run MediaPipe Face Landmarker (CPU) over MPIIFaceGaze, cache landmarks
     python -m semg.gaze_eval mpii           # landmark-feature baselines on MPIIFaceGaze (leave-one-subject-out,
                                             # and 9-point personal calibration per subject)
+    python -m semg.gaze_eval mpii-screen    # what Nullpoint ships: features -> screen pixels, 9-point calibration,
+                                            # poly2 vs the population head (LOSO), error converted to degrees
+    python -m semg.gaze_eval export-pop     # train the population head on all 15 subjects -> app/static/track_pop.json
 
 `sim` is a simulation. Element layouts are real rectangles (the DOM-0 fixture rendered in headless Chrome and
 detected by the DOM Model, plus synthetic layouts with typical web target sizes), but the gaze error is drawn
@@ -328,7 +331,7 @@ def load_mpii(root=MPII_DIR):
                 fc, gt = v[20:23], v[23:26]
                 g = gt - fc
                 g = g / np.linalg.norm(g)
-                rows.append({"subject": s, "path": os.path.join(root, sub, p[0]), "screen": v[0:2], "face_centre": fc,
+                rows.append({"subject": s, "path": os.path.join(root, sub, p[0]), "screen": v[0:2], "face_centre": fc, "target_3d": gt,
                              "gaze": g, "pitch": math.asin(-g[1]), "yaw": math.atan2(-g[0], -g[2]),
                              "head_rt": v[14:20], "eye": p[27]})
     return rows
@@ -413,14 +416,44 @@ def angular_error_deg(py, yy, pt, yt):
     return np.degrees(np.arccos(np.clip((a * b).sum(-1), -1, 1)))
 
 
-def ridge(X, Y, lam, w=None):
+def ridge_fit(X, Y, lam, w=None):
+    """Weighted ridge on standardised inputs (unpenalised intercept). Returns {mu, sd, B}, B = (1 + d) x outputs."""
     mu, sd = X.mean(0), X.std(0)
     sd[sd < 1e-12] = 1
     Z = np.hstack([np.ones((len(X), 1)), (X - mu) / sd])
     w = np.ones(len(X)) if w is None else w
     A = (Z * w[:, None]).T @ Z + lam * w.sum() * np.diag([0] + [1] * (Z.shape[1] - 1))
-    B = np.linalg.solve(A, (Z * w[:, None]).T @ Y)
-    return lambda Xn: np.hstack([np.ones((len(Xn), 1)), (Xn - mu) / sd]) @ B
+    return {"mu": mu, "sd": sd, "B": np.linalg.solve(A, (Z * w[:, None]).T @ Y)}
+
+
+def ridge_apply(p, X, clip=None):
+    """Same as track.js popPredict(): standardised inputs optionally capped at +-clip."""
+    Z = (X - p["mu"]) / p["sd"]
+    if clip:
+        Z = np.clip(Z, -clip, clip)
+    return np.hstack([np.ones((len(Z), 1)), Z]) @ p["B"]
+
+
+def ridge(X, Y, lam, w=None):
+    p = ridge_fit(X, Y, lam, w)
+    return lambda Xn: ridge_apply(p, Xn)
+
+
+POP_EYE_IDS = sorted({133, 33, 159, 145, 362, 263, 386, 374, 160, 158, 144, 153, 385, 387, 373, 380} | set(range(468, 478)))
+POP_JSON = os.path.join(ROOT, "app", "static", "track_pop.json")
+POP_LAMBDA = 1e-3
+POP_CLIP = 5          # standardised population inputs are capped, as in track.js (a glitch frame cannot fling gaze)
+
+
+def eye_frame(lm, aspect=1.0):
+    """Same as track.js eyeFrame(): eye-region landmarks relative to the midpoint of the outer eye corners, scaled by
+    their distance and rotated so the corner line is horizontal (removes in-plane roll). 26 points x (x, y)."""
+    P = lm[:, :2] * np.array([aspect, 1.0])
+    c = (P[33] + P[263]) / 2
+    s = np.linalg.norm(P[33] - P[263])
+    ang = math.atan2(*(P[263] - P[33])[::-1])
+    rot = np.array([[math.cos(-ang), -math.sin(-ang)], [math.sin(-ang), math.cos(-ang)]])
+    return (((P[POP_EYE_IDS] - c) / s) @ rot.T).reshape(-1)
 
 
 def mpii_features():
@@ -436,17 +469,10 @@ def mpii_features():
     subj = np.array([r["subject"] for r in rows])
     target = np.array([[r["pitch"], r["yaw"]] for r in rows])
     screen = np.array([r["screen"] for r in rows])
-    # Rich landmark features for the person-independent baseline: eye-region landmarks relative to the eye centre,
-    # scaled by inter-ocular distance, in the head frame (rotation removed with the transformation matrix).
-    eye_ids = sorted({133, 33, 159, 145, 362, 263, 386, 374, 160, 158, 144, 153, 385, 387, 373, 380} | set(range(468, 478)))
-    R = np.zeros((len(rows), len(eye_ids) * 2))
+    # Rich landmark features for the person-independent baseline (eye_frame below).
+    R = np.zeros((len(rows), len(POP_EYE_IDS) * 2))
     for i in np.flatnonzero(ok):
-        P = lm[i][:, :2] * np.array([wh[i, 0] / wh[i, 1], 1.0])
-        c = (P[33] + P[263]) / 2
-        s = np.linalg.norm(P[33] - P[263])
-        ang = math.atan2(*(P[263] - P[33])[::-1])
-        rot = np.array([[math.cos(-ang), -math.sin(-ang)], [math.sin(-ang), math.cos(-ang)]])
-        R[i] = (((P[eye_ids] - c) / s) @ rot.T).reshape(-1)
+        R[i] = eye_frame(lm[i], wh[i, 0] / wh[i, 1])
     return {"ok": ok & ~blink, "E": E, "H": H, "R": R, "subject": subj, "target": target, "screen": screen, "n": len(rows)}
 
 
@@ -539,10 +565,108 @@ def mpii_eval(lams=(1e-4, 1e-3, 1e-2, 0.1, 1.0), seed=1234, notes="", log=True):
                 notes=notes or "MediaPipe landmark features + ridge; LOSO and 9-point personal calibration")
     return res
 
+def pop_inputs(F):
+    """Population head inputs: eye_frame landmarks + the 6 head-pose values."""
+    return np.hstack([F["R"], F["H"]])
+
+
+def pop_screen_x(pp, H):
+    """Same as track.js MAPPINGS.pop: population (pitch, yaw) + head translation over depth, mapped linearly to the screen."""
+    z = np.where(np.abs(H[:, 5]) > 1e-6, H[:, 5], -50)
+    return np.column_stack([pp[:, 0], pp[:, 1], H[:, 3] / z, H[:, 4] / z])
+
+
+def mpii_screen_eval(lams=(1e-4, 1e-3, 1e-2, 0.1, 1.0), notes="", log=True):
+    """The shipped pipeline on MPIIFaceGaze: per subject, 9 calibration images nearest a 3 x 3 grid (x 1 or x 5),
+    each mapping fitted to SCREEN PIXELS with lambda chosen by leave-one-point-out, inputs capped at +-3 SD as in
+    track.js, tested on all the subject's other images. The population head is trained leave-one-subject-out. Pixel
+    errors are converted to mm with the subject's screen size and to degrees with the face-to-target distance."""
+    from scipy.io import loadmat
+    rows = load_mpii()
+    F = mpii_features()
+    ok, subj = F["ok"], F["subject"]
+    X = pop_inputs(F)
+    pop = np.zeros((F["n"], 2))
+    for s in range(15):
+        tr, te = ok & (subj != s), ok & (subj == s)
+        pop[te] = ridge_apply(ridge_fit(X[tr], F["target"][tr], POP_LAMBDA), X[te], POP_CLIP)
+    res = {"protocol": "per subject: 9-point calibration to screen pixels, LOPO lambda, inputs capped at 3 SD; "
+                       "population head leave-one-subject-out", "rows": {}}
+    raw = {}
+    for s in range(15):
+        m = loadmat(os.path.join(MPII_DIR, f"p{s:02d}", "Calibration", "screenSize.mat"))
+        raw[s] = float(np.squeeze(m["width_mm"])) / float(np.squeeze(m["width_pixel"]))
+    for per_point in (1, 5):
+        out = {"poly2": [], "pop": [], "selected by LOPO (as Nullpoint)": []}
+        picked_pop = 0
+        for s in range(15):
+            idx = np.flatnonzero(ok & (subj == s))
+            scr = F["screen"][idx]
+            lo, hi = scr.min(0), scr.max(0)
+            cal = []
+            for fy in (0.1, 0.5, 0.9):
+                for fx in (0.1, 0.5, 0.9):
+                    g = lo + (hi - lo) * np.array([fx, fy])
+                    d = np.linalg.norm(scr - g, axis=1)
+                    d[np.isin(np.arange(len(idx)), cal)] = np.inf
+                    cal += list(np.argsort(d)[:per_point])
+            cal = np.array(cal)
+            test = np.setdiff1d(np.arange(len(idx)), cal)
+            groups = np.repeat(np.arange(9), per_point)
+            dmm = np.array([np.linalg.norm(rows[i]["target_3d"] - rows[i]["face_centre"]) for i in idx])
+            c = np.median(F["E"][idx[cal]], 0)
+            designs = {"poly2": np.array([poly2(F["E"][i], F["H"][i], c) for i in idx]),
+                       "pop": pop_screen_x(pop[idx], F["H"][idx])}
+            errs, lopo_err = {}, {}
+            for name, D in designs.items():
+                def lopo(lam):
+                    e = []
+                    for gq in range(9):
+                        trm = groups != gq
+                        q = ridge_apply(ridge_fit(D[cal[trm]], scr[cal[trm]], lam), D[cal[~trm]], 3)
+                        e.append(np.linalg.norm(np.median(q, 0) - scr[cal[~trm]].mean(0)))
+                    return float(np.mean(e))
+                scores = {lam: lopo(lam) for lam in lams}
+                best = min(scores, key=scores.get)
+                lopo_err[name] = scores[best]
+                q = ridge_apply(ridge_fit(D[cal], scr[cal], best), D[test], 3)
+                emm = np.linalg.norm(q - scr[test], axis=1) * raw[s]
+                errs[name] = float(np.degrees(np.arctan(emm / dmm[test])).mean())
+                out[name].append(errs[name])
+            pick = min(lopo_err, key=lopo_err.get)
+            picked_pop += pick == "pop"
+            out["selected by LOPO (as Nullpoint)"].append(errs[pick])
+        for name, v in out.items():
+            res["rows"][f"{name}, 9 points x {per_point} image(s)"] = {"mean_deg": float(np.mean(v)), "per_subject_deg": v}
+        res["rows"][f"selected by LOPO (as Nullpoint), 9 points x {per_point} image(s)"]["pop_chosen"] = f"{picked_pop}/15"
+    if log:
+        from .registry import log_run
+        log_run("evaluate", "track-mpii-screen", model="track", benchmark="MPIIFaceGaze screen-space calibration",
+                metrics={k: v["mean_deg"] for k, v in res["rows"].items()}, details=res,
+                notes=notes or "Shipped pipeline (features -> screen px, 9-point calibration) on MPIIFaceGaze: poly2 vs "
+                               "population head (LOSO) + per-person linear map; degrees from screen mm and face distance")
+    return res
+
+
+def export_pop(path=POP_JSON):
+    """Population head on all 15 MPIIFaceGaze subjects -> JSON for track.js. CC BY-NC-SA 4.0 data: non-commercial."""
+    F = mpii_features()
+    ok = F["ok"]
+    p = ridge_fit(pop_inputs(F)[ok], F["target"][ok], POP_LAMBDA)
+    out = {"version": 1, "eye_ids": POP_EYE_IDS, "clip": POP_CLIP, "lambda": POP_LAMBDA,
+           "inputs": "eye_frame(landmarks) (26 x 2) + head pose [yaw, pitch, roll, tx, ty, tz]", "outputs": ["pitch", "yaw"],
+           "mu": p["mu"].tolist(), "sd": p["sd"].tolist(), "B": p["B"].tolist(), "n_images": int(ok.sum()),
+           "trained_on": "MPIIFaceGaze (Zhang et al., CVPRW 2017), 15 subjects, MediaPipe Face Landmarker features",
+           "licence": "Derived from MPIIFaceGaze, CC BY-NC-SA 4.0: non-commercial use, share alike, attribute."}
+    with open(path, "w") as f:
+        json.dump(out, f, separators=(",", ":"))
+    print("wrote", path, f"{os.path.getsize(path) / 1024:.1f} KB, {out['n_images']} images")
+    return out
+
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["sim", "mpii-extract", "mpii"])
+    ap.add_argument("cmd", choices=["sim", "mpii-extract", "mpii", "mpii-screen", "export-pop"])
     ap.add_argument("--reps", type=int, default=200)
     ap.add_argument("--bias-share", type=float, default=0.0)
     ap.add_argument("--fixation", default="centre50", choices=["centre50", "uniform"])
@@ -565,6 +689,13 @@ def main():
     elif a.cmd == "mpii-extract":
         mpii_extract(workers=a.workers)
         return
+    elif a.cmd == "export-pop":
+        export_pop()
+        return
+    elif a.cmd == "mpii-screen":
+        out = mpii_screen_eval(log=not a.no_log)
+        for k, v in out["rows"].items():
+            print(f"{k}: {v['mean_deg']:.2f} deg" + (f" (pop chosen {v['pop_chosen']})" if "pop_chosen" in v else ""))
     else:
         out = mpii_eval(log=not a.no_log)
         print(json.dumps({k: v for k, v in out.items()}, indent=1))

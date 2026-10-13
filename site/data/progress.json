@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-30T09:40-07:00",
+  "updated": "2026-10-12T18:54-07:00",
   "headline": {
     "dates_word_acc": 96.5,
     "closed500_word_acc": 54.9,
@@ -335,10 +335,27 @@
         "accuracy_deg_v0": 22.585607613749477,
         "accuracy_px_poly2": 1458.7663168502972,
         "accuracy_px_v0": 1215.3416130664355
+      },
+      {
+        "date": "2026-10-12",
+        "benchmark": "MPIIFaceGaze screen-space calibration",
+        "poly2, 9 points x 1 image(s)": 8.211307354355935,
+        "pop, 9 points x 1 image(s)": 7.83694030237643,
+        "selected by LOPO (as Nullpoint), 9 points x 1 image(s)": 7.714055071700211,
+        "poly2, 9 points x 5 image(s)": 5.222605391963308,
+        "pop, 9 points x 5 image(s)": 5.223798581236867,
+        "selected by LOPO (as Nullpoint), 9 points x 5 image(s)": 5.1749052652258065
       }
     ]
   },
   "runs": [
+    {
+      "date": "2026-10-12",
+      "kind": "evaluate",
+      "run_id": "track-mpii-screen",
+      "summary": "Benchmark (unigram decoder): dates & times None% word accuracy, 500-word sentences None%, open vocabulary WER None%.",
+      "notes": "Shipped pipeline (features -> screen px, 9-point calibration) on MPIIFaceGaze: poly2 vs population head (LOSO) + per-person linear map; degrees from screen mm and face distance"
+    },
     {
       "date": "2026-09-30",
       "kind": "evaluate",
@@ -931,7 +948,7 @@
   "counts": {
     "train": 4,
     "calibrate": 1,
-    "evaluate": 20
+    "evaluate": 21
   },
   "phases": [
     {

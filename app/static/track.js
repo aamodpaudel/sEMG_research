@@ -1,7 +1,9 @@
 /* Afono Track Model v1: webcam gaze that snaps to page elements.
    MediaPipe Face Landmarker (iris landmarks 468-477 + facial transformation matrix)
    -> eye-in-head features (iris centre relative to the eye corners) + head pose
-   -> ridge-regularised 2nd-order polynomial mapping fitted by a 9-point calibration
+   -> ridge-regularised 2nd-order polynomial mapping fitted by a 9-point calibration, or the population head
+      (eye landmarks -> gaze angles, trained on MPIIFaceGaze; track_pop.json) mapped to the screen per person;
+      leave-one-point-out on the calibration picks between them
    -> One Euro smoothing -> fixation detector -> Bayesian snap to the nearest page element
    with hysteresis, and top-k candidates with probabilities for fusion with the voice decoder.
 
@@ -60,6 +62,32 @@ export function featuresV0(lm, matrix) {
   return f;
 }
 
+/* ---------- population head (semg/gaze_eval.py export_pop) ---------- */
+let POP = null;
+/** Load the population head: {eye_ids, mu, sd, B, clip}. Without it, calibration uses poly2 and v0 only. */
+export function setPopulation(p) { POP = p && p.B ? p : null; }
+
+/** Same as gaze_eval.eye_frame(): eye-region landmarks relative to the midpoint of the outer eye corners, scaled by
+    their distance and rotated so the corner line is horizontal. lm must already be in square pixels. */
+export function eyeFrame(lm, ids) {
+  const a = lm[33], b = lm[263], cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
+  const s = Math.hypot(b.x - a.x, b.y - a.y) || 1e-6, ang = Math.atan2(b.y - a.y, b.x - a.x);
+  const co = Math.cos(-ang), si = Math.sin(-ang), out = [];
+  for (const i of ids) {
+    const x = (lm[i].x - cx) / s, y = (lm[i].y - cy) / s;
+    out.push(co * x - si * y, si * x + co * y);
+  }
+  return out;
+}
+
+/** Population gaze estimate [pitch, yaw] in radians (gaze_eval.ridge_apply with clip). */
+export function popPredict(lm, h, P = POP) {
+  if (!P) return null;
+  const x = [...eyeFrame(lm, P.eye_ids), ...h];
+  const z = [1, ...x.map((v, j) => Math.max(-P.clip, Math.min(P.clip, (v - P.mu[j]) / P.sd[j])))];
+  return [0, 1].map((k) => z.reduce((s, zi, i) => s + zi * P.B[i][k], 0));
+}
+
 /** Gaze features from one frame's landmarks, or null during a blink / no face.
     e = [u, v, open]: iris centre (mean of the 5 iris points) along the eye-corner axis (u, 0 = image-left corner,
     1 = image-right corner) and perpendicular to it (v), both in eye widths, averaged over the two eyes; open = lid gap.
@@ -84,7 +112,8 @@ export function features(lm, matrix, aspect = 1, blink = 0.12) {
     open += len(sub(lm[e.top], lm[e.bottom])) / w / 2;
   }
   if (open < blink) return null;                                            // blink
-  return { e: [u, v, open], h: headPose(matrix), v0: featuresV0(raw, matrix) };
+  const h = headPose(matrix);
+  return { e: [u, v, open], h, v0: featuresV0(raw, matrix), pop: popPredict(lm, h) };
 }
 
 /* ---------- design matrices ---------- */
@@ -97,7 +126,14 @@ export const MAPPINGS = {
     const [yaw, pitch, roll, tx, ty, tz] = f.h, z = Math.abs(tz) > 1e-6 ? tz : -50;
     return [u, v, u * u, v * v, u * v, o, yaw, pitch, roll, tx / z, ty / z, z];
   },
+  /** pop: population gaze angles + head translation over depth, mapped linearly to the screen (gaze_eval.pop_screen_x). */
+  pop: (f) => {
+    const [, , , tx, ty, tz] = f.h, z = Math.abs(tz) > 1e-6 ? tz : -50;
+    return [f.pop[0], f.pop[1], tx / z, ty / z];
+  },
 };
+/* Inputs of each mapping that come from head pose, for headDrift(). */
+const HEAD_INPUTS = { poly2: [6, 7, 8, 9, 10, 11], pop: [2, 3] };
 
 /* ---------- weighted ridge regression on standardised features ---------- */
 function solve(A, b) {
@@ -186,7 +222,7 @@ export function calibrate(points, opts = {}) {
   if (pts.length < 6) throw new Error(`Only ${pts.length} calibration points had enough clean frames (need 6).`);
   const all = pts.flatMap((p) => p.frames);
   const centre = [0, 1, 2].map((j) => median(all.map((f) => f.e[j])));
-  const kinds = opts.kinds || ["poly2", "v0"];
+  const kinds = opts.kinds || ["poly2", "v0", ...(all.every((f) => f.pop) ? ["pop"] : [])];
   const result = { models: {}, lopo_px: {}, dropped: [] };
   // One outlier point (a missed dot) is dropped if its LOPO error is > 2.5x the median of the others.
   const probe = lopo(pts, "poly2", 0.01, centre), med = median(probe);
@@ -220,14 +256,14 @@ export function predict(m, f) {
   return predictRaw(m.reg, MAPPINGS[m.kind](f, m.centre));
 }
 
-/** How far the head is from where it was during calibration: the largest |z| of the head-pose inputs (poly2), so
+/** How far the head is from where it was during calibration: the largest |z| of the mapping's head-pose inputs, so
     values above Z_CLIP mean the mapping is extrapolating and calibrating again will help. */
 export function headDrift(m, f) {
   if (m && m.model) m = m.model;
-  if (!m || m.kind !== "poly2" || !f) return 0;
-  const x = MAPPINGS.poly2(f, m.centre);
+  if (!m || !HEAD_INPUTS[m.kind] || !f || (m.kind === "pop" && !f.pop)) return 0;
+  const x = MAPPINGS[m.kind](f, m.centre);
   let worst = 0;
-  for (let j = 6; j < x.length; j++) worst = Math.max(worst, Math.abs((x[j] - m.reg.mu[j]) / m.reg.sd[j]));
+  for (const j of HEAD_INPUTS[m.kind]) worst = Math.max(worst, Math.abs((x[j] - m.reg.mu[j]) / m.reg.sd[j]));
   return worst;
 }
 export function lastFrame() { return last; }
@@ -366,6 +402,7 @@ export async function start(videoEl, status) {
   const { FaceLandmarker, FilesetResolver } = await import("/vendor/mediapipe/vision_bundle.mjs");
   video = videoEl;
   status("Loading the Track Model…");
+  try { setPopulation(await (await fetch("/static/track_pop.json")).json()); } catch (e) { setPopulation(null); }
   const files = await FilesetResolver.forVisionTasks("/vendor/mediapipe/wasm");
   const opts = (delegate) => ({ baseOptions: { modelAssetPath: "/vendor/mediapipe/face_landmarker.task", delegate },
     runningMode: "VIDEO", numFaces: 1, outputFacialTransformationMatrixes: true });

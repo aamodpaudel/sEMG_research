@@ -116,4 +116,27 @@ if (inp.oneeuro) {
   out.oneeuro = { raw_step: raw / 99, smooth_step: sm / 99, x_500ms_after_step: after };
 }
 
+// 7. Population head: landmarks + head matrix -> [pitch, yaw] (compared with Python), and calibration offers "pop".
+if (inp.pop) {
+  T.setPopulation(inp.pop.model);
+  out.pop = inp.pop.faces.map(({ lm, matrix, aspect }) => {
+    const f = T.features(lm.map(([x, y, z]) => ({ x, y, z })), { data: matrix }, aspect, 0);
+    return f ? { pop: f.pop, h: f.h } : null;
+  });
+  // Synthetic calibration where the screen point is linear in the population angles.
+  const pts = [];
+  for (const fy of [0.1, 0.5, 0.9]) for (const fx of [0.1, 0.5, 0.9]) {
+    const frames = [];
+    for (let i = 0; i < 20; i++) {
+      const pitch = (fy - 0.5) * 0.4 + 0.01 * gauss(), yaw = (fx - 0.5) * 0.6 + 0.01 * gauss();
+      frames.push({ e: [0.5 + 0.02 * gauss(), 0.02 * gauss(), 0.3], h: [0, 0, 0, 0.1 * gauss(), 0.1 * gauss(), -55],
+        v0: new Array(12).fill(0).map(() => gauss()), pop: [pitch, yaw], t: 0 });
+    }
+    pts.push({ x: fx * 1920, y: fy * 1080, frames });
+  }
+  const res = T.calibrate(pts);
+  out.pop_calibration = { kind: res.kind, kinds: Object.keys(res.models), lopo_px: res.lopo_px };
+  T.setPopulation(null);
+}
+
 process.stdout.write(JSON.stringify(out));

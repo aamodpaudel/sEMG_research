@@ -59,6 +59,33 @@ def test_features_match_python_and_move_together():
     assert r[2][1] - r[0][1] > 0.02
 
 
+def test_population_head_matches_python_and_is_offered_by_calibration():
+    with open(G.POP_JSON) as f:
+        model = json.load(f)
+    rng = np.random.default_rng(2)
+    faces = []
+    for du, dv, roll in [(0, 0, 0.0), (0.1, 0.02, 0.1), (-0.05, -0.03, -0.2)]:
+        lm = _face(du, dv, rng)
+        c = np.array([0.5, 0.45])                                   # roll the face in the image plane
+        R2 = np.array([[np.cos(roll), -np.sin(roll)], [np.sin(roll), np.cos(roll)]])
+        lm[:, :2] = (lm[:, :2] - c) @ R2.T + c
+        yaw, pitch = rng.normal(0, 0.1, 2)
+        M = np.eye(4)
+        M[:3, :3] = [[np.cos(yaw), 0, np.sin(yaw)], [0, 1, 0], [-np.sin(yaw), 0, np.cos(yaw)]]
+        M[:3, :3] = M[:3, :3] @ [[1, 0, 0], [0, np.cos(pitch), -np.sin(pitch)], [0, np.sin(pitch), np.cos(pitch)]]
+        M[:3, 3] = [rng.normal(0, 2), rng.normal(0, 2), -55 + rng.normal(0, 3)]
+        faces.append((lm, M))
+    r = js({"pop": {"model": model, "faces": [{"lm": lm.tolist(), "matrix": M.reshape(-1).tolist(), "aspect": 4 / 3}
+                                              for lm, M in faces]}})
+    p = {k: np.array(model[k]) for k in ("mu", "sd", "B")}
+    for (lm, M), got in zip(faces, r["pop"]):
+        np.testing.assert_allclose(got["h"], G.head_pose(M), atol=1e-9)
+        x = np.concatenate([G.eye_frame(lm, 4 / 3), G.head_pose(M)])[None]
+        np.testing.assert_allclose(got["pop"], G.ridge_apply(p, x, model["clip"])[0], atol=1e-9)
+    assert r["pop_calibration"]["kinds"] == ["poly2", "v0", "pop"]
+    assert r["pop_calibration"]["kind"] == "pop"                     # the screen is linear in the angles here
+
+
 def test_calibration_fits_synthetic_mapping_and_rejects_glitch():
     r = js({"calibration": {"noise": 0.002}})["calibration"]
     assert r["frames"] <= 9 * 25            # the glitch frame at every point was rejected
