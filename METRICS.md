@@ -287,8 +287,30 @@ accuracy test 2.94° (137 px), precision 0.69°, 5 of 5 points, eyes tracked 99%
 One person, one session: not a benchmark. The target test in the same session got no snaps because of the
 extrapolation bug above.
 
-Model plan: (1) now, personal poly2 calibration in the browser; (2) next, a population regression head on MediaPipe
-landmarks trained on MPIIFaceGaze, corrected per person from the 9-point calibration (the 5.7° and 4.9° rows);
+**Population head in Nullpoint (2026-10-12).** The table above works in gaze angles. Nullpoint maps to screen pixels,
+so the shipped pipeline was scored the same way (`python -m semg.gaze_eval mpii-screen`): per subject, 9 calibration
+images nearest a 3 × 3 grid, each mapping fitted to the subject's screen pixels with lambda by leave-one-point-out,
+inputs capped at ±3 SD as in track.js, tested on all the subject's other images; pixel errors converted to mm with the
+subject's screen size and to degrees with the face-to-target distance. "pop" = the population head (eye landmarks in
+the head frame + head pose → pitch, yaw; ridge, trained leave-one-subject-out) followed by a per-person linear map of
+(pitch, yaw, tx/z, ty/z) to the screen. "Selected" = whichever has the lower leave-one-point-out error on the 9
+calibration points, which is what `calibrate()` does.
+
+| Screen-space calibration | poly2 | pop | selected (pop chosen) |
+|---|---|---|---|
+| 9 points × 1 image | 8.21° | 7.84° | **7.71°** (12 / 15 subjects) |
+| 9 points × 5 images | 5.22° | 5.22° | **5.17°** (4 / 15) |
+
+The pop design (pitch, yaw, tx/z, ty/z) was fixed before this run. Afterwards, three other designs were tried on the
+same data and not adopted (choosing among them here would be tuning on test): (pitch, yaw) only 7.44° / 6.14° (pop
+column, 9 × 1 / 9 × 5), with quadratic terms 8.23° / 6.62°, tangent projection + t/z 7.89° / 5.26°. Reading: the
+population head helps when calibration data is thin (one image per point) and adds nothing once there are five; the
+gain is smaller than the angle-space rows suggest. Shipped as `app/static/track_pop.json` (5 KB, trained on all 15
+subjects; `python -m semg.gaze_eval export-pop`); tests/test_track.py checks the JS and Python heads agree to 1e-9.
+The weights derive from MPIIFaceGaze (CC BY-NC-SA 4.0), so they are for non-commercial use.
+
+Model plan: (1) done, personal poly2 calibration in the browser; (2) done (above), a population regression head on MediaPipe
+landmarks trained on MPIIFaceGaze, mapped per person from the 9-point calibration;
 (3) later, a small CNN on normalised eye patches (MobileNet-sized, ONNX in the browser), trained leave-one-subject-out
 on MPIIFaceGaze with the paper's 4.8° as the bar, then fine-tuned per person.
 
@@ -313,6 +335,14 @@ the encoder frames covering the clip was tried and rejected: CPU accuracy on the
 **Self-test (the measurement):** Nullpoint's Whisper tab draws 20 prompts from the connected page's phrases.
 It logs, per session, top-choice accuracy, accuracy when accepted, rejection rate, speaking style (whisper,
 quiet, normal) and microphone, as `voice-1` in the run registry.
+
+## Gaze × sEMG fusion in Nullpoint (2026-10-12, mechanism only)
+The Track simulation above favours soft fusion over all elements. Nullpoint's sEMG decoder now applies it to the page
+vocabulary (`semg.page.gaze_word_weights`): each target gets p' = 0.5 × its gaze probability + 0.5 / (number of
+targets); a label word's prior is multiplied by n × the mean p' of the targets whose label contains it (1 when gaze is
+uniform, never 0); command and number words are unchanged. Gaze older than 1.5 s is ignored, and a request can turn it
+off (`"gaze": false`). It is the rule Whisper mode already uses for phrases. Not yet measured: needs Tier 1 recordings
+made while looking at a page.
 
 ## Planned protocols for the other two models
 - **Afono Track Model** (gaze): first human sessions with the v1 protocol above (accuracy, sigma, snap vs pixel hit rate on the same trials); then a CNN on MPIIFaceGaze, leave-one-subject-out.

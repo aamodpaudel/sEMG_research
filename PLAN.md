@@ -154,3 +154,10 @@ Evaluate → the site data rebuilds itself → republish the site. The training 
 - Tried and not kept: trigram Kneser-Ney prior (open −1.5 points, p = 0.04, not better on closed sets); DTW voiced-EMG distillation (page30-hard worse, p < 0.01); stronger augmentation (training stalled, stopped at epoch 26).
 - **Tier 1 ready:** `python -m semg.commands plan | record | train | eval` for the 27-word starter set (vocab/commands.json, `tier1_starter`), tested end to end on synthetic 4-channel and Gaddy-derived data.
 - **Next:** record Tier 1 sessions 1–3 this weekend and run `semg.commands eval`; that number, not the Gaddy simulation, decides the product claim.
+
+## Status (2026-10-12)
+- **Full test pass:** 50 Python tests (sEMG pipeline, commands, DOM Model, Track, Whisper) plus the film project's lint and type check.
+- **Track Model:** population gaze head (MPIIFaceGaze) shipped as a third calibration mapping; on MPIIFaceGaze with one image per calibration point, 8.21° → 7.71° (poly2 → selected by LOPO), no change with five (METRICS.md).
+- **sEMG Model:** gaze × sEMG soft fusion on the page vocabulary in Nullpoint (mechanism; not yet measured).
+- **Film:** `video/` (Remotion), 61 s product film.
+- **Still blocked on a person or hardware:** Tier 1 sessions 1–3 (`semg.commands eval`), a Whisper self-test in a real voice, a Track target test after the input-cap fix, a hand-labelled DOM-2 div-soup set.
