@@ -46,9 +46,25 @@ def number_words(n: int) -> str:
     return normalize_text(str(n))
 
 
+def spoken_digits(n: int) -> str:
+    """25 -> 'two five': the intent grammar's digit-by-digit form (see vocab/commands.json, intent_v1)."""
+    return " ".join(normalize_text(c) for c in str(int(n)))
+
+
 def digitize(text: str) -> str:
-    """'reply two' -> 'reply 2', 'click forty two' -> 'click 42' (Whisper writes numbers as digits)."""
-    out, words, i = [], text.split(), 0
+    """'reply two' -> 'reply 2', 'click forty two' -> 'click 42', 'click two five' -> 'click 25'
+    (Whisper writes numbers as digits)."""
+    words = text.split()
+    i, merged = 0, []
+    while i < len(words):                                 # runs of 2-3 single digits are one number
+        j = i
+        while j < len(words) and j - i < 3 and words[j] in _DIGITS and int(_DIGITS[words[j]]) < 10:
+            j += 1
+        if j - i > 1:
+            merged.append("".join(_DIGITS[w] for w in words[i:j])); i = j
+        else:
+            merged.append(words[i]); i += 1
+    out, words, i = [], merged, 0
     while i < len(words):
         w = words[i]
         if w in _TENS and i + 1 < len(words) and words[i + 1] in _DIGITS and 0 < int(_DIGITS[words[i + 1]]) < 10:
@@ -67,7 +83,8 @@ def candidates(targets=None, commands=COMMAND_PHRASES, max_numbers=60):
     """Allowed phrases for the current page.
 
     Returns [{"say": spoken form, "send": command text for the extension, "target": badge n or None}].
-    A target can be said as its label ("sign in"), as "click <label>", or as "click <badge number>".
+    A target can be said as its label ("sign in"), as "click <label>", or as "click <badge number>", the number
+    either as a word ("click twenty five") or digit by digit ("click two five").
     """
     out, seen = [], set()
 
@@ -86,6 +103,8 @@ def candidates(targets=None, commands=COMMAND_PHRASES, max_numbers=60):
             add("click " + label, "click " + label, n)
         if n is not None and int(n) <= max_numbers:
             add("click " + number_words(int(n)), "click " + str(int(n)), n)
+            if int(n) >= 10:
+                add("click " + spoken_digits(int(n)), "click " + str(int(n)), n)
     return out
 
 
@@ -180,7 +199,7 @@ class Decoder:
         gaze: {badge n: probability} from the Track Model. It re-weights target phrases softly, mixed with a
         uniform floor so a wrong gaze estimate can lower a phrase but never remove it (hard top-k filtering
         lost accuracy in simulation, METRICS.md "Track Model").
-        Accepted when the best phrase has posterior >= min_p and is within `margin` nats of the free
+        Accepted when the best action (phrases summed by the command they send) has posterior >= min_p and is within `margin` nats of the free
         transcription (the garbage model); otherwise the result is returned but not accepted.
         """
         t0 = time.perf_counter()
@@ -207,16 +226,24 @@ class Decoder:
         m = max(best)
         post = np.exp(np.array(best) - m)
         post /= post.sum()
+        # The decision is over actions, not phrases: "click twenty five", "click two five" (and "reply" /
+        # "click reply") send the same command and share spellings such as "Click 25", so per phrase they would
+        # split the probability and none could reach min_p.
+        action = {}
+        for i, c in enumerate(cands):
+            action[c["send"]] = action.get(c["send"], 0.0) + float(post[i])
         order = np.argsort(-post)
         top = [{"say": cands[i]["say"], "send": cands[i]["send"], "target": cands[i]["target"], "p": round(float(post[i]), 4),
-                "logp": round(acoustic[i], 2)} for i in order[:5]]
-        b = order[0]
+                "p_action": round(action[cands[i]["send"]], 4), "logp": round(acoustic[i], 2)} for i in order[:5]]
+        best_send = max(action, key=action.get)
+        b = max((i for i, c in enumerate(cands) if c["send"] == best_send), key=lambda i: post[i])
+        p_act = action[best_send]
         # The free transcription agreeing with the choice, up to homophones and spelling ("reply to" / "reply two",
         # "color" / "colour"), confirms it; the log-probability margin only decides when they disagree.
         f = normalize_text(free)
         same = max(SequenceMatcher(None, f, v).ratio() for v in (cands[b]["say"], normalize_text(digitize(cands[b]["say"])))) >= 0.75
-        accepted = bool(post[b] >= min_p and (same or acoustic[b] >= free_score - margin))
-        return {"say": cands[b]["say"], "send": cands[b]["send"], "p": round(float(post[b]), 4), "accepted": accepted,
+        accepted = bool(p_act >= min_p and (same or acoustic[b] >= free_score - margin))
+        return {"say": cands[b]["say"], "send": cands[b]["send"], "p": round(p_act, 4), "accepted": accepted,
                 "free": free, "free_logp": round(free_score, 2), "top": top, "n_candidates": len(cands),
                 "gaze_used": bool(gaze), "ms": round(1000 * (time.perf_counter() - t0)), "model": self.model_id,
                 "device": self.device.type}

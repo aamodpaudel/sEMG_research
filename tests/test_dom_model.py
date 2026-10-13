@@ -99,8 +99,9 @@ def test_vocabulary_is_flat_word_list():
 
 @need_node
 def test_command_numbers():
-    assert js("['one hundred forty two','twenty one','two three','seven'].map(s => C.number(s.split(' ')))") == [
-        142, 21, 2, 7]
+    # digit by digit is the intent grammar's form: "two three" = 23, "2 5" from Whisper = 25
+    assert js("['one hundred forty two','twenty one','two three','seven','2 5','25'].map(s => C.number(s.split(' ')))") == [
+        142, 21, 23, 7, 25, 25]
 
 
 @need_node

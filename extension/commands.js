@@ -9,12 +9,22 @@
 
   function number(words) {
     if (!words.length) return null;
-    if (/^\d+$/.test(words[0])) return parseInt(words[0], 10);
+    if (/^\d+$/.test(words[0])) {                                // "25", or Whisper's "2 5" -> 25
+      if (words[0].length > 1) return parseInt(words[0], 10);
+      var ds = words[0];
+      for (var k = 1; k < 3 && /^\d$/.test(words[k] || ""); k++) ds += words[k];
+      return parseInt(ds, 10);
+    }
+    // Digit by digit, the intent grammar's form: "two five" -> 25 (up to 3 digits). Clearer on the muscles than
+    // "twenty five", where "fourteen"/"forty" differ mainly in stress.
+    var digits = [];
+    for (var j = 0; j < words.length && j < 3 && words[j] in NUMS && NUMS[words[j]] < 10; j++) digits.push(NUMS[words[j]]);
+    if (digits.length > 1) return parseInt(digits.join(""), 10);
     var n = 0, used = false;                                     // "one hundred forty two" -> 142
     for (var i = 0; i < words.length && i < 4; i++) {
       if (words[i] === "hundred" && used) { n = n * 100; continue; }
       if (!(words[i] in NUMS)) break;
-      if (used && n % 10 !== 0 && NUMS[words[i]] < 10) break;    // "two three" is not 5
+      if (used && n % 10 !== 0 && NUMS[words[i]] < 10) break;    // "twenty two three": stop after 22
       n += NUMS[words[i]]; used = true;
     }
     return used ? n : null;

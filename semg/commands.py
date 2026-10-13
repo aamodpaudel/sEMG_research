@@ -53,8 +53,11 @@ def load_commands(path=COMMANDS_FILE):
         return json.load(f)
 
 
-def starter_items(path=COMMANDS_FILE):
-    return list(load_commands(path)["tier1_starter"]["items"])
+ITEM_SETS = ("tier1_starter", "intent_v1")
+
+
+def starter_items(path=COMMANDS_FILE, set_name="tier1_starter"):
+    return list(load_commands(path)[set_name]["items"])
 
 
 def meta_path(profile):
@@ -422,7 +425,7 @@ def capture(stream, n):
 
 
 def cmd_record(args):
-    items = args.items or starter_items()
+    items = args.items or starter_items(set_name=getattr(args, "set", "tier1_starter"))
     profile = Profile(args.user)
     stream = simulated_samples(args.channels) if args.simulate else serial_samples(args.port, channels=args.channels)
     order = session_order(items, args.reps, args.session, args.seed)
@@ -447,7 +450,7 @@ def cmd_tag(args):
     """Attach a session number to labelled Nullpoint recordings made in a time window."""
     profile = Profile(args.user)
     meta = load_meta(profile)
-    items = set(args.items or starter_items())
+    items = set(args.items or starter_items(set_name=getattr(args, "set", "tier1_starter")))
     n = 0
     for rid, lab in profile.labels().items():
         if rid in meta or lab["text"] not in items:
@@ -465,7 +468,7 @@ def cmd_synth(args):
     """Synthetic 4-channel recordings: each item is a sequence of phone-like bursts; each session has its own
     electrode gains and offset (so session-held-out evaluation is meaningful)."""
     from .phonemes import TOKEN_TO_ID, pronounce
-    items = args.items or starter_items()
+    items = args.items or starter_items(set_name=getattr(args, "set", "tier1_starter"))
     profile = Profile(args.user)
     rng = np.random.default_rng(args.seed)
     C = args.channels
@@ -562,9 +565,12 @@ def main():
         if user:
             p.add_argument("--user", required=True)
         p.add_argument("--items", nargs="*", default=None, help="restrict to these items (default: all / starter set)")
+        p.add_argument("--set", default="tier1_starter", choices=ITEM_SETS,
+                       help="item set from vocab/commands.json: tier1_starter, or intent_v1 (verbs + digits)")
         p.add_argument("--notes", default="")
 
     p = sub.add_parser("plan")
+    p.add_argument("--set", default="tier1_starter", choices=ITEM_SETS)
     p.add_argument("--session", type=int, default=1)
     p.add_argument("--reps", type=int, default=10)
     p.add_argument("--seed", type=int, default=0)
@@ -607,9 +613,9 @@ def main():
 
     if args.cmd == "plan":
         c = load_commands()
-        st = c["tier1_starter"]
+        st = c[args.set]
         items = st["items"]
-        print(f"Tier 1 starter set ({len(items)} items): {', '.join(items)}\n\nWhy: {st['why']}\n")
+        print(f"{args.set} ({len(items)} items): {', '.join(items)}\n\nWhy: {st['why']}\n")
         n = len(items) * args.reps
         print(f"Session {args.session}: {n} prompts, about {n * (1 + WINDOW_S + 0.5) / 60:.0f} min. Order:")
         print(", ".join(it for it, _ in session_order(items, args.reps, args.session, args.seed)[:40]), "...")
