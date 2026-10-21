@@ -51,17 +51,26 @@ of this repository. For testing we run Nullpoint from the code instead.
 3. **You should see**, after about 3 minutes, a line ending in `60 passed`. Warnings are fine.
 4. If anything says `failed`, stop and send me the output.
 
-### A3. Start Nullpoint from the code
+### A3. Start Nullpoint: the admin app and the volunteer app
 
-1. In the same PowerShell window:
-   ```powershell
-   python -m app.desktop
-   ```
-2. **You should see** a line like `Afono Nullpoint started http://127.0.0.1:8765/ data: D:\0_Github_Repos\sEMG`,
-   and a Nullpoint window opens.
-3. Check the end of that line says `data: D:\0_Github_Repos\sEMG`. If PowerShell prints nothing and only a window
-   appears, the old app is still running in the background: close the window, repeat A1, and try again.
-4. Leave this PowerShell window open the whole time. Closing it stops Nullpoint.
+Nullpoint now has two windows on one server:
+
+| Window | Who uses it | How to open it |
+|---|---|---|
+| **Nullpoint Admin** | You: participants, live view, results | Double-click `Nullpoint Admin.cmd` in `D:\0_Github_Repos\sEMG` |
+| **Nullpoint** (volunteer app) | The volunteer: sign-in and their steps, nothing else | **Open the volunteer window** in the admin app, or double-click `Nullpoint.cmd` |
+| Research tools (every model tab) | You, for debugging | **Research tools** in the admin app (it is `/lab`) |
+
+1. Double-click **`Nullpoint Admin.cmd`**. A black console window opens and prints a line like
+   `Afono Nullpoint started http://127.0.0.1:8765/admin data: D:\0_Github_Repos\sEMG`. Check it ends with
+   `data: D:\0_Github_Repos\sEMG`. If it prints nothing and only a window appears, the old app is still running:
+   close the window, repeat A1, and try again.
+2. **The first time only**, the admin window asks you to set an admin password (8 or more characters). After that it
+   asks for it each time you open it.
+3. Click **Open the volunteer window**. Put it on the right of the screen, Chrome on the left; keep the admin window
+   on a second screen or behind them (it updates by itself).
+4. Leave the black console window open the whole time (minimise it). Nullpoint stops when every Nullpoint window is
+   closed.
 
 ### A4. Replace the browser extension
 
@@ -135,12 +144,9 @@ from this repository.
    page with the glass φ. On the laptop, `http://127.0.0.1:8000` shows the same.
 5. Leave this window running while friends test.
 
-Setup is done. You already have the code p01 from the command line. Give it a Nullpoint login once, so your own
-results stay under p01:
-```powershell
-python -m semg.study account --pid p01 --username yourname
-```
-Then in Nullpoint choose **I have an account** and sign in. Friends sign up in Nullpoint themselves (Part B).
+Setup is done. Your own code p01 already exists: in the admin app, **Participants**, click **Set login** on p01 and
+choose a username and password. Then click **Check in** on p01: the volunteer window signs you in by itself. Friends
+sign up in the volunteer window themselves (Part B), or you add them in the admin app.
 
 ---
 
@@ -152,11 +158,13 @@ laptop ready and stay nearby for questions.
 
 ### B1. Before each person (1 minute)
 
-1. Nullpoint is running from the code (A3) and the Chrome extension is connected (A5).
+1. The admin app is open (A3). Its **System** box shows the Chrome page as connected (green) once Hacker News is
+   open in Chrome (A5).
 2. Chrome: one tab on https://news.ycombinator.com, scrolled to the top, zoom 100% (`Ctrl+0`).
-3. Windows on screen: Chrome on the left two thirds, the Nullpoint window on the right (A7 step 7).
-4. If the previous person is still signed in, click **Sign out** at the top right of Nullpoint.
+3. Windows on screen: Chrome on the left two thirds, the volunteer window on the right (A7 step 7).
+4. If the previous person is still signed in, click **Sign them out** in the admin app's **Live** box.
 5. Earbuds: theirs (connect them and pick them as the Windows input, A6) or yours, wiped.
+6. A returning volunteer who forgot their password: **Reset login** on their row, or just **Check in** for them.
 
 ### B2. What they see and do
 
@@ -182,6 +190,12 @@ The microphone indicator at the top always shows the state: grey **Microphone of
 
 ### B3. What you still do
 
+The admin app is your control room. **Live** shows who is signed in, which step they are on, their microphone
+(listening, hearing them), whether Chrome is connected, and the last phrase Nullpoint heard. **Task list in
+progress** shows the task, its timer and every action as it happens; **Stop the task list** if something went wrong
+(nothing from it is saved). **Participants** shows each person's steps (W whisper check, Q quiet check, M mouse run,
+V voice run, S survey, C camera). **Results** fills in as task lists finish.
+
 - **Watch, do not help.** If they ask, say "do what you would do at home". Write down what confused them.
 - **Wrong actions are not counted automatically.** Nullpoint records every action and whether each task ended in
   the right place, and counts undos itself. If you saw something odd, tell me and I will check the run.
@@ -190,7 +204,7 @@ The microphone indicator at the top always shows the state: grey **Microphone of
 - Ask whether they know someone with RSI, arthritis or limited hand use who might try it. Do not take that person's
   details here; ask them to get in touch.
 
-### B4. Fallback: you at the keyboard
+### B4. Fallback: the command line
 
 If the Study tab misbehaves, the command-line tool still works and saves the same way:
 ```powershell
@@ -239,20 +253,17 @@ Then the task list with `--mode silent-gaze`.
 
 ## Part E. End of each day
 
-1. Close the Nullpoint window and press `Ctrl+C` in the website PowerShell window.
-2. ```powershell
-   python -m semg.study summary --log
-   python -m semg.site_data
-   ```
+1. In the admin app, **Results**: click **End of day: log the summary and rebuild the website numbers**.
+   (Same as `python -m semg.study summary --log` and `python -m semg.site_data`.)
+2. Close the Nullpoint windows and press `Ctrl+C` in the website PowerShell window.
    The table shows, per person and mode: tasks done, median seconds per task, errors, undos, the hands-free time
    divided by the same person's mouse time (`vs mouse`, 1.00 = as fast as a mouse) and their usability score.
 3. Back up: copy the folders `data\study` and `data\user` to a USB drive or cloud folder you control.
 4. Tell me the day is done. I read `data\study` and the registry myself and write up what we learned, what broke,
    and what to fix before the next round. Commit when you are happy with it (you author the commits).
 
-If someone asks for their data to be deleted: delete `data\study\<pid>` and `data\user\<pid>`, remove their entry
-from `data\study\participants.json`, and delete their lines in `runs\registry.jsonl` (search for `"participant":
-"<pid>"` and `"profile": "<pid>"`).
+If someone asks for their data to be deleted: in the admin app, **Delete** on their row and type their code. It
+removes their study files, voice clips, account and run-log lines.
 
 ---
 
