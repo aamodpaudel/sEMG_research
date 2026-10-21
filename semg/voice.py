@@ -37,6 +37,11 @@ COMMAND_PHRASES = ["scroll up", "scroll down", "page up", "page down", "top", "b
                    "yes", "no", "done", "show", "hide", "sleep", "afono",
                    "click", "double", "right", "zoom", "out", "up", "down"]   # gaze set: acts on the gazed element
 
+# Gaze-only words act on the element you look at; with no live gaze they have no target, and as short catch-all
+# phrases they won whenever part of a longer command was unclear ("click safedep io" -> "click"). Drop them then.
+GAZE_ONLY = ("click", "double", "right")
+COMMANDS_NO_GAZE = [c for c in COMMAND_PHRASES if c not in GAZE_ONLY]
+
 _DIGITS = {w: str(i) for i, w in enumerate(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
                                              "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
                                              "sixteen", "seventeen", "eighteen", "nineteen", "twenty"])}
@@ -106,6 +111,44 @@ def candidates(targets=None, commands=COMMAND_PHRASES, max_numbers=60):
             add("click " + number_words(int(n)), "click " + str(int(n)), n)
             if int(n) >= 10:
                 add("click " + spoken_digits(int(n)), "click " + str(int(n)), n)
+    return out
+
+
+PROMPT_SET = "v3"   # v3: v2 prompts, scored by action (same target counts as right)
+PROMPT_COMMANDS = ["scroll down", "scroll up", "back", "next", "top", "bottom", "zoom in", "zoom out", "stop",
+                   "enter", "cancel", "yes", "show", "hide"]
+
+
+def selftest_prompts(targets=None, n=20, seed=None):
+    """Self-test prompts weighted like real use (prompt set v2): half "click" plus a badge number said digit by
+    digit, three in ten commands, the rest real link labels. Labels the DOM Model made unique with a number
+    ("upvote two"), or that are long or contain digits, are left out: nobody would say them. Falls back to the
+    other kinds when a page has too few of one. Every prompt is one of candidates(targets)."""
+    import random
+    rng = random.Random(seed)
+    allowed = {c["say"] for c in candidates(targets)}
+    nums, labels = [], []
+    for t in targets or []:
+        k = t.get("n")
+        if k is not None and 0 < int(k) <= 60:
+            nums.append("click " + (spoken_digits(int(k)) if int(k) >= 10 else number_words(int(k))))
+        label = normalize_text(t.get("label", ""))
+        words = label.split()
+        if label and len(words) <= 4 and not any(ch.isdigit() for ch in label) and words[-1] not in _DIGITS:
+            labels.append(label)
+    pools = [sorted({p for p in nums if p in allowed}), [c for c in PROMPT_COMMANDS if c in allowed],
+             sorted({p for p in labels if p in allowed})]
+    want = [round(n * 0.5), round(n * 0.3)]
+    want.append(n - sum(want))
+    out = []
+    for pool, k in zip(pools, want):
+        out += rng.sample(pool, min(k, len(pool)))
+    rest = [p for pool in pools for p in pool if p not in out]
+    rng.shuffle(rest)
+    out += rest[: n - len(out)]
+    while len(out) < n and out:                              # tiny page: repeat
+        out.append(rng.choice(out))
+    rng.shuffle(out)
     return out
 
 

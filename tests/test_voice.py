@@ -39,3 +39,19 @@ def test_decode_decides_on_actions_not_phrases():
     cands = V.candidates([{"n": 25, "label": "reply"}, {"n": 3, "label": "share"}])
     r = d.decode([0.0] * 16000, cands)
     assert r["send"] == "click 25" and r["accepted"] and r["p"] > 0.99
+
+
+def test_selftest_prompts_weighted_like_real_use():
+    labels = ["new", "past", "comments", "guidelines", "php eight two", "upvote", "upvote two", "hide three",
+              "duckdb 2.0.0 lts", "a very long story title that nobody would say"]
+    targets = [{"n": i + 1, "label": l} for i, l in enumerate(labels)] + [{"n": 25, "label": "upvote nine"}]
+    ps = V.selftest_prompts(targets, n=20, seed=1)
+    allowed = {c["say"] for c in V.candidates(targets)}
+    assert len(ps) == 20 and all(p in allowed for p in ps)
+    nums = [p for p in ps if p.startswith("click ") and p.split()[1] in ("one", "two", "three", "four", "five",
+                                                                         "six", "seven", "eight", "nine", "ten")]
+    assert len(nums) >= 9                                   # about half are "click" + a number
+    assert sum(p in V.PROMPT_COMMANDS for p in ps) >= 5
+    for bad in ("upvote two", "hide three", "duckdb 2.0.0 lts", "upvote nine"):
+        assert bad not in ps
+    assert all(len(p.split()) <= 4 for p in ps)

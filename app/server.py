@@ -56,7 +56,11 @@ async def local_only(request: Request, call_next):
     needs_header = path.startswith("/api/") and (request.method != "GET" or path in ("/api/commands", "/api/context"))
     if needs_header and not request.headers.get("x-afono-client"):
         return JSONResponse({"detail": "Missing X-Afono-Client header."}, status_code=403)
-    return await call_next(request)
+    response = await call_next(request)
+    if not path.startswith("/api/"):
+        # The app window must always run the scripts on disk: a cached copy once ran an old self-test.
+        response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
 # ------------------------------------------------------------------ recordings to browse
@@ -509,6 +513,13 @@ def voice_status(load: int = 0):
             "page": CONTEXT.get("title") or None, "candidates": [c["say"] for c in cands[:200]]}
 
 
+@app.get("/api/voice/prompts")
+def voice_prompts(n: int = 20):
+    """Self-test prompts for the connected page, weighted like real use (semg.voice.selftest_prompts)."""
+    v = _voice()
+    return {"prompts": v.selftest_prompts(CONTEXT.get("targets"), n=max(1, min(n, 50))), "set": v.PROMPT_SET}
+
+
 @app.post("/api/voice/decode")
 async def voice_decode(request: Request, send: int = 0, gaze: int = 1, keep: int = 0, label: str = "",
                        profile: str = "default"):
@@ -520,14 +531,18 @@ async def voice_decode(request: Request, send: int = 0, gaze: int = 1, keep: int
     if len(raw) < 3200:
         raise HTTPException(400, "Clip too short.")
     audio = np.frombuffer(raw[: 2 * int(v.MAX_SECONDS * v.SR)], dtype=np.int16).astype(np.float32) / 32768.0
-    cands = v.candidates(CONTEXT.get("targets"))
-    if label and normalize_text(label) not in {c["say"] for c in cands}:
-        cands.append({"say": normalize_text(label), "send": normalize_text(label), "target": None})
     g = None
     if gaze and GAZE and time.time() - GAZE.get("received", 0) < 1.5:
         g = {int(c["id"][1:]): c["p"] for c in GAZE.get("candidates", []) if c["id"][:1] == "n" and c["id"][1:].isdigit()}
+    cands = v.candidates(CONTEXT.get("targets"), commands=v.COMMAND_PHRASES if g else v.COMMANDS_NO_GAZE)
+    if label and normalize_text(label) not in {c["say"] for c in cands}:
+        cands.append({"say": normalize_text(label), "send": normalize_text(label), "target": None})
     import asyncio
     r = await asyncio.to_thread(v.get_decoder().decode, audio, cands, g or None)
+    if label:
+        # Self-test: right means the same action ("click five four" and "click fifty four" are both badge 54).
+        want = {c["say"]: c["send"] for c in cands}.get(normalize_text(label))
+        r["label_ok"] = bool(want) and r.get("send") == want
     if send and r["accepted"]:
         r["send"] = aim(r["send"])
         COMMAND_QUEUE.append(r["send"])
@@ -546,7 +561,7 @@ async def voice_decode(request: Request, send: int = 0, gaze: int = 1, keep: int
 @app.post("/api/voice/result")
 def voice_result(body: dict = Body(...)):
     keep = {k: body[k] for k in ("accuracy", "accepted_accuracy", "reject_rate", "trials", "median_candidates",
-                                 "median_ms", "style", "mic", "gaze") if k in body}
+                                 "median_ms", "style", "mic", "gaze", "prompt_set") if k in body}
     rec = log_run("evaluate", "voice-1", model="voice", benchmark="Whisper mode self-test", metrics=keep,
                   whisper_model=_voice().MODEL_ID, profile=str(body.get("profile", "default"))[:40],
                   notes=str(body.get("notes", ""))[:200])

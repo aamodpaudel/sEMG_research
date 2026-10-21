@@ -3,7 +3,7 @@
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
-  var SR = 16000, PRE_ROLL_S = 0.3, END_SILENCE_S = 0.6, MAX_S = 5;
+  var SR = 16000, PRE_ROLL_S = 0.6, END_SILENCE_S = 0.6, MAX_S = 5;
   var ctx = null, stream = null, node = null, rate = 48000;
   var recording = false, chunks = [], preRoll = [], busy = false;
   var floor = 0.003, loud = 0, quiet = 0, auto = false;
@@ -117,9 +117,12 @@
   $("v-test").addEventListener("click", function () {
     poll().then(function (s) {
       if (!s || !s.candidates.length) return;
-      var pool = s.candidates.slice(), prompts = [];
-      for (var i = 0; i < 20; i++) prompts.push(pool[Math.floor(Math.random() * pool.length)]);
-      test = { prompts: prompts, i: 0, rows: [], n: s.n_candidates };
+      // Prompts weighted like real use: "click" + a badge number, commands, real link labels (server side).
+      return NP.api("/api/voice/prompts?n=20").then(function (r) { return { s: s, r: r }; });
+    }).then(function (x) {
+      if (!x || !x.r.prompts.length) return;
+      var s = x.s, prompts = x.r.prompts;
+      test = { prompts: prompts, i: 0, rows: [], n: s.n_candidates, set: x.r.set };
       $("v-test").disabled = true;
       $("v-prompt").textContent = "Say: " + prompts[0];
       NP.msg("v-score", "1 of 20. " + (auto ? "Speak when ready." : "Hold the talk button while you speak."));
@@ -128,7 +131,7 @@
 
   function nextPrompt(r) {
     var want = test.prompts[test.i];
-    test.rows.push({ ok: r.say === want, accepted: r.accepted, ms: r.ms });
+    test.rows.push({ ok: r.label_ok != null ? r.label_ok : r.say === want, accepted: r.accepted, ms: r.ms });
     test.i += 1;
     var done = test.rows.length, ok = test.rows.filter(function (x) { return x.ok; }).length;
     if (test.i < test.prompts.length) {
@@ -141,7 +144,7 @@
     var ms = test.rows.map(function (x) { return x.ms; }).sort(function (a, b) { return a - b; });
     var res = { accuracy: ok / done, accepted_accuracy: acc.length ? accOk / acc.length : null, reject_rate: 1 - acc.length / done,
                 trials: done, median_candidates: test.n, median_ms: ms[Math.floor(ms.length / 2)], style: $("v-style").value,
-                mic: $("v-micname").value.slice(0, 60), gaze: $("v-gaze").checked, profile: NP.prof() };
+                mic: $("v-micname").value.slice(0, 60), gaze: $("v-gaze").checked, profile: NP.prof(), prompt_set: test.set };
     $("v-prompt").textContent = "Done";
     NP.msg("v-score", "Top choice right " + ok + " / " + done + " (" + Math.round(100 * res.accuracy) + "%). " +
       "When it was sure enough to act: " + (acc.length ? Math.round(100 * accOk / acc.length) + "% right" : "never") +
