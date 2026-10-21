@@ -202,7 +202,19 @@ def signal_for(src, rid, profile):
 # ------------------------------------------------------------------ pages
 @app.get("/")
 def index():
+    """The volunteer app: sign-in and the guided study, nothing else."""
     return FileResponse(paths.res("app", "static", "index.html"))
+
+
+@app.get("/lab")
+def lab():
+    """The research tools: every model tab (the same page, opened in lab mode)."""
+    return FileResponse(paths.res("app", "static", "index.html"))
+
+
+@app.get("/admin")
+def admin_page():
+    return FileResponse(paths.res("app", "static", "admin.html"))
 
 
 LAST_BEAT = [0.0]
@@ -546,6 +558,8 @@ async def voice_decode(request: Request, send: int = 0, gaze: int = 1, keep: int
             cands.append({"say": w, "send": w, "target": None})
     import asyncio
     r = await asyncio.to_thread(v.get_decoder().decode, audio, cands, g or None)
+    LAST_VOICE.update(say=r.get("say"), accepted=r.get("accepted"), p=r.get("p"), heard=r.get("free"),
+                      time=time.strftime("%H:%M:%S"), selftest=bool(label), profile=profile)
     if study_words and r["accepted"] and r["say"] in study_words:
         r["study"] = _study_voice(r["say"])        # "start", "done" or "skip" drive the task list, not the page
         return r
@@ -602,6 +616,7 @@ def _session(pid):
     import secrets
     token = secrets.token_urlsafe(24)
     SESSIONS[token] = pid
+    LIVE["user"] = {"pid": pid, "since": time.strftime("%H:%M:%S"), "step": None, "view": None, "mic": None, "seen": time.time()}
     return {"token": token, "pid": pid, "first": _first_name(pid)}
 
 
@@ -629,7 +644,9 @@ def study_login(body: dict = Body(...)):
 
 @app.post("/api/study/logout")
 def study_logout(request: Request):
-    SESSIONS.pop(request.headers.get("x-afono-token", ""), None)
+    pid = SESSIONS.pop(request.headers.get("x-afono-token", ""), None)
+    if pid and LIVE.get("user", {}).get("pid") == pid:
+        LIVE.pop("user", None)
     if RUN and RUN.get("phase") != "finished":
         RUN.clear()
     return {"ok": True}
@@ -738,6 +755,183 @@ def study_run_cancel(request: Request):
 def study_run(request: Request):
     pid = _who(request)
     return _run_view() if RUN.get("pid") == pid else None
+
+
+@app.post("/api/study/ping")
+def study_ping(request: Request, body: dict = Body(...)):
+    """The volunteer window reports where it is, for the admin's live view."""
+    pid = _who(request)
+    u = LIVE.get("user") or {"pid": pid, "since": time.strftime("%H:%M:%S")}
+    u.update(pid=pid, step=str(body.get("step", ""))[:30], view=str(body.get("view", ""))[:20],
+             mic=str(body.get("mic", ""))[:20], seen=time.time())
+    LIVE["user"] = u
+    return {"ok": True}
+
+
+@app.get("/api/study/checkin")
+def study_checkin():
+    """The admin app can sign a participant into the volunteer window; the window picks the session up here."""
+    c = CHECKIN.pop("pending", None)
+    if c and time.time() - c["time"] < 120:
+        return c["session"]
+    return None
+
+
+# ------------------------------------------------------------------ the admin app (research team)
+ADMIN_SESSIONS, LIVE, LAST_VOICE, CHECKIN = set(), {}, {}, {}
+
+
+def _admin(request: Request):
+    if request.headers.get("x-afono-admin", "") not in ADMIN_SESSIONS:
+        raise HTTPException(401, "Please sign in to the admin app again.")
+
+
+@app.get("/api/admin/state")
+def admin_state():
+    return {"set": STUDY.admin_is_set()}
+
+
+@app.post("/api/admin/setup")
+def admin_setup(body: dict = Body(...)):
+    if STUDY.admin_is_set():
+        raise HTTPException(400, "The admin password is already set.")
+    try:
+        STUDY.set_admin_password(str(body.get("password", "")))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return admin_login(body)
+
+
+@app.post("/api/admin/login")
+def admin_login(body: dict = Body(...)):
+    import secrets
+    if not STUDY.check_admin(str(body.get("password", ""))):
+        raise HTTPException(401, "That is not the admin password.")
+    token = secrets.token_urlsafe(24)
+    ADMIN_SESSIONS.add(token)
+    return {"token": token}
+
+
+@app.get("/api/admin/live")
+def admin_live(request: Request):
+    _admin(request)
+    u = dict(LIVE.get("user") or {})
+    if u:
+        u["name"] = STUDY.load_people().get(u["pid"], {}).get("name", "")
+        u["signed_in"] = u["pid"] in SESSIONS.values()
+        u["seconds_ago"] = round(time.time() - u.get("seen", time.time()))
+    v = _run_view()
+    if v:
+        v["pid"] = RUN.get("pid")
+        v["actions"] = [a["text"] for a in RUN.get("actions", [])] if RUN.get("phase") == "active" else []
+    voice = _voice()
+    return {"user": u or None, "run": v, "last_voice": LAST_VOICE or None,
+            "page": {"title": CONTEXT.get("title"), "url": CONTEXT.get("url"), "targets": len(CONTEXT.get("targets", [])),
+                     "time": CONTEXT.get("time")},
+            "voice": {"ready": voice._DECODER is not None, "loading": VOICE["loading"], "error": VOICE["error"]},
+            "device": DEVICE.type, "time": time.strftime("%H:%M:%S")}
+
+
+@app.get("/api/admin/participants")
+def admin_participants(request: Request):
+    _admin(request)
+    return {"people": STUDY.overview(read_runs()), "summary": STUDY.summarize(), "groups": STUDY.GROUPS}
+
+
+@app.post("/api/admin/participants")
+def admin_add(request: Request, body: dict = Body(...)):
+    _admin(request)
+    if not body.get("consent"):
+        raise HTTPException(400, "Tick that they agreed to take part (read them the consent text first).")
+    try:
+        if body.get("username"):
+            pid = STUDY.register(body.get("full_name", ""), body.get("username", ""), str(body.get("password", "")),
+                                 bool(body.get("keep_voice_clips")), str(body.get("group", "prefer-not-to-say")))
+        else:
+            pid = STUDY.add_participant(body.get("full_name", ""), bool(body.get("keep_voice_clips")),
+                                        str(body.get("group", "prefer-not-to-say")))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return {"pid": pid}
+
+
+@app.post("/api/admin/set-login")
+def admin_set_login(request: Request, body: dict = Body(...)):
+    _admin(request)
+    try:
+        STUDY.set_login(str(body.get("pid", "")), body.get("username", ""), str(body.get("password", "")))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return {"ok": True}
+
+
+@app.post("/api/admin/checkin")
+def admin_checkin(request: Request, body: dict = Body(...)):
+    """Sign this participant into the volunteer window (it picks the session up within a few seconds)."""
+    _admin(request)
+    pid = str(body.get("pid", ""))
+    if pid not in STUDY.load_people():
+        raise HTTPException(400, "Unknown participant.")
+    for t in [t for t, p in SESSIONS.items()]:
+        SESSIONS.pop(t, None)                      # one volunteer at a time on this laptop
+    CHECKIN["pending"] = {"session": _session(pid), "time": time.time()}
+    return {"ok": True}
+
+
+@app.post("/api/admin/signout-user")
+def admin_signout_user(request: Request):
+    _admin(request)
+    SESSIONS.clear()
+    LIVE.pop("user", None)
+    CHECKIN.clear()
+    if RUN and RUN.get("phase") != "finished":
+        RUN.clear()
+    return {"ok": True}
+
+
+@app.post("/api/admin/stop-run")
+def admin_stop_run(request: Request):
+    _admin(request)
+    RUN.clear()
+    return {"ok": True}
+
+
+@app.post("/api/admin/delete")
+def admin_delete(request: Request, body: dict = Body(...)):
+    _admin(request)
+    pid = str(body.get("pid", ""))
+    if str(body.get("confirm", "")) != pid:
+        raise HTTPException(400, "Type the participant code to confirm.")
+    for t in [t for t, p in SESSIONS.items() if p == pid]:
+        SESSIONS.pop(t, None)
+    if RUN.get("pid") == pid:
+        RUN.clear()
+    try:
+        return STUDY.delete_participant(pid)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/admin/rebuild")
+def admin_rebuild(request: Request):
+    """End of day: log the study summary and rebuild the website's numbers from the registry."""
+    _admin(request)
+    sm = STUDY.summarize()
+    if sm["rows"]:
+        log_run("evaluate", "demo-summary", model="intent", benchmark=f"Task list {STUDY.TASK_SET} summary",
+                metrics={"people": sm["people"], **{f"{k}_vs_mouse": v for k, v in sm["median_vs_mouse"].items()}})
+    from semg import site_data
+    site_data.build(site=paths.res("site"))
+    return {"ok": True, "people": sm["people"]}
+
+
+@app.post("/api/admin/open-user")
+def admin_open_user(request: Request):
+    """Open the volunteer window next to the admin window."""
+    _admin(request)
+    from app import desktop
+    desktop.open_window(f"http://127.0.0.1:{desktop.PORT}/", os.path.join(paths.DATA, "window"))
+    return {"ok": True}
 
 
 @app.post("/api/study/survey")

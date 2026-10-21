@@ -78,7 +78,8 @@ def main():
         from app import server
         uvicorn.run(server.app, host="127.0.0.1", port=PORT, log_level="warning", log_config=None)
         return
-    url = f"http://127.0.0.1:{PORT}/"
+    # --admin opens the admin app (research team) instead of the volunteer app; both use the same server.
+    url = f"http://127.0.0.1:{PORT}/" + ("admin" if "--admin" in sys.argv else "")
     profile_dir = os.path.join(paths.DATA, "window")
     if _running(PORT):                       # already open: just show another window
         open_window(url, profile_dir)        # the running instance keeps serving it

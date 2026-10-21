@@ -7,6 +7,17 @@
   var token = null;
   try { token = sessionStorage.getItem(KEY); } catch (e) { /* private window: sign in each time */ }
   var me = null, current = null, run = null, runT = null, meT = null, spokenFor = null;
+  // "/" is the volunteer app (only the study); "/lab" keeps every research tab.
+  var LAB = location.pathname.indexOf("/lab") === 0;
+  if (!LAB) document.body.classList.add("user-app");
+
+  function view() { var v = document.querySelector('[role="tab"][aria-selected="true"]'); return v ? v.dataset.tab : "study"; }
+  function goTo(tab, label) {
+    $("tab-" + tab).click();
+    document.body.classList.toggle("away", tab !== "study");
+    if (label) $("back-text").textContent = label;
+  }
+  $("back-btn").addEventListener("click", function () { goTo("study"); load(); });
 
   function api(path, body) {
     var opt = { headers: { "X-Afono-Token": token || "" } };
@@ -45,17 +56,30 @@
     showGate(false); current = null; load();
   }
   $("sign-out").addEventListener("click", function () {
-    api("/api/study/logout", {}).catch(function () {}).finally(function () {
-      token = null; me = null; run = null; current = null; stopRun();
-      try { sessionStorage.removeItem(KEY); } catch (e) { /* nothing kept */ }
-      var p = $("profile"); p.readOnly = false; p.value = "default"; p.dispatchEvent(new Event("change"));
-      document.body.classList.remove("signed-in");
-      $("acct").hidden = true; render(); pick(false); showGate(true);
-    });
+    api("/api/study/logout", {}).catch(function () {}).finally(signedOut);
   });
 
+  function signedOut() {
+    token = null; me = null; run = null; current = null; stopRun();
+    try { sessionStorage.removeItem(KEY); } catch (e) { /* nothing kept */ }
+    var p = $("profile"); p.readOnly = false; p.value = "default"; p.dispatchEvent(new Event("change"));
+    document.body.classList.remove("signed-in"); $("acct").hidden = true;
+    goTo("study"); render(); pick(false); if (!LAB) showGate(true);
+  }
+  // The admin app can check a participant in: the volunteer window picks the session up here.
+  setInterval(function () {
+    if (token || LAB || $("gate").hidden) return;
+    NP.api("/api/study/checkin").then(function (r) { if (r && r.token) signedIn(r); }).catch(function () {});
+  }, 2000);
+  // Tell the admin app where this window is; a 401 means the admin signed this person out.
+  setInterval(function () {
+    if (!token) return;
+    api("/api/study/ping", { step: current, view: view(), mic: NP.micState ? NP.micState() : "" })
+      .catch(function (e) { if (/sign in/i.test(e.message)) signedOut(); });
+  }, 3000);
+
   function load() {
-    if (!token) { render(); showGate(true); return Promise.resolve(); }
+    if (!token) { render(); if (!LAB) showGate(true); return Promise.resolve(); }
     return api("/api/study/me").then(function (m) {
       var first = !me;
       me = m;
@@ -67,11 +91,7 @@
       if (m.run) { run = m.run; if (run.phase !== "finished") startRun(); }
       if (first || !current) current = firstOpen();
       render();
-    }).catch(function () {
-      token = null; me = null;
-      try { sessionStorage.removeItem(KEY); } catch (e) { /* nothing kept */ }
-      render(); showGate(true);
-    });
+    }).catch(function () { signedOut(); });
   }
 
   /* ---------- the steps ---------- */
@@ -127,7 +147,7 @@
   function renderMain() {
     var box = $("st-main");
     if (!me) {
-      box.innerHTML = '<h2>Study</h2><div class="panel"><p class="big-task">Sign in to take part.</p>' +
+      box.innerHTML = '<h2>Study</h2><div class="panel"><p class="big-task">' + (LAB ? "Research tools: sign in only to test the study." : "Sign in to take part.") + '</p>' +
         '<p>Each volunteer has their own account, so their results stay separate.</p><div class="row"><button class="btn primary" type="button" id="st-signin">Sign in or create an account</button></div></div>';
       $("st-signin").addEventListener("click", function () { showGate(true); });
       return;
@@ -180,7 +200,7 @@
     $("st-go").addEventListener("click", function () {
       $("v-style").value = s.style; $("v-micname").value = device() || "not given"; $("v-keep").checked = !!me.keep_voice_clips;
       micOnHandsFree();
-      $("tab-voice").click();
+      goTo("voice", "Voice check: say each phrase shown under Self-test, on the right. It takes about 2 minutes.");
       var tries = 0;
       (function wait() {          // the speech model may still be loading
         if (!$("v-test").disabled) { $("v-test").click(); $("v-prompt").scrollIntoView({ block: "center" }); return; }
@@ -198,7 +218,8 @@
         '<p>Say <span class="say">show</span> to put a number on everything you can click, then <span class="say">click</span> and the number, digit by digit: <span class="say">click two five</span> for 25. Or say a link’s words, like <span class="say">new</span>.</p>' +
         '<div class="say-list">' + SAY.map(function (w) { return '<span class="say">' + w + '</span>'; }).join("") + '</div>' +
         '<p>Each task: say <span class="say">start</span>, do it, then say <span class="say">done</span>. Say <span class="say">skip</span> if you cannot do it.</p>' +
-        (s.mode === "whisper-gaze" ? '<p>With the camera: look at a link and just say <span class="say">click</span>. Calibrate in the Track Model tab first.</p>' : "") +
+        (s.mode === "whisper-gaze" ? '<p>With the camera: look at a link and just say <span class="say">click</span>. First set up the camera: click <b>Start camera</b>, then <b>Calibrate</b> and look at each dot, then <b>Accuracy test</b>, <b>Target test</b> and <b>Live snap</b>.</p>' +
+          '<div class="row"><button class="btn" type="button" id="st-cam">Set up the camera</button></div>' : "") +
         '<label class="f" for="st-style">How you will speak<select id="st-style"><option value="quiet">Quiet voice</option><option value="whisper">Whisper</option></select></label>'
       : '<p class="big-task">Use the mouse and keyboard as you normally would.</p>' +
         '<p>For each task: click <b>Start</b> here, do it in Chrome, then click <b>Done</b> here. Zoom with Ctrl and the mouse wheel.</p>';
@@ -211,6 +232,10 @@
     try { $("st-read").checked = localStorage.getItem("afono-read") === "1"; } catch (e) { /* default off */ }
     $("st-read").addEventListener("change", function (e) { try { localStorage.setItem("afono-read", e.target.checked ? "1" : "0"); } catch (x) { /* not kept */ } });
     if ($("st-on")) $("st-on").addEventListener("click", next);
+    if ($("st-cam")) $("st-cam").addEventListener("click", function () {
+      $("v-gaze").checked = true;
+      goTo("track", "Camera: Start camera, Calibrate (look at each dot), Accuracy test, Target test, then Live snap. Then come back.");
+    });
     $("st-start").addEventListener("click", function () {
       if (voice && !NP.micOn()) { NP.msg("st-msg", "Turn on the microphone first (step 1).", true); return; }
       var style = voice ? $("st-style").value : "";
@@ -275,7 +300,11 @@
     if (before !== v.phase + v.i) render();
     else if (v.phase === "active" && $("st-timer")) $("st-timer").textContent = (v.elapsed || 0).toFixed(1) + " s";
   }
-  function startRun() { if (!runT) runT = setInterval(function () { api("/api/study/run").then(update).catch(function () {}); }, 400); }
+  function startRun() {
+    if (!runT) runT = setInterval(function () {
+      api("/api/study/run").then(update).catch(function (e) { if (/sign in/i.test(e.message)) signedOut(); });
+    }, 400);
+  }
   function stopRun() { clearInterval(runT); runT = null; }
   document.addEventListener("np-study", function () { api("/api/study/run").then(update).catch(function () {}); });
 
@@ -312,7 +341,7 @@
   }
 
   /* ---------- keep the checks and progress current ---------- */
-  document.addEventListener("np-selftest-done", function () { setTimeout(function () { $("tab-study").click(); load().then(next); }, 1800); });
+  document.addEventListener("np-selftest-done", function () { setTimeout(function () { goTo("study"); load().then(next); }, 1800); });
   meT = setInterval(function () {
     if (!me || runT || $("view-study").hidden) return;
     api("/api/study/me").then(function (m) {

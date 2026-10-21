@@ -241,6 +241,94 @@ def check_login(username, password, root=ROOT):
     return a["pid"] if hmac.compare_digest(a["hash"], _hash(password, a["salt"])) else None
 
 
+# ------------------------------------------------------------------ the admin (research team) side
+
+def _admin_path(root):
+    return os.path.join(root, "admin.json")
+
+
+def admin_is_set(root=ROOT) -> bool:
+    return os.path.exists(_admin_path(root))
+
+
+def set_admin_password(password, root=ROOT):
+    if len(password) < 8:
+        raise ValueError("Admin password: at least 8 characters.")
+    os.makedirs(root, exist_ok=True)
+    salt = secrets.token_hex(16)
+    with open(_admin_path(root), "w", encoding="utf-8") as f:
+        json.dump({"salt": salt, "hash": _hash(password, salt), "iterations": _ITER, "set": _now()}, f)
+
+
+def check_admin(password, root=ROOT) -> bool:
+    if not admin_is_set(root):
+        return False
+    with open(_admin_path(root), encoding="utf-8") as f:
+        a = json.load(f)
+    return hmac.compare_digest(a["hash"], _hash(password, a["salt"]))
+
+
+def add_participant(full_name, keep_voice_clips=False, group="prefer-not-to-say", root=ROOT) -> str:
+    """Consented participant without a login yet (the admin app, or `new` on the command line)."""
+    full_name = " ".join(str(full_name).split())
+    if len(full_name) < 2:
+        raise ValueError("Please enter a full name.")
+    people = load_people(root)
+    pid = next_pid(people)
+    people[pid] = {"name": full_name, "added": _now(), "consent": True, "keep_voice_clips": bool(keep_voice_clips),
+                   "group": group if group in GROUPS else "prefer-not-to-say"}
+    _save_people(people, root)
+    return pid
+
+
+def overview(runs, root=ROOT) -> list[dict]:
+    """One row per participant for the admin app: who, login, consent, steps done, last activity."""
+    people, accounts = load_people(root), load_accounts(root)
+    login = {a["pid"]: u for u, a in accounts.items()}
+    last = {}
+    for s in sessions(root):
+        last[s["pid"]] = max(last.get(s["pid"], ""), s.get("time", ""))
+    for r in runs:
+        who = r.get("participant") or r.get("profile")
+        if who in people:
+            last[who] = max(last.get(who, ""), r.get("time", ""))
+    out = []
+    for pid, p in sorted(people.items()):
+        out.append({"pid": pid, "name": p.get("name", ""), "username": login.get(pid), "group": p.get("group"),
+                    "keep_voice_clips": p.get("keep_voice_clips", False), "added": p.get("added"),
+                    "last": last.get(pid) or p.get("added"), "progress": progress(pid, runs, root)})
+    return out
+
+
+def delete_participant(pid, registry_path=None, root=ROOT, user_root=None) -> dict:
+    """Remove everything about one person, as promised in the consent text: study files, voice clips and
+    recordings, the participant and login entries, and their lines in the run log."""
+    import shutil
+    from . import registry as _reg
+    if not re.match(r"^p\d{2,}$", pid or ""):
+        raise ValueError("Not a participant code.")
+    removed = {"files": 0, "registry_lines": 0}
+    for d in (os.path.join(root, pid), os.path.join(user_root or os.environ.get("AFONO_USER_ROOT", "data/user"), pid)):
+        if os.path.isdir(d):
+            removed["files"] += sum(len(f) for _, _, f in os.walk(d))
+            shutil.rmtree(d)
+    people = load_people(root)
+    people.pop(pid, None)
+    _save_people(people, root)
+    accounts = {u: a for u, a in load_accounts(root).items() if a["pid"] != pid}
+    with open(_accounts_path(root), "w", encoding="utf-8") as f:
+        json.dump(accounts, f, indent=2)
+    path = registry_path or _reg.REGISTRY
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            lines = f.read().splitlines()
+        keep = [l for l in lines if not l.strip() or (lambda r: r.get("participant") != pid and r.get("profile") != pid)(json.loads(l))]
+        removed["registry_lines"] = len(lines) - len(keep)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("\n".join(keep) + ("\n" if keep else ""))
+    return removed
+
+
 # ------------------------------------------------------------------ saving (shared by the CLI and Nullpoint)
 
 def _write(pid, suffix, rec, root):

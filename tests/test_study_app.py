@@ -78,3 +78,45 @@ def test_survey_saved_with_score(client):
     r = c.post("/api/study/survey", headers=h, json={"answers": [5, 1] * 5, "would_use": 4, "open": {"best": "fast"}})
     assert r.json()["sus"] == 100.0
     assert c.get("/api/study/me", headers=h).json()["progress"]["survey"] is True
+
+
+def test_admin_app_controls_the_volunteer_window(client):
+    c, S, tmp = client
+    S.ADMIN_SESSIONS.clear(); S.LIVE.clear(); S.CHECKIN.clear()
+    assert c.get("/admin").status_code == 200 and c.get("/lab").status_code == 200
+    assert c.get("/api/admin/live", headers=H).status_code == 401
+    assert c.get("/api/admin/state").json() == {"set": False}
+    assert c.post("/api/admin/setup", headers=H, json={"password": "short"}).status_code == 400
+    adm = {**H, "X-Afono-Admin": c.post("/api/admin/setup", headers=H, json={"password": "admin-pass-1"}).json()["token"]}
+    assert c.post("/api/admin/setup", headers=H, json={"password": "another-pass"}).status_code == 400
+    assert c.post("/api/admin/login", headers=H, json={"password": "wrong-pass"}).status_code == 401
+
+    # add without a login, then give one
+    assert c.post("/api/admin/participants", headers=adm, json={"full_name": "Kim Lee"}).status_code == 400  # no consent
+    pid = c.post("/api/admin/participants", headers=adm, json={"full_name": "Kim Lee", "consent": True}).json()["pid"]
+    assert c.post("/api/admin/set-login", headers=adm, json={"pid": pid, "username": "kim", "password": "kimpass"}).status_code == 200
+    assert c.post("/api/study/login", headers=H, json={"username": "kim", "password": "kimpass"}).json()["pid"] == pid
+    people = c.get("/api/admin/participants", headers=adm).json()["people"]
+    assert people[0]["username"] == "kim" and people[0]["name"] == "Kim Lee"
+
+    # check in: the volunteer window picks the session up once
+    assert c.post("/api/admin/checkin", headers=adm, json={"pid": pid}).status_code == 200
+    sess = c.get("/api/study/checkin").json()
+    assert sess["pid"] == pid and c.get("/api/study/checkin").json() is None
+    user = {**H, "X-Afono-Token": sess["token"]}
+    c.post("/api/study/ping", headers=user, json={"step": "setup", "view": "study", "mic": "listening"})
+    live = c.get("/api/admin/live", headers=adm).json()
+    assert live["user"]["pid"] == pid and live["user"]["signed_in"] and live["user"]["mic"] == "listening"
+
+    # sign them out: their next call is refused
+    c.post("/api/admin/signout-user", headers=adm, json={})
+    assert c.get("/api/study/me", headers=user).status_code == 401
+
+    # delete on request: files, login and run-log lines
+    tok = c.post("/api/study/login", headers=H, json={"username": "kim", "password": "kimpass"}).json()["token"]
+    c.post("/api/study/survey", headers={**H, "X-Afono-Token": tok}, json={"answers": [3] * 10, "would_use": 3})
+    assert c.post("/api/admin/delete", headers=adm, json={"pid": pid, "confirm": "nope"}).status_code == 400
+    r = c.post("/api/admin/delete", headers=adm, json={"pid": pid, "confirm": pid}).json()
+    assert r["files"] >= 1 and r["registry_lines"] == 1
+    assert c.get("/api/admin/participants", headers=adm).json()["people"] == []
+    assert c.post("/api/study/login", headers=H, json={"username": "kim", "password": "kimpass"}).status_code == 401
