@@ -5,11 +5,10 @@ the camera arrives. Every step says what you should see; if you do not see it, s
 
 **Contents**
 - [Part A. One-time setup (about 20 minutes, today)](#part-a-one-time-setup-about-20-minutes-today)
-- [Part B. Before each person](#part-b-before-each-person-2-minutes)
-- [Part C. One session, step by step (about 25 minutes)](#part-c-one-session-step-by-step-about-25-minutes)
-- [Part D. Tomorrow: the camera](#part-d-tomorrow-the-camera)
-- [Part E. If the electrode rig is built](#part-e-if-the-electrode-rig-is-built)
-- [Part F. End of each day](#part-f-end-of-each-day)
+- [Part B. Each volunteer, on their own (about 25 minutes)](#part-b-each-volunteer-on-their-own-about-25-minutes)
+- [Part C. Tomorrow: the camera](#part-c-tomorrow-the-camera)
+- [Part D. If the electrode rig is built](#part-d-if-the-electrode-rig-is-built)
+- [Part E. End of each day](#part-e-end-of-each-day)
 - [Problems and fixes](#problems-and-fixes)
 - [What to say to volunteers](#what-to-say-to-volunteers)
 
@@ -17,12 +16,12 @@ the camera arrives. Every step says what you should see; if you do not see it, s
 
 | What | Where | Who sees it |
 |---|---|---|
-| Names, consent, health group, per-task times, observer notes, survey answers and quotes | `data\study\` | This laptop only (git-ignored) |
+| Accounts (passwords stored only as salted hashes), names, consent, health group, per-task times and actions, survey answers and quotes | `data\study\` | This laptop only (git-ignored) |
 | Whisper self-test clips, only if the person agrees | `data\user\<pid>\voice\` | This laptop only (git-ignored) |
 | Pseudonym (`p01`) and numbers | `runs\registry.jsonl` and then the website | Public once you commit it |
 
-Never type a name or a health detail into Nullpoint or into the "Observer notes" prompt: Nullpoint's fields can end
-up in the public registry. Names go only into `python -m semg.study new`.
+Names go only into the sign-up form (or `python -m semg.study new`). Never type a name or a health detail into
+other Nullpoint fields or the "Observer notes" prompt: those can end up in the public registry.
 
 ---
 
@@ -136,106 +135,74 @@ from this repository.
    page with the glass φ. On the laptop, `http://127.0.0.1:8000` shows the same.
 5. Leave this window running while friends test.
 
-Setup is done. Run Part B and Part C on yourself first, as `p01`.
+Setup is done. You already have the code p01 from the command line. Give it a Nullpoint login once, so your own
+results stay under p01:
+```powershell
+python -m semg.study account --pid p01 --username yourname
+```
+Then in Nullpoint choose **I have an account** and sign in. Friends sign up in Nullpoint themselves (Part B).
 
 ---
 
-## Part B. Before each person (2 minutes)
+## Part B. Each volunteer, on their own (about 25 minutes)
 
-1. **Register them.** In the third PowerShell window:
-   ```powershell
-   cd D:\0_Github_Repos\sEMG
-   python -m semg.study new --name "Their name"
-   ```
-   It shows a short consent text: read it to them aloud. Type `y` if they agree, `y` or `n` for keeping voice clips,
-   and press Enter for the health group unless they want to say (it stays on this laptop). It prints their code, for
-   example **p02**, and which mode they do first. Write the code on a sticky note.
-2. **Nullpoint profile.** In the Nullpoint window, the **Profile** box at the top: delete `default`, type the code
-   (`p02`), press Enter.
-3. **Earbuds.** If they use their own earbuds, connect them and redo A6 step 2. Otherwise use yours (wipe them).
-4. **Reset the page.** One Chrome tab only, on https://news.ycombinator.com, scrolled to the top, zoom 100%
-   (press `Ctrl+0`), numbers hidden.
+Since 21 October, Nullpoint runs the whole session itself: sign-up and consent, the voice checks, the timed task
+lists (it reads each task, times it and checks where the page ended up) and the survey. Your job is only to get the
+laptop ready and stay nearby for questions.
 
-## Part C. One session, step by step (about 25 minutes)
+### B1. Before each person (1 minute)
 
-### C1. Whisper self-test, twice (5 minutes)
+1. Nullpoint is running from the code (A3) and the Chrome extension is connected (A5).
+2. Chrome: one tab on https://news.ycombinator.com, scrolled to the top, zoom 100% (`Ctrl+0`).
+3. Windows on screen: Chrome on the left two thirds, the Nullpoint window on the right (A7 step 7).
+4. If the previous person is still signed in, click **Sign out** at the top right of Nullpoint.
+5. Earbuds: theirs (connect them and pick them as the Windows input, A6) or yours, wiped.
 
-1. Nullpoint, **Whisper** tab, right column **Self-test**.
-2. **How you speak**: **Whisper**. **Microphone**: type what they use, e.g. `AirPods Pro`.
-3. **Keep the self-test clips on this computer**: tick only if they said yes to keeping clips.
-4. Check **Listen hands-free** is ticked (left column). Click **Start self-test**.
-5. A prompt appears, for example **Say: scroll up**. They whisper it; the next prompt appears. 20 prompts.
-6. **You should see** "Top choice right 17 / 20 (85%)... Logged to the run log." at the end.
-7. Change **How you speak** to **Quiet voice** and click **Start self-test** again.
+### B2. What they see and do
 
-How to speak in each style. Say this to them before each run, because it is the one thing that keeps results
-comparable:
-- **Whisper**: breath only, no voice at all, like whispering during a film. If it does not hear them, whisper a
-  little louder or hold the mic closer, but never switch to their voice. If they do switch, note it.
-- **Quiet voice**: their real voice, very soft, like talking to the person next to them in a library.
+They sit down, and Nullpoint shows **Welcome to the Nullpoint study**.
 
-The prompts are mostly what people actually say: "click" plus a number digit by digit ("click two five"),
-commands ("scroll down", "back") and short link names ("new", "guidelines"). During the self-test nothing is sent to
-the page, so the Hacker News tab does not move.
+1. **I am new**: full name, a username, a password twice, the consent box, and whether we may keep their voice-check
+   clips. The health question is optional. **Create my account and start**. Nullpoint gives them a code (`p02`) and
+   shows it at the top right. If they come back tomorrow, they choose **I have an account** and sign in.
+2. The **Study** tab lists their steps on the left, ticked as they finish them:
+   1. **Get ready**: which earbuds, **Turn on the microphone**, and a test ("scroll down" should scroll Hacker
+      News). The **Right now** box turns green when Chrome is connected and the microphone is on.
+   2. **Voice check: whisper** and 3. **Voice check: quiet voice**: Nullpoint opens the voice check, starts it by
+      itself and comes back to Study when the 20 phrases are done.
+   4. and 5. **Task list with the mouse** and **Task list by voice**, in the order Nullpoint shows (it alternates per
+      person). By voice: they say **start**, do the task, say **done** (or **skip**); hands stay in their lap.
+      With the mouse they click **Start** and **Done** in Nullpoint. Nullpoint times each task and checks it from
+      the page address. **Read each task aloud to me** is optional.
+   6. **Your opinion**: ten 1-to-5 questions, one about using it if a mouse hurt, four open questions.
+3. At the end they click **Sign out**.
 
-Open-ear earbuds (the mic sits far from the mouth) hear whispers much less well than in-ear ones or a headset. Write
-the exact model in **Microphone** so we can compare.
+The microphone indicator at the top always shows the state: grey **Microphone off**, teal **Listening**, orange
+**Hearing you** (with the level bar moving), black **Working it out**.
 
-### C2. The task list, twice (10 minutes)
+### B3. What you still do
 
-The order (mouse first or whisper first) was printed in Part B. Do both runs.
+- **Watch, do not help.** If they ask, say "do what you would do at home". Write down what confused them.
+- **Wrong actions are not counted automatically.** Nullpoint records every action and whether each task ended in
+  the right place, and counts undos itself. If you saw something odd, tell me and I will check the run.
+- **The website** on their phone (A8): ask them to open it and scroll once. Their answer to the last survey
+  question covers it.
+- Ask whether they know someone with RSI, arthritis or limited hand use who might try it. Do not take that person's
+  details here; ask them to get in touch.
 
-1. Reset the page (Part B step 4).
-2. Seat them in front of the laptop. You sit beside them with the PowerShell window.
-3. Start the run, with their code and mode:
-   ```powershell
-   python -m semg.study run --pid p02 --mode mouse
-   python -m semg.study run --pid p02 --mode whisper --device "AirPods Pro" --style quiet
-   ```
-4. For each task the tool prints, for example `Task 1: Open the comments of the third story.`:
-   - Read it to them aloud.
-   - Press **Enter** the moment they start.
-   - Press **Enter** again when the task is done. If they are stuck for about a minute, type `f` then Enter
-     (gave up). If a task cannot be done at all, `s` (skip).
-   - It asks **Wrong actions**: how many times something happened that they did not want (a wrong link opened, a
-     scroll they did not ask for). Type the number, or Enter for 0.
-   - It asks **Undos**: how many times they said "back" or "undo" to fix a mistake.
-5. **Mouse run:** mouse and keyboard allowed as normal (`Ctrl` and the mouse wheel to zoom).
-6. **Whisper run:** hands in their lap, no touching. Before the run you press `Alt+Shift+F` once so the numbers
-   are showing; after that they only speak. Tell them the grammar once, before you start:
-   - "click" and the number, digit by digit: **click two five** for 25
-   - **scroll down**, **scroll up**, **top**, **bottom**, **back**, **zoom in**, **zoom out**
-   - or the link's own words: **click guidelines**, **new**
-7. Do not help during a task. If they ask, say "do what you would do at home".
-8. At the end it asks **Observer notes**: what you noticed (where they hesitated, what Nullpoint misheard). No names.
-9. **You should see** `Saved data/study/p02/...json and logged to the registry`.
+### B4. Fallback: you at the keyboard
 
-### C3. Survey (5 minutes)
-
+If the Study tab misbehaves, the command-line tool still works and saves the same way:
 ```powershell
+python -m semg.study new --name "Their name"
+python -m semg.study run --pid p02 --mode mouse
+python -m semg.study run --pid p02 --mode whisper --device "AirPods Pro" --style quiet
 python -m semg.study survey --pid p02
 ```
-1. Read each of the 10 statements aloud. They answer 1 (strongly disagree) to 5 (strongly agree), about the
-   **hands-free** run. Type their number.
-2. Then: how likely they would use it if a mouse hurt (1 to 5).
-3. Four open questions. Type their answers word for word, even half sentences. These quotes are what users and
-   investors remember.
-4. **You should see** `SUS 72.5 / 100 (68 is average)`.
+You read each task aloud and press Enter when they start and finish. Set Nullpoint's **Profile** to their code
+for the voice checks.
 
-### C4. Website (3 minutes)
-
-They open `http://<your IPv4>:8000` on their own phone (A8) and scroll the whole page once. Ask:
-did the glass φ appear, was anything slow or broken, and press **Decode** in the live demo. Their answer to the
-survey's last question covers the rest; add anything else to the observer notes of the next run, or tell me.
-
-### C5. Thank them
-
-Ask whether they know someone with RSI, arthritis or limited hand use who might try it. Do not take that person's
-details here; ask them to contact you.
-
----
-
-## Part D. Tomorrow: the camera
+## Part C. Tomorrow: the camera
 
 Same people where possible, same codes. Do Part A3, A5 and A7 again first (Nullpoint from the code, extension
 connected, Whisper ready), then for each person:
@@ -255,7 +222,7 @@ connected, Whisper ready), then for each person:
    Now they can look at a link and just say **click**.
 8. If time allows, the survey again: `python -m semg.study survey --pid p02` (the newest one counts).
 
-## Part E. If the electrode rig is built
+## Part D. If the electrode rig is built
 
 Only with someone who agrees to electrodes on their skin. Run the laptop on battery (unplugged from the charger)
 while the rig is attached.
@@ -270,7 +237,7 @@ python -m semg.commands eval --user p01 --set gaze_v1
 ```
 Then the task list with `--mode silent-gaze`.
 
-## Part F. End of each day
+## Part E. End of each day
 
 1. Close the Nullpoint window and press `Ctrl+C` in the website PowerShell window.
 2. ```powershell
