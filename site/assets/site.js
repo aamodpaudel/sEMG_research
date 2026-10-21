@@ -188,8 +188,8 @@
   function draw(now) {
     if (!env) return;
     var W = cv.width, H = cv.height, mid = H / 2, t = (now - t0) / 1000;
-    var teal = getComputedStyle(root).getPropertyValue("--teal").trim() || "#0F5E63";
-    var orange = getComputedStyle(root).getPropertyValue("--signal").trim() || "#D9552B";
+    var cs = getComputedStyle(cv), teal = cs.getPropertyValue("--teal").trim() || "#0F5E63";
+    var orange = cs.getPropertyValue("--signal").trim() || "#D9552B";
     var gap = 5 * dpr, shift = t * 70 * dpr, maxA = H * 0.42, step = 2 * dpr;
     ctx.clearRect(0, 0, W, H);
     ctx.globalCompositeOperation = "source-over";
