@@ -10,6 +10,16 @@
   var test = null, statusT = null;
 
   function state(t, err) { NP.msg("v-state", t, err); }
+  // The microphone indicator in the header (and the big level bar): off, listening, hearing you, working it out.
+  var micState = "off";
+  function mic(st) {
+    micState = st;
+    var pill = $("mic-pill"); if (!pill) return;
+    pill.dataset.state = st;
+    $("mic-text").textContent = { off: "Microphone off", listening: "Listening", hearing: "Hearing you", decoding: "Working it out" }[st];
+  }
+  NP.micState = function () { return micState; };
+  NP.micOn = function () { return !!stream; };
 
   function poll(load) {
     return NP.api("/api/voice/status" + (load ? "?load=1" : "")).then(function (s) {
@@ -38,24 +48,25 @@
     return out;
   }
 
-  function startClip() { recording = true; chunks = preRoll.slice(); }
+  function startClip() { recording = true; chunks = preRoll.slice(); mic("hearing"); }
   // Speech that ends while the previous clip is still decoding is kept (the latest one) and decoded next,
   // instead of being dropped: a noise blip decoded first used to swallow the words that followed it.
   var pending = null;
   function endClip() {
     recording = false;
     var pcm = toPcm16(chunks); chunks = [];
+    mic(stream ? "listening" : "off");
     if (pcm.length < SR * 0.25) return;
     if (busy) { pending = pcm; return; }
     decode(pcm);
   }
   function decode(pcm) {
-    busy = true;
+    busy = true; mic("decoding");
     var q = ["send=" + (test ? 0 : ($("v-send").checked ? 1 : 0)), "gaze=" + ($("v-gaze").checked ? 1 : 0), "profile=" + encodeURIComponent(NP.prof())];
     if (test) { q.push("label=" + encodeURIComponent(test.prompts[test.i])); if ($("v-keep").checked) q.push("keep=1"); }
     NP.api("/api/voice/decode?" + q.join("&"), { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: pcm.buffer })
       .then(show).catch(function (e) { NP.msg("v-meta", e.message, true); })
-      .finally(function () { busy = false; if (pending) { var p = pending; pending = null; decode(p); } });
+      .finally(function () { busy = false; mic(stream ? (recording ? "hearing" : "listening") : "off"); if (pending) { var p = pending; pending = null; decode(p); } });
   }
 
   /** Whisper transcribes silence and noise as nothing or a bracketed tag ("[BLANK_AUDIO]", "(water splashing)"). */
@@ -67,6 +78,11 @@
       return;
     }
     $("v-out").textContent = (r.accepted ? "" : "? ") + r.say;
+    if (r.study) {                                       // "start", "done", "skip" during the task list
+      NP.msg("v-meta", "Task list: " + r.say + ". Heard as “" + r.free + "”.");
+      document.dispatchEvent(new CustomEvent("np-study", { detail: r.study }));
+      return;
+    }
     NP.msg("v-meta", (r.accepted ? (r.queued ? "Sent to the page. " : "Accepted. ") : "Not sure, nothing sent. ") +
       "p = " + r.p.toFixed(2) + " of " + r.n_candidates + " phrases" + (r.gaze_used ? ", gaze used" : "") + ". Heard as “" + r.free + "”. " + r.ms + " ms.");
     $("v-top").textContent = r.top.map(function (t) { return t.p.toFixed(3) + "  " + t.say; }).join("\n");
@@ -77,7 +93,9 @@
     var x = new Float32Array(e.inputBuffer.getChannelData(0));
     var s = 0; for (var i = 0; i < x.length; i++) s += x[i] * x[i];
     var rms = Math.sqrt(s / x.length), dt = x.length / rate;
-    $("v-level").value = Math.min(1, rms * 20);
+    var lv = Math.min(1, rms * 20);
+    $("v-level").style.width = Math.round(lv * 100) + "%";
+    var hb = $("mic-level"); if (hb) hb.style.width = Math.round(lv * 100) + "%";
     preRoll.push(x); while (preRoll.length * dt > PRE_ROLL_S) preRoll.shift();
     if (recording) {
       chunks.push(x);
@@ -95,7 +113,7 @@
   }
 
   $("v-mic").addEventListener("click", function () {
-    if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); node.disconnect(); ctx.close(); stream = null; $("v-mic").textContent = "Start microphone"; poll(); return; }
+    if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); node.disconnect(); ctx.close(); stream = null; $("v-mic").textContent = "Start microphone"; mic("off"); poll(); return; }
     // Noise suppression is off: it tends to erase whispers.
     navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true, channelCount: 1 } })
       .then(function (s) {
@@ -103,7 +121,7 @@
         var src = ctx.createMediaStreamSource(s);
         node = ctx.createScriptProcessor(2048, 1, 1);
         node.onaudioprocess = onAudio; src.connect(node); node.connect(ctx.destination);
-        $("v-mic").textContent = "Stop microphone"; poll(true);
+        $("v-mic").textContent = "Stop microphone"; mic("listening"); poll(true);
       }).catch(function (e) { state("Microphone: " + e.message, true); });
   });
 
@@ -112,6 +130,7 @@
   function up() { if (recording && !auto) endClip(); }
   ptt.addEventListener("pointerdown", down); ptt.addEventListener("pointerup", up); ptt.addEventListener("pointerleave", up);
   $("v-auto").addEventListener("change", function (e) { auto = e.target.checked; loud = quiet = 0; });
+  NP.voicePoll = poll;
 
   /* ---------- self-test ---------- */
   $("v-test").addEventListener("click", function () {
@@ -149,7 +168,9 @@
     NP.msg("v-score", "Top choice right " + ok + " / " + done + " (" + Math.round(100 * res.accuracy) + "%). " +
       "When it was sure enough to act: " + (acc.length ? Math.round(100 * accOk / acc.length) + "% right" : "never") +
       ", unsure " + Math.round(100 * res.reject_rate) + "% of the time. Logged to the run log.");
-    NP.post("/api/voice/result", res).catch(function () {});
+    NP.post("/api/voice/result", res).catch(function () {}).finally(function () {
+      document.dispatchEvent(new CustomEvent("np-selftest-done", { detail: res }));
+    });
     test = null; $("v-test").disabled = false;
   }
 

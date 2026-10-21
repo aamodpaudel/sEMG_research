@@ -10,6 +10,7 @@ task and count errors (a wrong action) and undos. Then the System Usability Scal
     python -m semg.study run --pid p01 --mode whisper --device "AirPods Pro"
     python -m semg.study survey --pid p01                    # SUS + open questions
     python -m semg.study summary [--log]                     # per person and mode, hands-free vs mouse
+    python -m semg.study account --pid p01 --username aamod  # a Nullpoint login for someone added with `new`
 
 Privacy: names, health notes, quotes and per-task rows stay in data/study/ (git-ignored, this computer only).
 runs/registry.jsonl, which is public, only ever gets the pseudonym and the numbers.
@@ -17,8 +18,12 @@ runs/registry.jsonl, which is public, only ever gets the pseudonym and the numbe
 import argparse
 import datetime as _dt
 import glob
+import hashlib
+import hmac
 import json
 import os
+import re
+import secrets
 import statistics
 
 from .registry import log_run
@@ -37,6 +42,18 @@ TASKS = [
     "Go to the bottom of the page and open 'Guidelines'.",
     "Go back.",
 ]
+# How Nullpoint checks each task by itself, from the page address and the actions the extension ran.
+# EXPECTED_BACKS: "back" commands the task itself needs (they are not undos).
+TASK_CHECKS = [
+    {"url": "item?id="},
+    {"scrolls": 2},
+    {"front": True},
+    {"url": "/newest"},
+    {"zoom": True},
+    {"url": "newsguidelines"},
+    {"not_url": "newsguidelines"},
+]
+EXPECTED_BACKS = [0, 0, 1, 0, 0, 0, 1]
 MODES = ["mouse", "whisper", "whisper-gaze", "gaze", "silent", "silent-gaze"]
 GROUPS = ["none", "hand-pain-or-rsi", "autoimmune", "limited-hand-use", "voice-loss", "prefer-not-to-say"]
 
@@ -103,8 +120,9 @@ def task_metrics(rows) -> dict:
         "success_rate": round(len(done) / len(rows), 3) if rows else None,
         "median_s": round(statistics.median(times), 1) if times else None,
         "total_s": round(sum(r["seconds"] for r in rows), 1),
-        "errors": sum(r["errors"] for r in rows),
-        "undos": sum(r["undos"] for r in rows),
+        "errors": sum(r["errors"] for r in rows if r.get("errors") is not None),
+        "undos": sum(r["undos"] for r in rows if r.get("undos") is not None),
+        "verified": sum(1 for r in rows if r.get("verified") is True),
     }
 
 
@@ -141,6 +159,169 @@ def summarize(root=ROOT) -> dict:
         rows.append(row)
     return {"rows": rows, "median_vs_mouse": {k: statistics.median(v) for k, v in ratios.items()},
             "people": len({r["pid"] for r in rows} | set(sus))}
+
+
+# ------------------------------------------------------------------ accounts (this laptop only)
+# Accounts keep volunteers' sessions apart on a shared laptop. Passwords are stored as salted PBKDF2 hashes in
+# data/study/accounts.json; nothing about an account leaves this computer.
+_USER = re.compile(r"^[a-z0-9_.-]{3,32}$")
+_ITER = 200_000
+
+
+def _accounts_path(root):
+    return os.path.join(root, "accounts.json")
+
+
+def load_accounts(root=ROOT) -> dict:
+    p = _accounts_path(root)
+    if not os.path.exists(p):
+        return {}
+    with open(p, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _hash(password, salt):
+    return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), bytes.fromhex(salt), _ITER).hex()
+
+
+def register(full_name, username, password, keep_voice_clips=False, group="prefer-not-to-say", root=ROOT) -> str:
+    """Create a consented participant with a login. Returns the pseudonym. Raises ValueError with a message
+    fit to show the person."""
+    full_name, username = " ".join(str(full_name).split()), str(username).strip().lower()
+    if len(full_name) < 2:
+        raise ValueError("Please enter your full name.")
+    if not _USER.match(username):
+        raise ValueError("Username: 3 to 32 letters, numbers, dots, dashes or underscores.")
+    if len(password) < 6:
+        raise ValueError("Password: at least 6 characters.")
+    if group not in GROUPS:
+        group = "prefer-not-to-say"
+    accounts = load_accounts(root)
+    if username in accounts:
+        raise ValueError("That username is taken. Sign in instead, or choose another.")
+    people = load_people(root)
+    pid = next_pid(people)
+    people[pid] = {"name": full_name, "username": username, "added": _now(), "consent": True,
+                   "keep_voice_clips": bool(keep_voice_clips), "group": group}
+    salt = secrets.token_hex(16)
+    accounts[username] = {"pid": pid, "salt": salt, "hash": _hash(password, salt), "iterations": _ITER}
+    _save_people(people, root)
+    with open(_accounts_path(root), "w", encoding="utf-8") as f:
+        json.dump(accounts, f, indent=2)
+    return pid
+
+
+def set_login(pid, username, password, root=ROOT):
+    """Give an existing participant (for example one added with `new`) a username and password."""
+    username = str(username).strip().lower()
+    if not _USER.match(username):
+        raise ValueError("Username: 3 to 32 letters, numbers, dots, dashes or underscores.")
+    if len(password) < 6:
+        raise ValueError("Password: at least 6 characters.")
+    people, accounts = load_people(root), load_accounts(root)
+    if pid not in people:
+        raise ValueError(f"Unknown participant {pid}.")
+    if username in accounts and accounts[username]["pid"] != pid:
+        raise ValueError("That username is taken.")
+    for u in [u for u, a in accounts.items() if a["pid"] == pid]:
+        del accounts[u]                                     # one login per person
+    salt = secrets.token_hex(16)
+    accounts[username] = {"pid": pid, "salt": salt, "hash": _hash(password, salt), "iterations": _ITER}
+    people[pid]["username"] = username
+    _save_people(people, root)
+    with open(_accounts_path(root), "w", encoding="utf-8") as f:
+        json.dump(accounts, f, indent=2)
+
+
+def check_login(username, password, root=ROOT):
+    """Pseudonym for a correct username and password, else None."""
+    a = load_accounts(root).get(str(username).strip().lower())
+    if not a:
+        return None
+    return a["pid"] if hmac.compare_digest(a["hash"], _hash(password, a["salt"])) else None
+
+
+# ------------------------------------------------------------------ saving (shared by the CLI and Nullpoint)
+
+def _write(pid, suffix, rec, root):
+    d = os.path.join(root, pid)
+    os.makedirs(d, exist_ok=True)
+    path = os.path.join(d, _dt.datetime.now().strftime("%Y%m%d-%H%M%S") + f"-{suffix}.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(rec, f, indent=2)
+    return path
+
+
+def save_task_run(pid, mode, rows, device="", style="", notes="", source="observer", root=ROOT):
+    rec = {"type": "tasks", "pid": pid, "mode": mode, "task_set": TASK_SET, "device": device, "style": style,
+           "source": source, "time": _now(), "tasks": rows, "notes": notes}
+    path = _write(pid, mode, rec, root)
+    m = task_metrics(rows)
+    log_run("evaluate", "demo-1", model="intent", benchmark=f"Task list {TASK_SET} ({mode})", metrics=m,
+            participant=pid, mode=mode, task_set=TASK_SET, device=str(device)[:60], style=style, source=source)
+    return path, m
+
+
+def save_survey(pid, answers, would_use, open_answers, root=ROOT):
+    score = sus_score(answers)
+    rec = {"type": "survey", "pid": pid, "time": _now(), "sus_answers": list(answers), "sus": score,
+           "would_use_if_hurt": would_use, **{k: str(open_answers.get(k, ""))[:2000] for k, _ in OPEN}}
+    path = _write(pid, "survey", rec, root)
+    log_run("evaluate", "study-sus", model="intent", benchmark="System Usability Scale",
+            metrics={"sus": score, "would_use_if_hurt": would_use}, participant=pid)
+    return path, score
+
+
+def check_task(i, url, actions):
+    """Did task i (0-based) end where it should? True, False, or None when it cannot be told (for example a
+    scroll done with the mouse wheel, which the extension does not see)."""
+    c, url = TASK_CHECKS[i], (url or "").lower()
+    texts = [a.get("text", "").lower() for a in actions]
+    if "url" in c:
+        return c["url"] in url
+    if "not_url" in c:
+        return bool(url) and c["not_url"] not in url
+    if c.get("front"):
+        path = url.split("news.ycombinator.com", 1)[-1].split("?")[0]
+        return "news.ycombinator.com" in url and path in ("", "/", "/news")
+    if "scrolls" in c:
+        n = sum(1 for t in texts if "scroll" in t or t in ("down", "page down"))
+        return True if n >= c["scrolls"] else None
+    if c.get("zoom"):
+        zin = any("zoom in" in t or t == "zoom" for t in texts)
+        zout = any("zoom out" in t or t == "out" for t in texts)
+        return True if zin and zout else None
+    return None
+
+
+def count_undos(i, actions):
+    backs = sum(1 for a in actions if a.get("text", "").lower() in ("back", "undo"))
+    return max(0, backs - EXPECTED_BACKS[i])
+
+
+def progress(pid, runs, root=ROOT) -> dict:
+    """What this person has done so far: self-tests (registry, prompt set v3), task runs by mode, survey, Track."""
+    done = {"selftest_whisper": False, "selftest_quiet": False, "survey": False, "track": False}
+    for r in runs:
+        if r.get("profile") != pid:
+            continue
+        m = r.get("metrics", {})
+        if r.get("run_id") == "voice-1" and r.get("valid", True) and m.get("prompt_set") == "v3" \
+                and m.get("style") in ("whisper", "quiet"):
+            done["selftest_" + m["style"]] = True
+        if r.get("model") == "track":
+            done["track"] = True
+    modes = set()
+    for s in sessions(root):
+        if s.get("pid") != pid:
+            continue
+        if s.get("type") == "tasks":
+            modes.add(s["mode"])
+        elif s.get("type") == "survey":
+            done["survey"] = True
+    done["tasks"] = sorted(modes)
+    done["first_mode"] = "mouse" if pid[1:].isdigit() and int(pid[1:]) % 2 else "whisper"
+    return done
 
 
 # ------------------------------------------------------------------ interactive parts (observer at the keyboard)
@@ -213,17 +394,7 @@ def cmd_run(args):
                      "errors": errors, "undos": undos})
         print(f"  {result}, {secs:.1f} s")
     notes = input("Observer notes (stay on this computer): ").strip()
-    rec = {"type": "tasks", "pid": args.pid, "mode": args.mode, "task_set": TASK_SET, "device": args.device,
-           "style": args.style,
-           "time": _now(), "tasks": rows, "notes": notes}
-    d = os.path.join(args.root, args.pid)
-    os.makedirs(d, exist_ok=True)
-    path = os.path.join(d, _dt.datetime.now().strftime("%Y%m%d-%H%M%S") + f"-{args.mode}.json")
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(rec, f, indent=2)
-    m = task_metrics(rows)
-    log_run("evaluate", "demo-1", model="intent", benchmark=f"Task list {TASK_SET} ({args.mode})", metrics=m,
-            participant=args.pid, mode=args.mode, task_set=TASK_SET, device=args.device[:60], style=args.style)
+    path, m = save_task_run(args.pid, args.mode, rows, args.device, args.style, notes, "observer", args.root)
     print(f"\nSaved {path} and logged to the registry: {m}")
 
 
@@ -235,17 +406,20 @@ def cmd_survey(args):
     would = _ask("If using a mouse or keyboard hurt, how likely are you to use this? (1-5)", cast=int,
                  choices=[1, 2, 3, 4, 5])
     open_answers = {k: input(q + " ").strip() for k, q in OPEN}
-    score = sus_score(answers)
-    rec = {"type": "survey", "pid": args.pid, "time": _now(), "sus_answers": answers, "sus": score,
-           "would_use_if_hurt": would, **open_answers}
-    d = os.path.join(args.root, args.pid)
-    os.makedirs(d, exist_ok=True)
-    path = os.path.join(d, _dt.datetime.now().strftime("%Y%m%d-%H%M%S") + "-survey.json")
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(rec, f, indent=2)
-    log_run("evaluate", "study-sus", model="intent", benchmark="System Usability Scale",
-            metrics={"sus": score, "would_use_if_hurt": would}, participant=args.pid)
+    path, score = save_survey(args.pid, answers, would, open_answers, args.root)
     print(f"\nSUS {score:.1f} / 100 (68 is average). Saved {path}; answers to open questions stay on this computer.")
+
+
+def cmd_account(args):
+    import getpass
+    pw = getpass.getpass("Password (at least 6 characters): ")
+    if getpass.getpass("Password again: ") != pw:
+        raise SystemExit("The two passwords are not the same.")
+    try:
+        set_login(args.pid, args.username, pw, args.root)
+    except ValueError as e:
+        raise SystemExit(str(e))
+    print(f"{args.pid} can now sign in to Nullpoint as {args.username.strip().lower()}.")
 
 
 def cmd_summary(args):
@@ -278,8 +452,11 @@ def main():
                    help="how they spoke in a voice run: whisper (no voice), quiet voice or normal voice")
     p = sub.add_parser("survey"); p.add_argument("--pid", required=True)
     p = sub.add_parser("summary"); p.add_argument("--log", action="store_true")
+    p = sub.add_parser("account", help="give an existing participant a Nullpoint login")
+    p.add_argument("--pid", required=True); p.add_argument("--username", required=True)
     args = ap.parse_args()
-    {"new": cmd_new, "tasks": cmd_tasks, "run": cmd_run, "survey": cmd_survey, "summary": cmd_summary}[args.cmd](args)
+    {"new": cmd_new, "tasks": cmd_tasks, "run": cmd_run, "survey": cmd_survey, "summary": cmd_summary,
+     "account": cmd_account}[args.cmd](args)
 
 
 if __name__ == "__main__":

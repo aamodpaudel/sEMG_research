@@ -73,6 +73,69 @@
   #stage .track-chip[data-ok="1"] { background: rgba(15,94,99,.10); color: var(--teal); }
   #stage .gaze { opacity: .55; z-index: 2; }
   #stage .help { position: absolute; left: 50%; bottom: 3vh; transform: translateX(-50%); font: 500 15px var(--display); color: var(--ink-2); background: var(--card); padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); }
+
+  /* ---------- microphone indicator (header) and level bar ---------- */
+  .mic-pill { display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px 7px 12px; border-radius: 999px; background: var(--paper-2);
+    font: 600 13px var(--display); color: var(--ink-2); min-width: 210px; }
+  .mic-pill .dot { width: 10px; height: 10px; border-radius: 50%; background: #A8B0AE; flex: none; }
+  .mic-pill .bar { flex: 1; height: 8px; border-radius: 4px; background: rgba(0, 0, 0, .08); overflow: hidden; min-width: 60px; }
+  .mic-pill .bar i, .lvl i { display: block; height: 100%; width: 0; background: var(--teal); border-radius: inherit; transition: width .08s linear; }
+  .mic-pill[data-state="listening"] { color: var(--teal); background: rgba(15, 94, 99, .08); }
+  .mic-pill[data-state="listening"] .dot { background: var(--teal); }
+  .mic-pill[data-state="hearing"] { color: #8A2E12; background: #FBE7DF; }
+  .mic-pill[data-state="hearing"] .dot { background: var(--signal); animation: pulse .9s ease-in-out infinite; }
+  .mic-pill[data-state="hearing"] .bar i { background: var(--signal); }
+  .mic-pill[data-state="decoding"] { color: var(--ink); }
+  .mic-pill[data-state="decoding"] .dot { background: var(--ink); animation: pulse .6s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform: scale(.6); opacity: .5; } }
+  .lvl { height: 16px; border-radius: 8px; background: var(--paper-2); overflow: hidden; border: 1px solid var(--line); }
+  body.signed-in .dev-only { display: none; }
+  .acct { display: inline-flex; align-items: center; gap: 10px; font: 500 14px var(--display); }
+  .acct b { font-weight: 600; }
+  .acct .pid { font: 500 11px var(--mono); color: var(--ink-2); background: var(--paper-2); padding: 2px 8px; border-radius: 999px; }
+  .linkbtn { background: none; border: 0; color: var(--teal); font: 500 14px var(--display); cursor: pointer; padding: 6px 4px; text-decoration: underline; }
+
+  /* ---------- sign-in gate ---------- */
+  #gate { position: fixed; inset: 0; z-index: 80; background: var(--paper-2); display: grid; place-items: center; padding: 24px; overflow: auto; }
+  #gate .card { width: min(520px, 100%); background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 30px; display: grid; gap: 16px;
+    box-shadow: 0 30px 80px -40px rgba(0, 0, 0, .35); }
+  #gate h1 { font-size: 28px; letter-spacing: -0.03em; }
+  #gate .lead { color: var(--ink-2); font-size: 15px; }
+  #gate .switch { display: flex; gap: 4px; background: var(--paper-2); padding: 4px; border-radius: 999px; }
+  #gate .switch button { flex: 1; border: 0; background: transparent; font: 600 14px var(--display); padding: 9px; border-radius: 999px; cursor: pointer; color: var(--ink-2); }
+  #gate .switch button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  #gate form { display: grid; gap: 12px; }
+  #gate input[type=text], #gate input[type=password], #gate select { width: 100%; font: 400 16px var(--body); color: var(--ink); background: var(--paper);
+    border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 46px; }
+  .consent { background: var(--paper-2); border-radius: 14px; padding: 14px 16px; font-size: 14px; color: var(--ink-2); display: grid; gap: 8px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; color: var(--ink); }
+  .check input { width: 20px; height: 20px; margin-top: 1px; flex: none; }
+  #gate .btn.primary { justify-content: center; min-height: 48px; font-size: 16px; }
+
+  /* ---------- study tab ---------- */
+  .steps-list { display: grid; gap: 6px; }
+  .step { text-align: left; display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: center; padding: 11px 12px; border-radius: 12px; border: 1.5px solid transparent;
+    background: var(--card); cursor: pointer; font: 500 14.5px/1.3 var(--display); color: var(--ink); }
+  .step small { display: block; font: 400 12.5px var(--body); color: var(--ink-2); margin-top: 2px; }
+  .step .n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 13px var(--mono); background: var(--paper-2); color: var(--ink-2); }
+  .step.done .n { background: var(--teal); color: #fff; }
+  .step[aria-current="true"] { border-color: var(--teal); box-shadow: inset 3px 0 0 var(--teal); }
+  .step.later { opacity: .6; }
+  .big-task, .panel .big-task { font: 600 clamp(24px, 2.6vw, 34px)/1.2 var(--display); letter-spacing: -0.025em; color: var(--ink); }
+  .timer, .panel .timer { font: 500 44px var(--mono); letter-spacing: -0.02em; color: var(--teal); font-variant-numeric: tabular-nums; }
+  .say { display: inline-block; font: 600 15px var(--mono); background: var(--paper-2); padding: 3px 10px; border-radius: 8px; color: var(--ink); }
+  .say-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rows { display: grid; gap: 4px; }
+  .rows div { display: grid; grid-template-columns: 24px 1fr auto auto; gap: 10px; font-size: 14px; padding: 6px 8px; border-radius: 8px; background: var(--paper); align-items: center; }
+  .ok-y { color: var(--teal); font-weight: 700; } .ok-n { color: var(--signal); font-weight: 700; } .ok-q { color: var(--ink-2); }
+  .check-row { display: grid; grid-template-columns: 22px 1fr; gap: 8px; font-size: 14px; align-items: start; }
+  .sus-q { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .scale { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 12.5px; color: var(--ink-2); }
+  .scale label { display: grid; place-items: center; width: 44px; height: 40px; border-radius: 10px; border: 1.5px solid var(--line); cursor: pointer; font: 600 15px var(--display); color: var(--ink); }
+  .scale input { position: absolute; opacity: 0; pointer-events: none; }
+  .scale input:checked + span { color: #fff; }
+  .scale label:has(input:checked) { background: var(--teal); border-color: var(--teal); }
+  .scale label:has(input:focus-visible) { outline: 3px solid var(--signal); outline-offset: 2px; }
   @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } .col + .col { border-left: 0; border-top: 1px solid var(--line); } }
 </style>
 </head>
@@ -82,20 +145,43 @@
     <span class="lockup" style="font-size: 24px"><svg viewBox="0 0 64 96" aria-hidden="true"><circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="6.5"></circle><line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="6.5" stroke-linecap="round"></line></svg><span>afono</span></span>
     <span class="tag">Nullpoint</span>
     <div class="tabs" role="tablist" aria-label="Models">
-      <button role="tab" aria-selected="true" data-tab="semg" id="tab-semg">sEMG Model</button>
+      <button role="tab" aria-selected="true" data-tab="study" id="tab-study">Study</button>
+      <button role="tab" aria-selected="false" data-tab="semg" id="tab-semg">sEMG Model</button>
       <button role="tab" aria-selected="false" data-tab="track" id="tab-track">Track Model</button>
       <button role="tab" aria-selected="false" data-tab="dom" id="tab-dom">DOM Model</button>
       <button role="tab" aria-selected="false" data-tab="voice" id="tab-voice">Whisper</button>
       <button role="tab" aria-selected="false" data-tab="settings" id="tab-settings">Settings</button>
     </div>
     <span class="grow"></span>
-    <label class="f" for="profile">Profile<input type="text" id="profile" value="default" size="12" autocomplete="off"></label>
-    <label class="f" for="ckpt">sEMG model<select id="ckpt"></select></label>
+    <span class="mic-pill" id="mic-pill" data-state="off" role="status" aria-live="polite"><span class="dot"></span><span id="mic-text">Microphone off</span><span class="bar"><i id="mic-level"></i></span></span>
+    <span class="acct" id="acct" hidden><span>Signed in as <b id="acct-name"></b></span><span class="pid" id="acct-pid"></span><button class="linkbtn" type="button" id="sign-out">Sign out</button></span>
+    <label class="f dev-only" for="profile">Profile<input type="text" id="profile" value="default" size="12" autocomplete="off"></label>
+    <label class="f dev-only" for="ckpt">sEMG model<select id="ckpt"></select></label>
     <span class="tag" id="device"></span>
   </div>
 </header>
 
-<section class="layout" id="view-semg" role="tabpanel" aria-labelledby="tab-semg">
+<section class="layout" id="view-study" role="tabpanel" aria-labelledby="tab-study">
+  <div class="col">
+    <h2>Your session</h2>
+    <div class="steps-list" id="st-steps"></div>
+    <p class="msg">About 25 minutes. You can stop at any time.</p>
+  </div>
+  <div class="col" id="st-main"></div>
+  <div class="col">
+    <h2>Right now</h2>
+    <div class="panel" id="st-checks"></div>
+    <h2>What gets recorded</h2>
+    <div class="panel">
+      <p>Your name, username and answers stay on this laptop. Results are published only under your code
+        (<b id="st-pid">p00</b>) and as numbers: how long each task took, whether it worked, and your survey score.</p>
+      <p>Voice clips from the voice check are kept on this laptop only if you said yes when you signed up.</p>
+      <p>Nullpoint is a research prototype, not a medical device.</p>
+    </div>
+  </div>
+</section>
+
+<section class="layout" id="view-semg" role="tabpanel" aria-labelledby="tab-semg" hidden>
   <div class="col">
     <h2>Recordings</h2>
     <div class="chips" role="group" aria-label="Source">
@@ -245,8 +331,8 @@
       </div>
       <label class="f"><span><input type="checkbox" id="v-auto"> Listen hands-free (detects when you start and stop)</span></label>
       <label class="f"><span><input type="checkbox" id="v-send" checked> Send accepted phrases to the page</span></label>
-      <label class="f"><span><input type="checkbox" id="v-gaze" checked> Use gaze from the Track Model when live snap is on</span></label>
-      <p>Level <meter id="v-level" min="0" max="1" value="0" style="width: 60%"></meter></p>
+      <label class="f"><span><input type="checkbox" id="v-gaze"> Use gaze from the Track Model when live snap is on</span></label>
+      <label class="f">Microphone level (moves when it hears you)<div class="lvl"><i id="v-level"></i></div></label>
       <p>Audio is decoded on this computer and not stored, except self-test clips when you tick the box below.</p>
     </div>
   </div>
@@ -295,6 +381,43 @@
   <div class="col"></div>
 </section>
 
+
+<div id="gate" hidden>
+  <div class="card">
+    <span class="lockup" style="font-size: 26px"><svg viewBox="0 0 64 96" aria-hidden="true"><circle class="sym-ring" cx="32" cy="48" r="22" fill="none" stroke-width="6.5"></circle><line class="sym-bar" x1="32" y1="8" x2="32" y2="88" stroke-width="6.5" stroke-linecap="round"></line></svg><span>afono</span></span>
+    <h1>Welcome to the Nullpoint study</h1>
+    <p class="lead">Nullpoint lets you use a computer without your hands. In about 25 minutes you will try it by voice, and once with a mouse to compare. Nullpoint guides you through every step.</p>
+    <div class="switch" role="group" aria-label="Account">
+      <button type="button" id="g-new" aria-pressed="true">I am new</button>
+      <button type="button" id="g-back" aria-pressed="false">I have an account</button>
+    </div>
+    <form id="f-new" autocomplete="off">
+      <label class="f" for="r-name">Full name<input type="text" id="r-name" autocomplete="name" required></label>
+      <label class="f" for="r-user">Username (to sign in later)<input type="text" id="r-user" autocomplete="username" required></label>
+      <label class="f" for="r-pass">Password (at least 6 characters)<input type="password" id="r-pass" autocomplete="new-password" required></label>
+      <label class="f" for="r-pass2">Password again<input type="password" id="r-pass2" autocomplete="new-password" required></label>
+      <div class="consent">
+        <b style="color: var(--ink)">Before you start</b>
+        <span>We time a few tasks, by voice and with a mouse, and ask a few questions. Your name stays on this laptop; results are published under a code like p02. You can stop at any time and ask for your data to be deleted.</span>
+        <label class="check"><input type="checkbox" id="r-consent"> I have read this and I agree to take part.</label>
+        <label class="check"><input type="checkbox" id="r-clips"> You may keep my voice-check clips on this laptop to improve the model.</label>
+      </div>
+      <label class="f" for="r-group">Optional: do your hands or voice limit how you use a computer?<select id="r-group">
+        <option value="prefer-not-to-say">Prefer not to say</option><option value="none">No</option>
+        <option value="hand-pain-or-rsi">Hand pain or RSI</option><option value="autoimmune">An autoimmune condition (such as rheumatoid arthritis)</option>
+        <option value="limited-hand-use">Limited hand use</option><option value="voice-loss">Voice loss</option></select></label>
+      <button class="btn primary" type="submit">Create my account and start</button>
+      <p class="msg" id="r-msg"></p>
+    </form>
+    <form id="f-back" hidden>
+      <label class="f" for="l-user">Username<input type="text" id="l-user" autocomplete="username" required></label>
+      <label class="f" for="l-pass">Password<input type="password" id="l-pass" autocomplete="current-password" required></label>
+      <button class="btn primary" type="submit">Sign in</button>
+      <p class="msg" id="l-msg"></p>
+    </form>
+    <button class="linkbtn" type="button" id="g-skip" style="justify-self: start; font-size: 13px; color: var(--ink-2)">Continue without an account (for the research team)</button>
+  </div>
+</div>
 <div id="stage" hidden><div class="help" id="stage-help"></div></div>
 
 <script>
@@ -546,5 +669,6 @@
 </script>
 <script type="module" src="/static/track-ui.js"></script>
 <script src="/static/voice-ui.js"></script>
+<script src="/static/study-ui.js"></script>
 </body>
 </html>

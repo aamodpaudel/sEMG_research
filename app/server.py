@@ -423,6 +423,9 @@ def push_command(body: dict = Body(...)):
 def ran(body: dict = Body(...)):
     RAN.appendleft({"text": str(body.get("text", ""))[:120], "action": str(body.get("action", ""))[:20],
                     "time": time.strftime("%H:%M:%S")})
+    if RUN.get("phase") == "active":
+        RUN["actions"].append({"text": str(body.get("text", ""))[:120], "action": str(body.get("action", ""))[:20],
+                               "t": round(time.time() - RUN["t0"], 2)})
     return {"ok": True}
 
 
@@ -537,8 +540,15 @@ async def voice_decode(request: Request, send: int = 0, gaze: int = 1, keep: int
     cands = v.candidates(CONTEXT.get("targets"), commands=v.COMMAND_PHRASES if g else v.COMMANDS_NO_GAZE)
     if label and normalize_text(label) not in {c["say"] for c in cands}:
         cands.append({"say": normalize_text(label), "send": normalize_text(label), "target": None})
+    study_words = _study_words() if not label else ()
+    for w in study_words:
+        if w not in {c["say"] for c in cands}:
+            cands.append({"say": w, "send": w, "target": None})
     import asyncio
     r = await asyncio.to_thread(v.get_decoder().decode, audio, cands, g or None)
+    if study_words and r["accepted"] and r["say"] in study_words:
+        r["study"] = _study_voice(r["say"])        # "start", "done" or "skip" drive the task list, not the page
+        return r
     if label:
         # Self-test: right means the same action ("click five four" and "click fifty four" are both badge 54).
         want = {c["say"]: c["send"] for c in cands}.get(normalize_text(label))
@@ -566,6 +576,182 @@ def voice_result(body: dict = Body(...)):
                   whisper_model=_voice().MODEL_ID, profile=str(body.get("profile", "default"))[:40],
                   notes=str(body.get("notes", ""))[:200])
     return {"logged": rec["time"]}
+
+
+# ------------------------------------------------------------------ user study: accounts and the guided task list
+# Volunteers sign in with a local account (data/study, this laptop only); Nullpoint then runs the task list itself:
+# it shows and times each task, checks where the page ended up, and logs the run under the person's pseudonym.
+from semg import study as STUDY  # noqa: E402
+
+SESSIONS = {}          # token -> pseudonym, in memory: restarting Nullpoint signs everyone out
+RUN = {}               # the task list in progress (one at a time on this laptop)
+
+
+def _who(request: Request) -> str:
+    pid = SESSIONS.get(request.headers.get("x-afono-token", ""))
+    if not pid:
+        raise HTTPException(401, "Please sign in again.")
+    return pid
+
+
+def _first_name(pid):
+    return (STUDY.load_people().get(pid, {}).get("name") or pid).split()[0]
+
+
+def _session(pid):
+    import secrets
+    token = secrets.token_urlsafe(24)
+    SESSIONS[token] = pid
+    return {"token": token, "pid": pid, "first": _first_name(pid)}
+
+
+@app.post("/api/study/register")
+def study_register(body: dict = Body(...)):
+    if not body.get("consent"):
+        raise HTTPException(400, "Please read and accept the consent statement.")
+    if str(body.get("password", "")) != str(body.get("password2", body.get("password", ""))):
+        raise HTTPException(400, "The two passwords are not the same.")
+    try:
+        pid = STUDY.register(body.get("full_name", ""), body.get("username", ""), str(body.get("password", "")),
+                             bool(body.get("keep_voice_clips")), str(body.get("group", "prefer-not-to-say")))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return _session(pid)
+
+
+@app.post("/api/study/login")
+def study_login(body: dict = Body(...)):
+    pid = STUDY.check_login(body.get("username", ""), str(body.get("password", "")))
+    if not pid:
+        raise HTTPException(401, "Username or password is not right.")
+    return _session(pid)
+
+
+@app.post("/api/study/logout")
+def study_logout(request: Request):
+    SESSIONS.pop(request.headers.get("x-afono-token", ""), None)
+    if RUN and RUN.get("phase") != "finished":
+        RUN.clear()
+    return {"ok": True}
+
+
+def _run_view():
+    if not RUN:
+        return None
+    i = RUN["i"]
+    return {"mode": RUN["mode"], "phase": RUN["phase"], "i": i, "n": len(STUDY.TASKS),
+            "task": STUDY.TASKS[i] if i < len(STUDY.TASKS) else None,
+            "elapsed": round(time.time() - RUN["t0"], 1) if RUN["phase"] == "active" else None,
+            "rows": [{k: r[k] for k in ("task", "text", "seconds", "result", "verified")} for r in RUN["rows"]],
+            "metrics": RUN.get("metrics")}
+
+
+@app.get("/api/study/me")
+def study_me(request: Request):
+    pid = _who(request)
+    p = STUDY.load_people().get(pid, {})
+    return {"pid": pid, "first": _first_name(pid), "keep_voice_clips": p.get("keep_voice_clips", False),
+            "progress": STUDY.progress(pid, read_runs()), "tasks": STUDY.TASKS, "start_page": STUDY.START_PAGES[0],
+            "sus": STUDY.SUS, "open": STUDY.OPEN, "run": _run_view() if RUN.get("pid") == pid else None,
+            "page": {"title": CONTEXT.get("title"), "url": CONTEXT.get("url"), "targets": len(CONTEXT.get("targets", []))}}
+
+
+@app.post("/api/study/run/start")
+def study_run_start(request: Request, body: dict = Body(...)):
+    pid = _who(request)
+    mode = str(body.get("mode", ""))
+    if mode not in STUDY.MODES:
+        raise HTTPException(400, "Unknown mode.")
+    RUN.clear()
+    RUN.update(pid=pid, mode=mode, device=str(body.get("device", ""))[:60], style=str(body.get("style", ""))[:10],
+               i=0, phase="ready", rows=[], actions=[], t0=None)
+    return _run_view()
+
+
+def _begin():
+    if RUN.get("phase") != "ready":
+        return _run_view()
+    RUN.update(phase="active", t0=time.time(), actions=[])
+    return _run_view()
+
+
+def _finish(result):
+    if RUN.get("phase") != "active":
+        return _run_view()
+    i, secs, url = RUN["i"], round(time.time() - RUN["t0"], 1), CONTEXT.get("url", "")
+    acts = list(RUN["actions"])
+    row = {"task": i + 1, "text": STUDY.TASKS[i], "seconds": secs, "result": result,
+           "verified": STUDY.check_task(i, url, acts) if result == "done" else False,
+           "errors": None, "undos": STUDY.count_undos(i, acts), "actions": [a["text"] for a in acts], "url_end": url}
+    RUN["rows"].append(row)
+
+    def recheck():                       # the page may still be loading when "done" is said
+        if row["result"] == "done" and row["verified"] is not True:
+            row["verified"] = STUDY.check_task(i, CONTEXT.get("url", ""), acts)
+            row["url_end"] = CONTEXT.get("url", "")
+    threading.Timer(1.5, recheck).start()
+    RUN["i"] += 1
+    if RUN["i"] >= len(STUDY.TASKS):
+        RUN["phase"] = "saving"
+
+        def save():
+            recheck()
+            _, m = STUDY.save_task_run(RUN["pid"], RUN["mode"], RUN["rows"], RUN["device"], RUN["style"],
+                                       "", "nullpoint")
+            RUN.update(phase="finished", metrics=m)
+        threading.Timer(1.6, save).start()
+    else:
+        RUN["phase"] = "ready"
+    return _run_view()
+
+
+def _study_words():
+    phase = RUN.get("phase")
+    return ("start",) if phase == "ready" else ("done", "skip") if phase == "active" else ()
+
+
+def _study_voice(word):
+    return _begin() if word == "start" else _finish("done" if word == "done" else "skipped")
+
+
+@app.post("/api/study/run/begin")
+def study_run_begin(request: Request):
+    _who(request)
+    return _begin()
+
+
+@app.post("/api/study/run/finish")
+def study_run_finish(request: Request, body: dict = Body(...)):
+    _who(request)
+    result = str(body.get("result", "done"))
+    return _finish(result if result in ("done", "failed", "skipped") else "done")
+
+
+@app.post("/api/study/run/cancel")
+def study_run_cancel(request: Request):
+    _who(request)
+    RUN.clear()
+    return {"ok": True}
+
+
+@app.get("/api/study/run")
+def study_run(request: Request):
+    pid = _who(request)
+    return _run_view() if RUN.get("pid") == pid else None
+
+
+@app.post("/api/study/survey")
+def study_survey(request: Request, body: dict = Body(...)):
+    pid = _who(request)
+    try:
+        answers = [int(a) for a in body.get("answers", [])]
+        would = int(body.get("would_use", 0))
+        if would not in (1, 2, 3, 4, 5):
+            raise ValueError
+        _, score = STUDY.save_survey(pid, answers, would, body.get("open", {}))
+    except (ValueError, TypeError):
+        raise HTTPException(400, "Please answer every question from 1 to 5.")
+    return {"sus": score}
 
 
 # ------------------------------------------------------------------ calibration (in-process, works when packaged)
