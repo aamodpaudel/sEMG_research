@@ -23,3 +23,6 @@ dist/
 # private documents (funding, finances)
 private/
 packaging/build.log
+
+# Nullpoint app window profile (browser cache, cookies) when run from source
+/window/

@@ -25,7 +25,21 @@ def _summary(r):
         n = r.get('train_utterances')
         return (f"Trained {r.get('params_m', '?')}M-parameter model on {f'{n:,}' if isinstance(n, int) else '?'} recordings "
                 f"for {r.get('hours', '?')} h. Dev character error {_pct(r.get('dev_cer'))}%.")
-    if k == "evaluate":
+    if k == "evaluate" and r.get("model") == "voice":
+        m = r.get("metrics", {})
+        return (f"Whisper mode {r.get('benchmark')}: {_pct(m.get('accuracy'))}% of prompts right"
+                + (f" over {m['trials']} trials" if "trials" in m else "") + ".")
+    if k == "evaluate" and r.get("model") == "intent":
+        m = r.get("metrics", {})
+        if "sus" in m:
+            return f"Usability survey ({r.get('participant')}): SUS {m['sus']:.1f} of 100."
+        if "tasks" in m:
+            return (f"{r.get('benchmark')} by {r.get('participant')}: {_pct(m.get('success_rate'))}% of {m['tasks']} tasks done, "
+                    f"median {m.get('median_s')} s per task, {m.get('errors')} errors, {m.get('undos')} undos.")
+        return f"{r.get('benchmark')}: " + ", ".join(f"{a} {b}" for a, b in m.items()) + "."
+    if k == "evaluate" and r.get("model") not in (None, "dom", "track"):
+        return f"{r.get('benchmark') or r['run_id']}."
+    if k == "evaluate" and r.get("model") is None:
         m = r.get("metrics", {})
         return (f"Benchmark ({r.get('lm', 'unigram')} decoder): dates & times {_pct(m.get('dates_word_acc'))}% word accuracy, "
                 f"500-word sentences {_pct(m.get('closed500_word_acc'))}%, open vocabulary WER {_pct(m.get('open_wer'))}%.")
