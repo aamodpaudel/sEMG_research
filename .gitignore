@@ -26,3 +26,6 @@ packaging/build.log
 
 # Nullpoint app window profile (browser cache, cookies) when run from source
 /window/
+
+# third-party papers (copyrighted PDFs, local library only; our own papers go elsewhere)
+/papers/
